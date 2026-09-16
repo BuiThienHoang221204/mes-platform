@@ -1,0 +1,37 @@
+# ══ BÍ MẬT — không bao giờ commit ══════════════════════════════════════════
+# `mes-backend/.env` đang giữ mật khẩu Postgres và khoá ký JWT. Lọt vào git một
+# lần là phải ĐỔI khoá, xoá khỏi lịch sử thôi không đủ — ai clone trước đó vẫn có.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# ══ Phụ thuộc và bản dựng — cài lại được, đừng nhét vào kho ════════════════
+node_modules/
+.next/
+.next-build/
+out/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# ══ Bộ nhớ đệm công cụ ═════════════════════════════════════════════════════
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.tsbuildinfo
+.eslintcache
+
+# ══ Máy và trình soạn thảo ═════════════════════════════════════════════════
+.DS_Store
+Thumbs.db
+*.log
+
+# ══ Giữ LẠI, dù trông như tệp tạm ══════════════════════════════════════════
+# demo/ · docs/ · mockup/ là tài liệu nghiệp vụ và bản mockup — chúng là sản
+# phẩm bàn giao, không phải rác. Đừng thêm chúng vào đây.

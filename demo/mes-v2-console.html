@@ -1,0 +1,3363 @@
+<title>MES Bản Chốt v2.3</title>
+<link rel="stylesheet"
+  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+  :root {
+    --bg: #F2F5F6;
+    --surface: #FFFFFF;
+    --surface-2: #E8EDEF;
+    --surface-3: #F7FAFA;
+    --ink: #131A1D;
+    --ink-2: #56656B;
+    --ink-3: #7D8B90;
+    --line: #D5DEE0;
+    --line-strong: #B9C6C9;
+    --accent: #0C6B7A;
+    --accent-ink: #FFFFFF;
+    --accent-tint: #E4F1F3;
+    --ok: #1B7A45;
+    --ok-bg: #E2F1E8;
+    --warn: #8E5A08;
+    --warn-bg: #FAEFDC;
+    --bad: #A82C2C;
+    --bad-bg: #F9E6E5;
+    --shadow: 0 1px 2px rgba(19, 26, 29, .06), 0 4px 14px rgba(19, 26, 29, .05);
+    --sans: 'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0D1213;
+      --surface: #151D1F;
+      --surface-2: #1D2729;
+      --surface-3: #111A1C;
+      --ink: #E4EDEF;
+      --ink-2: #94A5AA;
+      --ink-3: #6E8085;
+      --line: #29373A;
+      --line-strong: #3A4B4F;
+      --accent: #48AFC0;
+      --accent-ink: #06181C;
+      --accent-tint: #12292D;
+      --ok: #55BE82;
+      --ok-bg: #12301F;
+      --warn: #D9A548;
+      --warn-bg: #33260F;
+      --bad: #E8736D;
+      --bad-bg: #351A19;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px rgba(0, 0, 0, .28);
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0D1213;
+    --surface: #151D1F;
+    --surface-2: #1D2729;
+    --surface-3: #111A1C;
+    --ink: #E4EDEF;
+    --ink-2: #94A5AA;
+    --ink-3: #6E8085;
+    --line: #29373A;
+    --line-strong: #3A4B4F;
+    --accent: #48AFC0;
+    --accent-ink: #06181C;
+    --accent-tint: #12292D;
+    --ok: #55BE82;
+    --ok-bg: #12301F;
+    --warn: #D9A548;
+    --warn-bg: #33260F;
+    --bad: #E8736D;
+    --bad-bg: #351A19;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 4px 14px rgba(0, 0, 0, .28);
+  }
+
+  * {
+    box-sizing: border-box
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    margin: 0;
+    padding: 0
+  }
+
+  h1,
+  h2,
+  h3 {
+    margin: 0;
+    text-wrap: balance;
+    font-weight: 600;
+    letter-spacing: -.01em
+  }
+
+  button {
+    font: inherit;
+    cursor: pointer
+  }
+
+  input,
+  select,
+  textarea {
+    font: inherit;
+    color: inherit
+  }
+
+  .mono {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums
+  }
+
+  .wrap {
+    max-width: 1380px;
+    margin: 0 auto;
+    padding-inline: 16px;
+    padding-block: 0 48px
+  }
+
+  @media(min-width:900px) {
+    .wrap {
+      padding-inline: 24px
+    }
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line)
+  }
+
+  .topbar .wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 18px;
+    align-items: center;
+    padding-block: 12px
+  }
+
+  .brand {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    margin-right: auto
+  }
+
+  .brand b {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -.015em
+  }
+
+  .brand span {
+    font-size: 11px;
+    color: var(--ink-3);
+    text-transform: uppercase;
+    letter-spacing: .09em
+  }
+
+  .clockbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 10px
+  }
+
+  .clockbox .lbl {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-3)
+  }
+
+  #clock {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums
+  }
+
+  .speeds {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden
+  }
+
+  .speeds button {
+    background: var(--surface);
+    border: 0;
+    border-right: 1px solid var(--line);
+    color: var(--ink-2);
+    padding: 6px 9px;
+    font-size: 12px;
+    font-family: var(--mono)
+  }
+
+  .speeds button:last-child {
+    border-right: 0
+  }
+
+  .speeds button[aria-pressed="true"] {
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600
+  }
+
+  .qrbox {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 5px 10px;
+    background: var(--surface-2);
+    max-width: 100%
+  }
+
+  .qrbox .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ok);
+    flex: 0 0 auto
+  }
+
+  .qrbox.err .dot {
+    background: var(--bad)
+  }
+
+  .qrbox.hit .dot {
+    background: var(--accent)
+  }
+
+  .qrbox .txt {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 260px
+  }
+
+  .qrbox .txt b {
+    font-family: var(--mono);
+    color: var(--ink)
+  }
+
+  .qrbox input {
+    width: 128px;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    padding: 3px 7px
+  }
+
+  .btn-cam {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px
+  }
+
+  /* ── lớp phủ camera ── */
+  #cam[hidden] {
+    display: none !important
+  }
+
+  #cam {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    background: rgba(8, 14, 16, .92);
+    display: grid;
+    place-items: center;
+    padding: 16px
+  }
+
+  .cam-box {
+    width: min(92vw, 460px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px
+  }
+
+  .cam-wrap {
+    position: relative;
+    aspect-ratio: 1;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    max-width: 100%
+  }
+
+  #cam-view {
+    width: 100%;
+    height: 100%
+  }
+
+  #cam-view video {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+    display: block
+  }
+
+  #cam-view img {
+    display: none
+  }
+
+  .cam-frame {
+    position: absolute;
+    inset: 16%;
+    border-radius: 8px;
+    pointer-events: none
+  }
+
+  .cam-frame i {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    border: 3px solid #fff
+  }
+
+  .cam-frame i:nth-child(1) {
+    top: 0;
+    left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border-radius: 8px 0 0 0
+  }
+
+  .cam-frame i:nth-child(2) {
+    top: 0;
+    right: 0;
+    border-left: 0;
+    border-bottom: 0;
+    border-radius: 0 8px 0 0
+  }
+
+  .cam-frame i:nth-child(3) {
+    bottom: 0;
+    left: 0;
+    border-right: 0;
+    border-top: 0;
+    border-radius: 0 0 0 8px
+  }
+
+  .cam-frame i:nth-child(4) {
+    bottom: 0;
+    right: 0;
+    border-left: 0;
+    border-top: 0;
+    border-radius: 0 0 8px 0
+  }
+
+  .cam-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px
+  }
+
+  #cam-msg {
+    flex: 1;
+    min-width: 150px;
+    font-size: 12.5px;
+    color: var(--ink-2)
+  }
+
+  #cam-msg b {
+    font-family: var(--mono);
+    color: var(--ink)
+  }
+
+  #cam-msg.err {
+    color: var(--bad)
+  }
+
+  .rail {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    position: sticky;
+    top: 57px;
+    z-index: 25
+  }
+
+  .rail-scroll {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin
+  }
+
+  .st {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 11px 15px;
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-2);
+    white-space: nowrap
+  }
+
+  .st:hover {
+    background: var(--surface-2)
+  }
+
+  .st[aria-selected="true"] {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    background: var(--accent-tint)
+  }
+
+  .st .num {
+    font-family: var(--mono);
+    font-size: 11px;
+    width: 19px;
+    height: 19px;
+    display: grid;
+    place-items: center;
+    border-radius: 4px;
+    background: var(--surface-2);
+    color: var(--ink-3);
+    font-weight: 600
+  }
+
+  .st[aria-selected="true"] .num {
+    background: var(--accent);
+    color: var(--accent-ink)
+  }
+
+  .st .nm {
+    font-size: 13px;
+    font-weight: 500
+  }
+
+  .st .ct {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 20px;
+    background: var(--surface-2);
+    color: var(--ink-2)
+  }
+
+  .cols {
+    display: grid;
+    gap: 16px;
+    margin-top: 18px
+  }
+
+  @media(min-width:1000px) {
+    .cols.two {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr)
+    }
+  }
+
+  /* Tab Kế hoạch: form gọn bên trái, sổ lệnh 8 cột lấy hết phần còn lại */
+  @media(min-width:1000px) {
+    .cols.plan {
+      grid-template-columns: minmax(260px, 340px) minmax(0, 1fr)
+    }
+  }
+
+  .tscroll.tall {
+    max-height: 62vh;
+    overflow: auto
+  }
+
+  .tscroll.tall th {
+    position: sticky;
+    top: 0;
+    z-index: 1
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    min-width: 0
+  }
+
+  .panel>header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line)
+  }
+
+  .panel>header h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--ink-2)
+  }
+
+  .panel>header .meta {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--ink-3);
+    font-family: var(--mono)
+  }
+
+  .panel .body {
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+  }
+
+  .panel .body.flush {
+    padding: 0
+  }
+
+  .row {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--surface-3)
+  }
+
+  .row.live {
+    background: var(--surface);
+    border-color: var(--line-strong)
+  }
+
+  .rhead {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    flex-wrap: wrap
+  }
+
+  .code {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: -.01em
+  }
+
+  .prod {
+    font-size: 12px;
+    color: var(--ink-2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0
+  }
+
+  .rmeta {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    color: var(--ink-2);
+    font-family: var(--mono)
+  }
+
+  .rmeta b {
+    color: var(--ink);
+    font-weight: 600
+  }
+
+  .acts {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center
+  }
+
+  .acts.nowrap {
+    flex-wrap: nowrap
+  }
+
+  .pill {
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    padding: 2px 7px;
+    border-radius: 20px;
+    background: var(--surface-2);
+    color: var(--ink-2);
+    white-space: nowrap
+  }
+
+  .pill b {
+    font-variant-numeric: tabular-nums
+  }
+
+  .pack-timer b {
+    display: inline-block;
+    min-width: 148px;
+    text-align: center
+  }
+
+  .rmeta [data-live] {
+    display: inline-block;
+    min-width: 148px;
+    font-variant-numeric: tabular-nums
+  }
+
+  [data-live^="pack"],
+  [data-live^="step"] {
+    font-variant-numeric: tabular-nums
+  }
+
+  .pill.ok {
+    background: var(--ok-bg);
+    color: var(--ok)
+  }
+
+  .pill.warn {
+    background: var(--warn-bg);
+    color: var(--warn)
+  }
+
+  .pill.bad {
+    background: var(--bad-bg);
+    color: var(--bad)
+  }
+
+  .pill.acc {
+    background: var(--accent-tint);
+    color: var(--accent)
+  }
+
+  .btn {
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink);
+    border-radius: 5px;
+    padding: 5px 11px;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: background .12s
+  }
+
+  .btn:hover {
+    background: var(--surface-2)
+  }
+
+  .btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px
+  }
+
+  .btn.primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600
+  }
+
+  .btn.primary:hover {
+    filter: brightness(1.08)
+  }
+
+  .btn.good {
+    border-color: var(--ok);
+    color: var(--ok)
+  }
+
+  .btn.danger {
+    border-color: var(--bad);
+    color: var(--bad)
+  }
+
+  .btn.ghost {
+    border-color: transparent;
+    color: var(--ink-3);
+    padding-inline: 7px
+  }
+
+  .btn.ghost:hover {
+    color: var(--ink);
+    background: var(--surface-2)
+  }
+
+  .btn[disabled] {
+    opacity: .4;
+    cursor: not-allowed
+  }
+
+  .btn.sm {
+    padding: 3px 8px;
+    font-size: 11.5px
+  }
+
+  input[type=text],
+  input[type=number],
+  select,
+  textarea {
+    background: var(--surface);
+    border: 1px solid var(--line-strong);
+    border-radius: 5px;
+    padding: 5px 8px;
+    font-size: 12.5px;
+    min-width: 0
+  }
+
+  textarea {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    width: 100%;
+    resize: vertical
+  }
+
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px
+  }
+
+  .num-in {
+    width: 78px;
+    font-family: var(--mono);
+    text-align: right
+  }
+
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px
+  }
+
+  .field label {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--ink-3);
+    line-height: 1.25;
+    min-height: 26px;
+    display: flex;
+    align-items: flex-end
+  }
+
+  .formgrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px 12px;
+    align-items: end
+  }
+
+  .formgrid .field input,
+  .formgrid .field select {
+    width: 100%;
+    height: 32px;
+    box-sizing: border-box
+  }
+
+  @media(max-width:520px) {
+    .formgrid {
+      grid-template-columns: 1fr
+    }
+
+    .field label {
+      min-height: auto
+    }
+  }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 2px
+  }
+
+  .tabs button {
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    color: var(--ink-3);
+    padding: 6px 9px;
+    font-size: 12.5px
+  }
+
+  .tabs button[aria-pressed="true"] {
+    color: var(--ink);
+    border-bottom-color: var(--accent);
+    font-weight: 600
+  }
+
+  .scan {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: var(--accent-tint);
+    border: 1px dashed var(--accent);
+    border-radius: 6px;
+    padding: 10px 11px;
+    flex-wrap: wrap
+  }
+
+  .scan input {
+    flex: 1;
+    min-width: 150px;
+    font-family: var(--mono);
+    font-weight: 600
+  }
+
+  .scan .hint {
+    font-size: 11px;
+    color: var(--ink-2);
+    flex-basis: 100%
+  }
+
+  .empty {
+    color: var(--ink-3);
+    font-size: 12.5px;
+    padding: 14px 2px;
+    text-align: center;
+    font-style: italic
+  }
+
+  .tscroll {
+    overflow-x: auto;
+    overflow-y: hidden
+  }
+
+  .tscroll.tall {
+    max-height: 62vh;
+    overflow: auto
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 12px;
+    table-layout: auto
+  }
+
+  th {
+    text-align: left;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--ink-3);
+    font-weight: 600;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    background: var(--surface-3);
+    vertical-align: middle;
+    height: 36px;
+    box-sizing: border-box
+  }
+
+  th u {
+    text-decoration: none;
+    color: var(--accent);
+    font-family: var(--mono)
+  }
+
+  .tscroll.tall th {
+    position: sticky;
+    top: 0;
+    z-index: 1
+  }
+
+  td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+    vertical-align: middle;
+    box-sizing: border-box
+  }
+
+  td.acts {
+    white-space: normal;
+    padding: 4px 8px
+  }
+
+  td.acts .btn {
+    flex: 0 0 auto
+  }
+
+  .panel .body.flush {
+    display: block;
+    padding: 0
+  }
+
+  .tscroll.tall {
+    scrollbar-gutter: stable
+  }
+
+  /* Cố định độ rộng tối thiểu từng cột sổ lệnh để không bị co lệch khi nội dung dài — cột thao tác đủ chỗ 2 nút */
+  .cols.plan .tscroll table th:nth-child(1),
+  .cols.plan .tscroll table td:nth-child(1) {
+    min-width: 148px
+  }
+
+  .cols.plan .tscroll table th:nth-child(2),
+  .cols.plan .tscroll table td:nth-child(2) {
+    min-width: 120px
+  }
+
+  .cols.plan .tscroll table th:nth-child(3),
+  .cols.plan .tscroll table td:nth-child(3) {
+    min-width: 80px
+  }
+
+  .cols.plan .tscroll table th:nth-child(4),
+  .cols.plan .tscroll table td:nth-child(4) {
+    min-width: 160px
+  }
+
+  .cols.plan .tscroll table th:nth-child(5),
+  .cols.plan .tscroll table td:nth-child(5) {
+    min-width: 105px
+  }
+
+  .cols.plan .tscroll table th:nth-child(6),
+  .cols.plan .tscroll table td:nth-child(6) {
+    min-width: 95px
+  }
+
+  .cols.plan .tscroll table th:nth-child(7),
+  .cols.plan .tscroll table td:nth-child(7) {
+    min-width: 148px;
+    width: 148px
+  }
+
+  .cols.plan .tscroll table td:nth-child(7) .acts {
+    justify-content: flex-end;
+    flex-wrap: nowrap
+  }
+
+  .cols.plan .tscroll table tr {
+    height: 42px
+  }
+
+  table.sub {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+    min-width: 600px;
+    table-layout: auto
+  }
+
+  table.sub td,
+  table.sub th {
+    white-space: normal;
+    vertical-align: top;
+    height: auto
+  }
+
+  /* dòng Tổng của bảng "thời gian từng bước theo vòng" */
+  table.sub tr.sum td {
+    border-top: 2px solid var(--line-strong);
+    background: var(--surface-2)
+  }
+
+  td.n {
+    font-family: var(--mono);
+    font-variant-numeric: tabular-nums;
+    text-align: right
+  }
+
+  th.n {
+    text-align: right
+  }
+
+  /* header cột số căn phải cho khớp với ô bên dưới */
+  td.n.running {
+    color: var(--accent)
+  }
+
+  .calc.late {
+    color: var(--bad)
+  }
+
+  tr.clickable {
+    cursor: pointer
+  }
+
+  tr.clickable:hover>td {
+    background: var(--surface-2)
+  }
+
+  tr.clickable.open>td {
+    background: var(--accent-tint)
+  }
+
+  td.detail {
+    background: var(--surface-3);
+    padding: 12px 14px;
+    white-space: normal
+  }
+
+  td.detail h3 {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-3);
+    margin-block: 2px 7px
+  }
+
+  td.detail h3:not(:first-child) {
+    margin-top: 14px
+  }
+
+  /* tiêu đề phụ của khối Sản xuất trong từng vòng */
+  td.detail h4 {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--accent);
+    font-weight: 600;
+    margin-block: 12px 6px
+  }
+
+  table.sub {
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface);
+    min-width: 600px
+  }
+
+  table.sub th {
+    background: var(--surface-2)
+  }
+
+  table.sub td,
+  table.sub th {
+    padding: 6px 10px;
+    font-size: 11.5px
+  }
+
+  .lines {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+    gap: 6px;
+    margin-block: 2px
+  }
+
+  .lchip {
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink-2);
+    border-radius: 5px;
+    padding: 6px 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.25;
+    text-align: center
+  }
+
+  .lchip:hover {
+    background: var(--surface-2)
+  }
+
+  .lchip[aria-pressed="true"] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+    font-weight: 600
+  }
+
+  .lchip small {
+    display: block;
+    font-size: 9px;
+    letter-spacing: .03em;
+    opacity: .72
+  }
+
+  /* bước đang chạy — tô màu thay vì thêm chữ, không làm xê dịch dòng */
+  td.c {
+    font-family: var(--mono);
+    font-weight: 600
+  }
+
+  .calc {
+    display: block;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 2px
+  }
+
+  /* gợi ý "bấm xem" trên dòng Sản xuất + nền của khối vừa bung ra */
+  .calc.acc {
+    color: var(--accent)
+  }
+
+  td.detail.sub2 {
+    background: var(--surface-3);
+    padding: 4px 12px 12px
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-top: 18px
+  }
+
+  .tile {
+    background: var(--surface);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px
+  }
+
+  .tile .k {
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--ink-3)
+  }
+
+  .tile .v {
+    font-family: var(--mono);
+    font-size: 23px;
+    font-weight: 600;
+    letter-spacing: -.02em
+  }
+
+  .tile .s {
+    font-size: 11px;
+    color: var(--ink-2)
+  }
+
+  .tile.ok .v {
+    color: var(--ok)
+  }
+
+  .tile.bad .v {
+    color: var(--bad)
+  }
+
+  .tile.warn .v {
+    color: var(--warn)
+  }
+
+  .log {
+    font-family: var(--mono);
+    font-size: 11.5px;
+    max-height: 440px;
+    overflow: auto;
+    display: flex;
+    flex-direction: column-reverse
+  }
+
+  .logrow {
+    display: grid;
+    grid-template-columns: 60px 74px 172px 1fr;
+    gap: 10px;
+    padding: 5px 12px;
+    border-bottom: 1px solid var(--line)
+  }
+
+  .logrow .t {
+    color: var(--ink-3)
+  }
+
+  .logrow .u {
+    color: var(--ink-3);
+    overflow: hidden;
+    text-overflow: ellipsis
+  }
+
+  .logrow .a {
+    font-weight: 600;
+    color: var(--accent);
+    overflow: hidden;
+    text-overflow: ellipsis
+  }
+
+  .logrow .d {
+    color: var(--ink-2);
+    white-space: normal
+  }
+
+  .logrow.sys .a {
+    color: var(--ink-3)
+  }
+
+  .logrow.rv .a {
+    color: var(--bad)
+  }
+
+  .note {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    background: var(--surface-2);
+    border-radius: 5px;
+    padding: 8px 10px;
+    border-left: 2px solid var(--accent)
+  }
+
+  .note u {
+    text-decoration: none;
+    font-family: var(--mono);
+    color: var(--accent);
+    font-weight: 600
+  }
+
+  .inline-form {
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    flex-wrap: wrap;
+    background: var(--surface-2);
+    border-radius: 5px;
+    padding: 8px 9px
+  }
+
+  .inline-form .lb {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--ink-3)
+  }
+
+  /* phiếu in */
+  .slip {
+    border: 1px solid var(--line-strong);
+    border-radius: 6px;
+    padding: 14px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 10px
+  }
+
+  .slip .sc {
+    font-family: var(--mono);
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    text-align: center;
+    border-block: 1px solid var(--line);
+    padding-block: 8px
+  }
+
+  .slip dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px 14px;
+    margin: 0;
+    font-size: 12px
+  }
+
+  .slip dt {
+    color: var(--ink-3);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em
+  }
+
+  .slip dd {
+    margin: 0;
+    font-family: var(--mono);
+    font-weight: 600
+  }
+
+  .slip .qr {
+    border: 1px dashed var(--line-strong);
+    border-radius: 4px;
+    height: 64px;
+    display: grid;
+    place-items: center;
+    color: var(--ink-3);
+    font-size: 10.5px;
+    letter-spacing: .1em;
+    text-transform: uppercase
+  }
+
+  .slip .ft {
+    font-size: 10.5px;
+    color: var(--ink-3);
+    text-align: center
+  }
+
+  #toast {
+    position: fixed;
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 22px;
+    z-index: 60;
+    background: var(--ink);
+    color: var(--bg);
+    padding: 9px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+    max-width: min(92vw, 560px);
+    box-shadow: var(--shadow)
+  }
+
+  #toast[hidden] {
+    display: none !important
+  }
+
+  #toast.err {
+    background: var(--bad);
+    color: #fff
+  }
+
+  @media (prefers-reduced-motion:reduce) {
+    * {
+      transition: none !important
+    }
+  }
+</style>
+
+<div class="topbar">
+  <div class="wrap">
+    <div class="brand"><b>MES Bản Chốt v2.3</b><span>mô phỏng đúng BRD đã chốt đợt 1</span></div>
+    <div class="clockbox"><span class="lbl">Giờ xưởng</span><span id="clock" class="mono">--:--</span></div>
+    <div class="speeds" id="speeds" role="group" aria-label="Tốc độ mô phỏng"></div>
+    <div class="qrbox" id="qrbox">
+      <span class="dot"></span>
+      <span class="txt" id="qrtxt">Sẵn sàng quét QR</span>
+      <input type="text" id="qr-sim" placeholder="giả lập: XM068820" autocomplete="off">
+      <button class="btn sm btn-cam" data-act="cam-open" title="Mở camera quét QR"><svg viewBox="0 0 24 24" width="15"
+          height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3" />
+          <path d="M3 12h18" />
+        </svg>Quét</button>
+    </div>
+    <button class="btn ghost sm" data-act="reset-clock">Về giờ hiện tại</button>
+    <button class="btn ghost sm" data-act="reseed">Nạp dữ liệu mẫu</button>
+    <button class="btn ghost sm" data-act="clear">Xóa hết</button>
+  </div>
+</div>
+<div class="rail">
+  <div class="wrap">
+    <div class="rail-scroll" id="rail" role="tablist"></div>
+  </div>
+</div>
+<div class="wrap">
+  <div id="view"></div>
+</div>
+<div id="cam" hidden>
+  <div class="cam-box">
+    <div class="cam-wrap">
+      <div id="cam-view"></div>
+      <div class="cam-frame"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="cam-bar">
+      <span id="cam-msg">Đang mở camera…</span>
+      <button class="btn" data-act="cam-close">Đóng</button>
+    </div>
+  </div>
+</div>
+<div id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+<script>
+  (function () {
+    "use strict";
+
+    /* ══ Hằng số theo BRD v2.3 ══════════════════════════════ */
+    const LINES = 14;                                  // §7.1 — 14 line
+    const SPEEDS = [1, 60, 600, 3600];
+    const STEP_NM = { 0: 'Kho', 1: 'Setup máy', 2: 'QC', 3: 'Bàn team leader', 4: 'Sản xuất', 5: 'Nhập kho' };
+    const ACTOR = { 0: 'Kho A', 1: 'Setup A', 2: 'QC1', 3: 'Bàn team leader', 4: 'Leader L1', 5: 'Kho nhập' };
+    const ACTOR_PACK = 'Đóng thùng';
+    const QC_REASONS = ['Sai thông số setup', 'Lỗi khuôn/gá', 'Lỗi vật tư đầu vào', 'Lỗi lắp ráp', 'Khác'];
+    const STATIONS = [
+      { n: 'plan', num: 'P', nm: 'Kế hoạch' }, { n: 0, num: 'K', nm: 'Kho' },
+      { n: 1, num: '1', nm: 'Setup máy' }, { n: 2, num: '2', nm: 'QC' },
+      { n: 3, num: '3', nm: 'Bàn team leader' }, { n: 4, num: '4', nm: 'Sản xuất' },
+      { n: 5, num: '5', nm: 'Nhập kho' }, { n: 'kpi', num: '∑', nm: 'Lịch sử & KPI' }
+    ];
+    const KEY = 'mes-v2-console-4';
+    /* Dọn state của các bản trước để lần mở này bắt đầu từ bảng trắng, không cần xóa cache tay */
+    try {
+      Object.keys(localStorage).forEach(k => {
+        if (k.indexOf('mes-v2-console') === 0 && k !== KEY) localStorage.removeItem(k);
+      });
+    } catch (e) { }
+
+    let S;
+    function blank() {
+      const d = new Date(); d.setHours(8, 0, 0, 0);
+      return { now: d.getTime(), speed: 600, tab: 'plan', seq: 1, runSeq: 1, mos: [], history: [], hourly: [], packHourly: [], ui: { mode: 'batch' } };
+    }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
+    function load() { try { const r = localStorage.getItem(KEY); if (r) { const p = JSON.parse(r); if (p && p.mos) return p; } } catch (e) { } return null; }
+
+    /* ══ Tiện ích ═══════════════════════════════════════════ */
+    const now = () => S.now;
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const ymd = ts => {
+      const d = new Date(ts);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    };
+    const hhmm = ts => { const d = new Date(ts); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+    /* Thời lượng luôn hiển thị đủ 3 đơn vị: "16 giờ 0 phút 0 giây" */
+    function dur(ms) {
+      if (ms == null || ms < 0 || !isFinite(ms)) return '—';
+      const s = Math.floor(ms / 1000);
+      return Math.floor(s / 3600) + ' giờ ' + Math.floor(s % 3600 / 60) + ' phút ' + (s % 60) + ' giây';
+    }
+    const nfmt = n => (n == null || isNaN(n)) ? '—' : Number(n).toLocaleString('vi-VN');
+    let toastT;
+    function toast(m, err) {
+      const t = $('#toast'); t.textContent = m; t.className = err ? 'err' : ''; t.hidden = false;
+      clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 3600);
+    }
+
+    /* §9 — History append-only: MO, step, action, user, timestamp, from→to, reason, metadata */
+    function log(mo, step, action, from, to, reason, kind) {
+      S.history.push({
+        at: now(), mo: mo ? mo.code : '—', step, action,
+        user: step == null ? 'Planner' : ACTOR[step], from: from || '', to: to || '', reason: reason || '', kind: kind || ''
+      });
+    }
+
+    /* ══ ĐỌC MÃ QUÉT ════════════════════════════════════════
+       Mã MO thật: chữ M + đúng 6 chữ số. Khi quét luôn có ký tự đứng trước
+       (đầu đọc chèn tiền tố) nên bỏ qua mọi thứ đứng trước chữ M.
+       (?!\d) để "M0688201" (7 số) KHÔNG bị cắt thành "M068820" — quét nhầm
+       mã dài hơn mà ra một mã có thật là loại lỗi không ai phát hiện được. */
+    const MO_CORE = /M\d{6}(?!\d)/g;
+    const MO_STRICT = /^M\d{6}$/;
+
+    function chuanHoaQuet(raw) {
+      return String(raw)
+        .replace(/[-​-‍﻿]/g, '')   // ky tu dieu khien, zero-width
+        .replace(/\s+/g, '')
+        .toUpperCase();
+    }
+    function docMaMO(raw) {
+      const t = chuanHoaQuet(raw);
+      if (!t) return { ma: null, loi: 'Chuỗi quét rỗng' };
+
+      let ds = [...new Set(t.match(MO_CORE) || [])];
+
+      if (!ds.length) {                    // thử sửa nhầm O↔0, I/L↔1 trong 6 ký tự sau chữ M
+        for (const u of (t.match(/M[A-Z0-9]{6}(?![A-Z0-9])/g) || [])) {
+          const sua = 'M' + u.slice(1).replace(/O/g, '0').replace(/[IL]/g, '1');
+          if (MO_STRICT.test(sua)) ds.push(sua);
+        }
+        ds = [...new Set(ds)];
+      }
+      if (ds.length === 1) return { ma: ds[0], loi: null };
+      if (ds.length > 1) return { ma: null, loi: 'Quét ra nhiều mã: ' + ds.join(' · ') + ' — quét lại' };
+      return { ma: null, loi: 'Không đọc được mã MO trong "' + t.slice(0, 28) + '"' };
+    }
+
+    const byId = id => S.mos.find(m => m.id === id);
+    const allRuns = () => S.mos.flatMap(m => m.runs);
+    const runById = id => allRuns().find(r => r.id === id);
+    /* ══ VÒNG CHẠY ══ Mỗi lần MO quay về Kho là một vòng mới.
+       Mọi tính toán (line, KPI, thời gian, sản lượng giờ) chỉ nhìn vòng hiện tại,
+       dữ liệu vòng cũ vẫn giữ nguyên trong mo.runs / S.hourly để truy cứu.        */
+    const roundOf = mo => mo.round || 1;
+    const runsOf = mo => mo.runs.filter(r => (r.round || 1) === roundOf(mo));
+    const activeRuns = () => S.mos.flatMap(m => runsOf(m));
+    const remainOf = mo => Math.max(0, mo.qty - (mo.qtyDone || 0));   // không bao giờ âm
+    const targetOf = mo => remainOf(mo);            // SL cần làm của riêng vòng này
+    const lineList = rs => rs.map(r => 'L' + String(r.line).padStart(2, '0')).join(', ');
+    /* C — Thời gian yêu cầu chia theo SL của vòng. Vòng 2 chỉ làm 1.000/10.000
+       thì chỉ được 1/10 thời gian, nếu không thì vòng nào cũng Đạt.
+       targetQty đóng dấu lúc thêm line nên MO đã xong vẫn giữ đúng mốc của vòng đó. */
+    const roundTarget = mo => {
+      const rs = runsOf(mo);
+      return (rs.length && rs[0].targetQty) || targetOf(mo) || mo.qty;
+    };
+    const requiredMs = mo => Math.max(1000, Math.round(mo.requiredSec * 1000 * (roundTarget(mo) / mo.qty)));
+    const sxOkOf = mo => (mo.sx && mo.sx.qtyOk != null) ? mo.sx.qtyOk : targetOf(mo);
+    const ngTotal = mo => (mo.qtyNgTotal || 0) + (mo.sx?.qtyNg || 0);   // hỏng ghi ở bước Sản xuất
+
+    const hourlySum = mo => (S.hourly || [])
+      .filter(h => h.moId === mo.id && (h.round || 1) === roundOf(mo))
+      .reduce((a, h) => a + h.qty, 0);
+    const atStep = n => {
+      if (n === 4) return S.mos.filter(m => m.step === 4 && m.steps[4]?.acceptedAt && !m.packing?.completedAt && m.status === 'PROCESSING');
+      return S.mos.filter(m => m.step === n && m.steps[n] && m.steps[n].acceptedAt && m.steps[n].completedAt == null && m.status === 'PROCESSING');
+    };
+
+    /** Hàng đợi của mỗi bước — không có khái niệm WIP limit trong v2 */
+    function queue(n) {
+      let q;
+      if (n === 0) q = S.mos.filter(m => !m.kho.acceptedAt &&
+        (m.status === 'SUBMITTED' || (m.status === 'PROCESSING' && m.step === 0)));  // vòng mới đi lại từ hàng đợi Kho
+      else if (n === 1) q = S.mos.filter(m => m.step === 0 && m.kho.handedOverAt && m.status === 'PROCESSING');
+      else if (n === 3) q = S.mos.filter(m => m.step === 2 && m.qc && m.qc.result === 'PASS');   // QC PASS → Bàn team leader
+      else if (n === 5) q = S.mos.filter(m => m.packing?.completedAt && m.steps[4]?.completedAt && !m.steps[5]?.acceptedAt && m.status === 'PROCESSING'); // chỉ khi Kết thúc đóng thùng xong và chưa Accept Nhập kho mới ở hàng đợi
+      else q = S.mos.filter(m => m.steps[n - 1]?.acceptedAt && m.steps[n - 1].completedAt == null && m.status === 'PROCESSING');
+      if (n !== 0 && n !== 1 && n !== 3 && n !== 5 && (!q || !q.length) && n !== 4) q = S.mos.filter(m => m.step === n - 1 && m.status === 'PROCESSING');
+      return q;
+    }
+
+    /* ══ Timer — §9: mỗi bước 1 timer riêng ═════════════════
+       actualDuration(N) = nextStep.acceptedAt − step.acceptedAt
+       Không có readyAt: thời gian làm và thời gian chờ gộp làm một. */
+    function stepElapsed(mo, n) {
+      const s = mo.steps[n]; if (!s || !s.acceptedAt) return null;
+      return (s.completedAt == null ? now() : s.completedAt) - s.acceptedAt;
+    }
+
+    /* ══ Hành động ══════════════════════════════════════════ */
+    /* `pcsPerBox` — QUY CÁCH đóng thùng, bao nhiêu pcs một thùng. 0 = không đóng thùng.
+       Đây là cầu nối DUY NHẤT giữa hai đơn vị: đơn hàng đặt bằng PCS, xưởng đếm bằng
+       THÙNG. Thiếu nó thì không quy đổi được, mà quy đổi sai thì hàng lẻ bị đọc nhầm
+       thành hàng thiếu (§7b.2). */
+    function mkMo(code, product, qty, mins, pcsPerBox) {
+      return {
+        id: S.seq++, code, product, qty, unit: 'PCS', pcsPerBox: Math.max(0, pcsPerBox || 0),
+        requiredSec: mins * 60,
+        status: 'DRAFT', step: null, round: 1, steps: {}, cancel: null,
+        kho: { acceptedAt: null, printedAt: null, printCount: 0, handedOverAt: null },
+        veDau: 0,                 /* vòng hiện tại bắt đầu ở bước nào: 0 Kho · 3 Bàn team leader */
+        qc: null, runs: [],
+        /* SL hỏng thuộc bước SẢN XUẤT — chuyền mới là chỗ phát hiện hàng lỗi.
+           Hàng xuống tới đóng thùng là hàng đã đạt. */
+        sx: { qtyOk: null, qtyNg: null, qtyShort: null, ngReason: null, shortReason: null, at: null },
+        packing: {
+          startedAt: null, completedAt: null, by: null, qtyPacked: null,
+          packingReason: null, remain: null, done: null
+        },
+        qtyDone: 0, qtyNgTotal: 0, qtyRemain: null, completedAt: null
+      };
+    }
+    /* §2.2 — 1C tạo lẻ & hàng loạt · 2C tiền tố + số tự tăng · transaction toàn lô */
+    /* Mã chạy liên tục: M + 6 chữ số (M068820, M068821…) */
+    function createBatch(soDau, count, product, qty, mins, pcsPerBox) {
+      const codes = new Set(S.mos.map(m => m.code)), made = [];
+      for (let i = 0; i < count; i++) {
+        const code = 'M' + String(soDau + i).padStart(6, '0');
+        if (codes.has(code)) { toast('Trùng mã ' + code + ' — cả lô không được tạo (transaction, §2.2).', true); return; }
+        codes.add(code); made.push(mkMo(code, product, qty, mins, pcsPerBox));
+      }
+      S.mos.push(...made);
+      made.forEach(m => log(m, null, 'MO_CREATE', '', 'DRAFT', product + ' · ' + nfmt(qty) + ' PCS'));
+      toast('Đã tạo ' + made.length + ' MO — trạng thái DRAFT.');
+    }
+    function importCsv(text) {
+      const rows = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+      const codes = new Set(S.mos.map(m => m.code)), made = [];
+      for (const line of rows) {
+        const p = line.split(',').map(x => x.trim());
+        if (p.length < 4) { toast('Dòng sai định dạng: "' + line + '" — cần ít nhất 4 cột.', true); return; }
+        if (codes.has(chuanHoaQuet(p[0]))) { toast('Trùng mã ' + p[0] + ' — cả lô không được tạo.', true); return; }
+        const ma = chuanHoaQuet(p[0]);
+        if (!MO_STRICT.test(ma)) { toast('Mã sai định dạng: "' + p[0] + '" — cần M + 6 chữ số.', true); return; }
+        codes.add(ma); made.push(mkMo(ma, p[1], +p[2] || 0, +p[3] || 1, +p[4] || 0));  // cột 5 tuỳ chọn: quy cách
+      }
+      S.mos.push(...made);
+      made.forEach(m => log(m, null, 'MO_IMPORT', '', 'DRAFT', 'Import CSV'));
+      toast('Đã import ' + made.length + ' MO.');
+    }
+    function submit(list) {
+      list.forEach(m => {
+        if (m.status !== 'DRAFT') return;
+        m.status = 'SUBMITTED'; m.step = 0; log(m, null, 'MO_SUBMIT', 'DRAFT', 'SUBMITTED', '');
+      });
+      toast('Đã Submit ' + list.length + ' MO — khóa cứng mã/sản phẩm/SL/thời gian (§4A).');
+    }
+    /* §4A — không sửa được sau Submit; nhập sai thì CANCELLED + tạo MO mới, không hard delete */
+    function cancel(mo, reason) {
+      const from = mo.status; mo.status = 'CANCELLED'; mo.cancel = { at: now(), by: 'Planner', reason };
+      log(mo, null, 'MO_CANCEL', from, 'CANCELLED', reason, 'rv');
+      toast(mo.code + ' đã hủy. Bản ghi vẫn giữ — tạo MO mới để thay thế (§4A).');
+    }
+    /* §3 — Kho: nhận → in → bàn giao */
+    function khoAccept(mo) {
+      mo.kho.acceptedAt = now(); mo.status = 'PROCESSING';
+      log(mo, 0, 'KHO_ACCEPT', 'SUBMITTED', 'PROCESSING', '');
+    }
+    /* §3 — BỎ thao tác In phiếu. Kho nhận lệnh xong là bàn giao luôn, bớt một lần bấm.
+       Xem phiếu vẫn còn nhưng chỉ để xem/in bằng trình duyệt, hệ thống không ghi sổ. */
+    function khoPrint(mo) {
+      mo.kho.printedAt = now(); mo.kho.printCount++;
+      log(mo, 0, 'KHO_PRINT', '', '', 'Lần in #' + mo.kho.printCount);
+    }
+    function khoHandover(mo) {
+      mo.kho.handedOverAt = now(); log(mo, 0, 'KHO_HANDOVER', 'Kho', 'Step1', 'Bàn giao trên hệ thống (§6B)'); return true;
+    }
+    /* §9 — mỗi Accept là 1 transaction: auto-complete bước trước → ghi acceptedAt → update currentStep */
+    function accept(mo, n) {
+      if (n === 1 && !mo.kho.handedOverAt) { toast('Chưa HANDOVER — Setup không được Accept (§3.2).', true); return false; }
+      const prev = mo.steps[n - 1];
+      if (prev && prev.acceptedAt && prev.completedAt == null) {
+        prev.completedAt = now();
+        log(mo, n - 1, 'STEP' + (n - 1) + '_AUTO_COMPLETE', 'ĐANG LÀM', 'HOÀN THÀNH',
+          'triggeredBy = ' + STEP_NM[n] + ' Accept', 'sys');
+      }
+      const had = mo.steps[n] && mo.steps[n].acceptedAt;
+      mo.steps[n] = { acceptedAt: now(), completedAt: null, by: ACTOR[n] };
+      mo.step = n;
+      log(mo, n, 'STEP' + n + '_ACCEPT', STEP_NM[n - 1] || '', STEP_NM[n],
+        had ? '⚠ ghi đè mốc giờ của lần trước (rework)' : '', had ? 'rv' : '');
+      return true;
+    }
+    function packingStart(mo) {
+      if (mo.packing.startedAt) { toast('Đã bắt đầu đóng thùng rồi — ' + mo.code, true); return false; }
+      if (!runsOf(mo).some(r => r.status === 'RUN' || r.status === 'DONE')) { toast('SX chưa bắt đầu — hãy bấm Đang lắp ráp ở bảng dưới trước', true); return false; }
+      mo.packing.startedAt = now(); mo.packing.by = ACTOR_PACK;
+      log(mo, 4, 'PACK_START', 'Sản xuất', 'Đóng thùng', 'Bắt đầu đóng thùng song song', 'sys');
+      toast(mo.code + ' — Bắt đầu đóng thùng (song song với SX)');
+      return true;
+    }
+    function packingFinish(mo, qty, reason) {
+      if (!mo.packing.startedAt) { toast('Chưa bắt đầu đóng thùng — ' + mo.code, true); return false; }
+      if (mo.packing.completedAt) { toast('Đã kết thúc đóng thùng rồi', true); return false; }
+      if (!mo.steps[4]?.completedAt) { toast('Chưa Hoàn thành (đồng bộ) SX — phải Hoàn thành SX trước khi Kết thúc đóng thùng', true); return false; }
+      /* Hàng tới đây là hàng ĐÃ ĐẠT — SL hỏng đã chốt ở bước Sản xuất.
+         Nên chỉ hỏi đóng được bao nhiêu, và không cho vượt SL đạt của SX. */
+      const tran = sxOkOf(mo);
+      qty = Number(qty) || 0;
+      if (qty <= 0) { toast('Nhập SL đã đóng thùng > 0', true); return false; }
+      if (qty > tran) {
+        toast('Đóng thùng ' + nfmt(qty) + ' vượt SL đạt của Sản xuất (' + nfmt(tran) + ')', true); return false;
+      }
+      reason = String(reason || '').trim();
+      if (!reason) { toast('Bắt buộc nhập Lý do', true); return false; }
+      mo.packing.qtyPacked = qty;        // SL đã đóng thùng — con số cộng vào tiến độ MO
+      mo.packing.packingReason = reason;
+      mo.packing.completedAt = now();
+      const sumH = hourlySum(mo);
+      const lech = (tran !== qty) ? ' — ⚠ SX đạt ' + nfmt(tran) + ' mà chỉ đóng ' + nfmt(qty)
+        : (sumH && sumH !== qty ? ' — ⚠ lệch đối soát: sản lượng giờ ' + nfmt(sumH) : '');
+      const duoi = mo.steps[4]?.completedAt ? Math.max(0, mo.packing.completedAt - mo.steps[4].completedAt) : null;
+      const duoiTxt = duoi != null ? ' — đuôi sau SX ' + dur(duoi) : '';
+      log(mo, 4, 'PACK_COMPLETE', 'Đóng thùng', 'Hoàn thành',
+        'Đóng thùng ' + moTaThung(qty, quyCach(mo)) + ' / SX đạt ' + nfmt(tran) +
+        ' (vòng ' + roundOf(mo) + ') — ' + reason + lech + ' — timer ' +
+        dur(mo.packing.completedAt - mo.packing.startedAt) + duoiTxt, 'sys');
+      toast(mo.code + ' — Kết thúc đóng thùng ' + dur(mo.packing.completedAt - mo.packing.startedAt) +
+        ' · ' + moTaThung(qty, quyCach(mo)));
+      return true;
+    }
+    /* §5 — 23A: FAIL bắt buộc lý do, ghi QC_FAIL, quay về Step1 */
+    function qcDecide(mo, pass, reason) {
+      if (pass) {
+        mo.qc = { result: 'PASS', at: now() };
+        log(mo, 2, 'QC_PASS', '', 'Chờ Bàn team leader Accept', '');
+      }
+      else {
+        mo.qc = { result: 'FAIL', at: now(), reason };
+        if (mo.steps[2]) mo.steps[2].completedAt = now();
+        log(mo, 2, 'QC_FAIL', 'Step2', 'Kho (vòng mới)', reason + ' — Chưa hoàn thành → về Kho', 'rv');
+        moVongMoi(mo, 'QC FAIL: ' + reason, 0);   // setup sai → phải làm lại từ Kho
+      }
+    }
+    /* ══ SANG VÒNG MỚI ══════════════════════════════════════
+       MO chưa hoàn thành thì mở một vòng chạy mới. Nhưng nó quay về ĐÂU
+       phụ thuộc nguyên nhân — hai chuyện khác hẳn nhau:
+    
+         thiếu SL / dừng lâu → BÀN TEAM LEADER. Máy đã setup đúng, hàng đã qua QC,
+                               chỉ là chưa làm đủ số. Không việc gì phải
+                               in lại phiếu và setup lại từ đầu.
+         QC FAIL             → KHO. Setup sai nên phải làm lại từ gốc:
+                               Kho in phiếu mới, Setup chỉnh máy, QC kiểm lại.  */
+    function moVongMoi(mo, reason, buocVe) {
+      const done = mo.packing?.qtyPacked || 0;
+      mo.qtyDone = (mo.qtyDone || 0) + done;                    // chỉ cộng SL ĐẠT đã đóng thùng
+      mo.qtyNgTotal = (mo.qtyNgTotal || 0) + (mo.sx?.qtyNg || 0);  // hỏng ghi ở Sản xuất
+      mo.qtyRemain = Math.max(0, mo.qty - mo.qtyDone);
+      mo._loops = (mo._loops || 1) + 1;
+      mo.round = roundOf(mo) + 1;
+
+      /* Chốt sổ vòng vừa xong rồi dọn steps. Giữ nguyên thì steps[5].acceptedAt
+         của vòng cũ sẽ khiến queue(5) loại MO ra vĩnh viễn. */
+      (mo.stepsHistory = mo.stepsHistory || []).push({
+        round: roundOf(mo) - 1,
+        steps: mo.steps,
+        khoAcceptedAt: mo.kho.acceptedAt,
+        handedOverAt: mo.kho.handedOverAt,
+        printCount: mo.kho.printCount,
+        qtyPacked: mo.packing?.qtyPacked || 0,
+        sxOk: mo.sx?.qtyOk != null ? mo.sx.qtyOk : null,
+        qtyNg: mo.sx?.qtyNg || 0,
+        sxShort: mo.sx?.qtyShort || 0,
+        sxNgReason: mo.sx?.ngReason || '',
+        sxShortReason: mo.sx?.shortReason || '',
+        packingReason: mo.packing?.packingReason || '',
+        /* batDauTu = nơi CHÍNH VÒNG NÀY đã bắt đầu (lấy trước khi đổi sang vòng mới).
+           veDau giữ nguyên nghĩa cũ: nơi vòng SAU sẽ về. Hai thứ khác nhau — trộn
+           lẫn là bảng hiện sai như lần QC FAIL vừa rồi. */
+        batDauTu: mo.veDau == null ? 0 : mo.veDau,
+        veDau: buocVe,
+        reason: reason || ''
+      });
+      if (mo.packing?.startedAt) {
+        if (!mo.packingHistory) mo.packingHistory = [];
+        mo.packingHistory.push({
+          startedAt: mo.packing.startedAt, completedAt: mo.packing.completedAt,
+          qtyPacked: mo.packing.qtyPacked, packingReason: mo.packing.packingReason, round: roundOf(mo) - 1
+        });
+      }
+      if (mo.qc) { (mo.qcHistory = mo.qcHistory || []).push(Object.assign({ round: roundOf(mo) - 1 }, mo.qc)); }
+
+      mo.steps = {};
+      mo.packing = {
+        startedAt: null, completedAt: null, by: null, qtyPacked: null,
+        packingReason: null, remain: mo.qtyRemain, done: mo.qtyDone
+      };
+      mo.sx = { qtyOk: null, qtyNg: null, qtyShort: null, ngReason: null, shortReason: null, at: null };
+      mo.qc = null;
+      mo.lastReturnReason = reason || '';
+      mo.veDau = buocVe;
+
+      if (buocVe === 0) {
+        /* Về Kho: phải Accept, in phiếu, bàn giao lại từ đầu */
+        mo.kho.acceptedAt = null; mo.kho.printedAt = null; mo.kho.handedOverAt = null;
+        mo.step = 0;
+      } else {
+        /* Về Bàn team leader: mở sẵn bước 3 của vòng mới nên MO nằm luôn ở hàng đợi
+           Sản xuất, chờ Line Leader quét để chạy tiếp phần còn thiếu. */
+        mo.step = 3;
+        mo.steps[3] = { acceptedAt: now(), completedAt: null, by: ACTOR[3] };
+      }
+
+      const ten = STEP_NM[buocVe];
+      log(mo, null, buocVe === 0 ? 'RETURN_KHO' : 'RETURN_BANCHO',
+        STEP_NM[5], ten + ' (Trả lại lần ' + (mo._loops - 1) + ')',
+        'Đã xong ' + nfmt(mo.qtyDone) + '/' + nfmt(mo.qty) + ' — còn ' + nfmt(mo.qtyRemain) +
+        ' — ' + (reason || 'Chưa hoàn thành'), 'rv');
+    }
+
+    /* §7.4 — gộp MO: 1 MO = 1 dòng, không chia SL theo line */
+    function addRun(mo, line) {
+      if (runsOf(mo).some(r => r.line === line)) { toast('Line L' + String(line).padStart(2, '0') + ' đã thêm cho MO này ở vòng hiện tại', true); return false; }
+      mo.runs.push({
+        id: 'R' + (S.runSeq++), moId: mo.id, round: roundOf(mo), line, addedAt: now(),
+        targetQty: targetOf(mo),          // SL mục tiêu của vòng — dùng chia thời gian yêu cầu
+        startedAt: null, completedAt: null, status: 'WAIT', segs: []
+      });
+      log(mo, 4, 'RUN_ADD', '', 'Chờ xử lý', 'Line ' + line + ' (vòng ' + roundOf(mo) + ')');
+      return true;
+    }
+    function runStart(r) {
+      const first = !r.startedAt;
+      if (first) r.startedAt = now();
+      r.segs.push({ from: now(), to: null });
+      r.status = 'RUN'; r.holdReason = null; r.holdAt = null;
+      log(byId(r.moId), 4, 'RUN_START', 'Chờ xử lý', 'Đang lắp ráp',
+        first ? 'chờ ' + dur(waitMs(r)) + ' trước khi vào chuyền (§11B)'
+          : 'chạy tiếp lần ' + r.segs.length);
+    }
+    /* §17 — hỏng máy: bắt buộc lý do. Không tạo Run mới, không đổi line.
+       §15A — chỉ có 3 hiện trạng nên Dừng đưa line về lại Chờ xử lý. */
+    function runHold(r, reason) {
+      const g = r.segs.find(x => x.to == null); if (g) g.to = now();
+      r.status = 'WAIT'; r.holdReason = reason;      // giữ lý do để hiện badge ĐANG DỪNG
+      r.holdAt = now();
+      log(byId(r.moId), 4, 'RUN_HOLD', 'Đang lắp ráp', 'Chờ xử lý', reason, 'rv');
+    }
+    /* Hiện tổng 3 ô ngay khi gõ — không bắt người vận hành bấm Xác nhận mới biết lệch */
+    function sxTong(id) {
+      const mo = byId(+id), el = document.getElementById('sxsum-' + id);
+      if (!mo || !el) return;
+      const muc = targetOf(mo);
+      const tong = nval('sxok-' + id) + nval('sxng-' + id) + nval('sxth-' + id);
+      const lech = tong - muc;
+      el.textContent = lech === 0
+        ? 'Σ ' + nfmt(tong) + ' — khớp'
+        : 'Σ ' + nfmt(tong) + '/' + nfmt(muc) + ' — ' + (lech > 0 ? 'dư ' : 'hụt ') + nfmt(Math.abs(lech));
+      el.className = 'pill ' + (lech === 0 ? 'ok' : 'bad');
+    }
+    /* §16 — tất cả line của 1 MO hoàn thành CÙNG LÚC, không cho hoàn thành lẻ — nút duy nhất để kết thúc SX */
+    /* §16 — đóng đồng bộ mọi line, đồng thời chốt SL đạt / SL hỏng của cả MO */
+    function finishAll(mo, qtyOk, qtyNg, qtyThieu, lyDoHong, lyDoThieu) {
+      const rs = runsOf(mo);
+      if (!rs.length) { toast('Chưa gán line nào.', true); return false; }
+      /* Chốt sổ một lần cho mỗi vòng — gọi lại sẽ ghi đè SL đã khai mà không ai hay */
+      if (mo.steps[4] && mo.steps[4].completedAt) {
+        toast('SX vòng ' + roundOf(mo) + ' đã chốt sổ rồi.', true); return false;
+      }
+      const chuaChay = rs.filter(r => r.startedAt == null);
+      if (chuaChay.length) { toast('Line ' + lineList(chuaChay) + ' chưa vào "Đang lắp ráp" — §16 yêu cầu đóng đồng bộ.', true); return false; }
+      const dangDung = rs.filter(r => r.status === 'WAIT');   // đã từng chạy nhưng đang dừng
+      if (dangDung.length) { toast('Line ' + lineList(dangDung) + ' đang dừng — cho chạy tiếp rồi mới hoàn thành đồng bộ.', true); return false; }
+
+      qtyOk = Number(qtyOk) || 0;
+      qtyNg = Number(qtyNg) || 0;
+      qtyThieu = Number(qtyThieu) || 0;
+      if (qtyOk < 0 || qtyNg < 0 || qtyThieu < 0) { toast('SL không được âm', true); return false; }
+      /* Ba ô SL phải cộng ĐÚNG BẰNG mục tiêu vòng — đây là chốt đối soát:
+         mỗi PCS giao xuống chuyền phải rơi vào đúng một trong ba nhóm
+         (đạt · hỏng · không làm ra được). Lệch nghĩa là có hàng không ai
+         khai — không được phép chốt sổ. */
+      const muc = targetOf(mo), tong = qtyOk + qtyNg + qtyThieu, lech = tong - muc;
+      if (lech !== 0) {
+        toast('Đạt ' + nfmt(qtyOk) + ' + hỏng ' + nfmt(qtyNg) + ' + thiếu ' + nfmt(qtyThieu) +
+          ' = ' + nfmt(tong) + ', phải đúng bằng SL cần làm vòng này (' + nfmt(muc) + ') — đang ' +
+          (lech > 0 ? 'dư ' : 'hụt ') + nfmt(Math.abs(lech)), true); return false;
+      }
+      if (qtyOk + qtyNg <= 0) { toast('Vòng này chưa làm ra PCS nào — không có gì để chốt sổ', true); return false; }
+      /* Lý do bắt buộc ở hai tình huống, không chỉ khi có hàng hỏng:
+           - có hỏng   → giải thích hỏng vì gì
+           - làm thiếu → giải thích vì sao không đủ (hết liệu, đổi ca, máy chậm…)
+         Trước đây chỉ hỏi khi có hỏng, nên lô thiếu mà không hỏng thì mất hẳn lý do. */
+      /* Hai lý do độc lập, hỏi riêng từng cái:
+           - hỏng 500 vì lỗi khuôn
+           - thiếu 1.000 vì chờ bù liệu
+         Gộp một ô thì một trong hai chuyện mất hẳn thông tin. */
+      lyDoHong = String(lyDoHong || '').trim();
+      lyDoThieu = String(lyDoThieu || '').trim();
+      const thieu = qtyThieu;
+      if (qtyNg > 0 && !lyDoHong) {
+        toast('Có ' + nfmt(qtyNg) + ' PCS hỏng — bắt buộc ghi LÝ DO HỎNG', true); return false;
+      }
+      if (thieu > 0 && !lyDoThieu) {
+        toast('Làm thiếu ' + nfmt(thieu) + ' PCS so với mục tiêu vòng — bắt buộc ghi LÝ DO THIẾU', true); return false;
+      }
+
+      const t = now();
+      rs.forEach(r => {
+        const g = r.segs.find(x => x.to == null); if (g) g.to = t;
+        r.completedAt = t; r.status = 'DONE';
+      });
+      if (mo.steps[4] && !mo.steps[4].completedAt) {
+        mo.steps[4].completedAt = t;
+        log(mo, 4, 'STEP4_COMPLETE', 'Sản xuất', 'Hoàn thành', 'Hoàn thành đồng bộ — SX xong ' + dur(t - mo.steps[4].acceptedAt), 'sys');
+      }
+      mo.sx = { qtyOk: qtyOk, qtyNg: qtyNg, qtyShort: qtyThieu, ngReason: lyDoHong, shortReason: lyDoThieu, at: t };
+      log(mo, 4, 'STEP4_FINISH_ALL', 'Đang lắp ráp', 'Hoàn thành',
+        rs.length + ' line đóng cùng một mốc giờ (§16) — đạt ' + nfmt(qtyOk) +
+        (qtyNg ? ' · hỏng ' + nfmt(qtyNg) + ' (' + lyDoHong + ')' : '') +
+        (thieu > 0 ? ' · thiếu ' + nfmt(thieu) + ' (' + lyDoThieu + ')' : ''));
+      const v = moKpi(mo);
+      toast('SX xong — đạt ' + nfmt(qtyOk) + (qtyNg ? ', hỏng ' + nfmt(qtyNg) : '') +
+        '. KPI thời gian: ' + (v.ok ? 'ĐẠT' : 'KHÔNG ĐẠT') +
+        (mo.packing.startedAt && !mo.packing.completedAt ? '. Đóng thùng vẫn chạy.' : ''));
+      return true;
+    }
+    /* §8 — bước cuối, giữ nút Hoàn thành (step 5 Nhập kho) */
+    function finishMo(mo) {
+      if (mo.packing.startedAt && !mo.packing.completedAt) { toast('Đóng thùng chưa kết thúc — hãy Kết thúc đóng thùng trước', true); return false; }
+      if (mo.steps[4] && !mo.steps[4].completedAt) { toast('SX chưa kết thúc — hãy Kết thúc SX trước', true); return false; }
+      // Thiếu SL → không COMPLETED, quay về Kho để làm tiếp phần còn lại (2026-09-11)
+      const packed = mo.packing.qtyPacked;
+      const tongSauVong = (mo.qtyDone || 0) + (packed || 0);      // cộng dồn cả các vòng trước
+      if (packed != null && tongSauVong < mo.qty) {
+        const conLai = mo.qty - tongSauVong;
+        if (mo.steps[5]) mo.steps[5].completedAt = now();
+        log(mo, 5, 'MO_PARTIAL', 'Nhập kho', 'Kho (vòng mới)',
+          'Vòng ' + roundOf(mo) + ' nhập ' + nfmt(packed) + ' — cộng dồn ' + nfmt(tongSauVong) + '/' + nfmt(mo.qty) +
+          ' — còn ' + nfmt(conLai) + ' → CHƯA HOÀN THÀNH, về Bàn team leader', 'rv');
+        moVongMoi(mo, 'Còn ' + nfmt(conLai) + ' chưa đóng thùng — về Bàn team leader làm tiếp', 3);
+        toast(mo.code + ' — cộng dồn ' + nfmt(tongSauVong) + '/' + nfmt(mo.qty) +
+          ' → CHƯA HOÀN THÀNH, đã về Bàn team leader để làm tiếp ' + nfmt(conLai), true);
+        return false;
+      }
+      mo.qtyDone = tongSauVong; mo.qtyRemain = 0;
+      if (mo.steps[5]) mo.steps[5].completedAt = now();
+      /* Chốt sổ vòng cuối y như khi trả về Kho: SL đã gộp vào qtyDone rồi nên phải
+         dọn packing, không thì mọi phép qtyDone + qtyPacked sẽ đếm lô cuối hai lần. */
+      if (mo.packing.startedAt) {
+        (mo.packingHistory = mo.packingHistory || []).push({
+          startedAt: mo.packing.startedAt, completedAt: mo.packing.completedAt,
+          qtyPacked: mo.packing.qtyPacked, packingReason: mo.packing.packingReason, round: roundOf(mo)
+        });
+      }
+      mo.qtyNgTotal = (mo.qtyNgTotal || 0) + (mo.sx?.qtyNg || 0);
+      /* Chốt sổ vòng cuối vào cùng một chỗ với các vòng trước. Trước đây chỉ
+         moVongMoi ghi stepsHistory nên vòng cuối — vòng làm MO hoàn thành —
+         không bao giờ hiện trong bảng truy cứu; MO xong ngay vòng 1 thì bảng trống trơn. */
+      (mo.stepsHistory = mo.stepsHistory || []).push({
+        round: roundOf(mo),
+        steps: mo.steps,
+        khoAcceptedAt: mo.kho.acceptedAt,
+        handedOverAt: mo.kho.handedOverAt,
+        printCount: mo.kho.printCount,
+        qtyPacked: packed,
+        sxOk: mo.sx?.qtyOk != null ? mo.sx.qtyOk : null,
+        qtyNg: mo.sx?.qtyNg || 0,
+        sxShort: mo.sx?.qtyShort || 0,
+        sxNgReason: mo.sx?.ngReason || '',
+        sxShortReason: mo.sx?.shortReason || '',
+        packingReason: mo.packing?.packingReason || '',
+        batDauTu: mo.veDau == null ? 0 : mo.veDau,
+        veDau: null,
+        reason: 'Hoàn thành — đủ ' + nfmt(mo.qty)
+      });
+      (mo.sxHistory = mo.sxHistory || []).push(Object.assign({ round: roundOf(mo) }, mo.sx));
+      mo.packing = {
+        startedAt: null, completedAt: null, by: null, qtyPacked: null,
+        packingReason: null, remain: 0, done: mo.qtyDone
+      };
+      mo.sx = { qtyOk: null, qtyNg: null, qtyShort: null, ngReason: null, shortReason: null, at: null };
+      mo.status = 'COMPLETED'; mo.completedAt = now();
+      log(mo, 5, 'MO_COMPLETE', 'PROCESSING', 'COMPLETED', '');
+      return true;
+    }
+    /* Ba số mỗi khung giờ, không phải một. `qty` là SẢN LƯỢNG THỰC TẾ — giữ nguyên
+       tên vì mọi phép cộng dồn và đối soát với SX đạt đều đang nhìn nó.
+         people  số người đứng chuyền khung đó → năng suất = qty / people
+         target  sản lượng yêu cầu khung đó    → đạt % = qty / target
+       Thiếu hai số kia thì con số thực tế trơ trọi: 500 cái là nhanh hay chậm,
+       không có gì để so. */
+    /* ══ QUY ĐỔI PCS ↔ THÙNG ═══════════════════════════════════════════════
+       Đơn hàng đặt bằng PCS, mọi phép tính tiến độ chạy bằng PCS. THÙNG chỉ là
+       cách ĐẾM cho nhanh ngoài xưởng. Bốn hàm dưới là chỗ DUY NHẤT hai đơn vị gặp
+       nhau — quy đổi rải rác là cách chắc chắn nhất để hai bảng ra hai con số.
+
+       Luật quyết định mọi thứ: **THÙNG CUỐI ĐƯỢC ĐÓNG THIẾU**. Đơn 3.000 với quy
+       cách 800 chia ra 3 thùng đầy + 1 thùng lẻ 600 — không có nó thì đơn nào không
+       chia hết cũng kẹt vĩnh viễn, vì mãi mãi thiếu vài trăm cái cho đủ thùng. */
+    const quyCach = mo => mo.pcsPerBox || 0;
+    const chiaThung = (pcs, qc) => !qc ? { day: 0, le: pcs } : { day: Math.floor(pcs / qc), le: pcs % qc };
+    const moTaThung = (pcs, qc) => {
+      if (!qc) return nfmt(pcs) + ' pcs';
+      const { day, le } = chiaThung(pcs, qc);
+      const phan = [];
+      if (day) phan.push(day + ' thùng đầy');
+      if (le) phan.push('1 thùng lẻ ' + nfmt(le));
+      return nfmt(pcs) + ' pcs = ' + (phan.join(' + ') || '0 thùng');
+    };
+    /* Số đã LÀM RA của vòng này. Chốt sổ rồi thì lấy SL đạt; chưa thì tạm lấy Σ sản
+       lượng giờ. KHÔNG dùng `sxOkOf` — hàm đó rơi về mục tiêu vòng khi chưa chốt, tức
+       là cho phép đóng thùng nhiều hơn số thật sự làm được. */
+    const laRaPcs = mo => (mo.sx && mo.sx.qtyOk != null) ? mo.sx.qtyOk : hourlySum(mo);
+    const thungGioSum = mo => (S.packHourly || [])
+      .filter(x => x.moId === mo.id && (x.round || 1) === roundOf(mo))
+      .reduce((a, x) => a + x.boxes, 0);
+    const daDongPcs = mo => thungGioSum(mo) * quyCach(mo);
+    /* Hàng lẻ trên bàn: ĐÃ LÀM RA rồi, chỉ chưa gom đủ một thùng. Đây KHÔNG phải
+       hàng thiếu (§7.5) — thiếu là chưa làm ra được, phải làm thêm. Lẻ thì không
+       phải làm thêm gì cả, giờ sau gom tiếp, cuối vòng vào thùng lẻ. */
+    const leTrenBan = mo => Math.max(0, laRaPcs(mo) - daDongPcs(mo));
+
+    /* Hai con số dẫn xuất, tính một chỗ để bảng nào cũng ra cùng một cách.
+       Hàng cũ lưu trước khi có `people`/`target` thì trả '—' chứ không trả 0 —
+       không biết khác hẳn bằng không. */
+    const datPct = (target, qty) => !target ? '—' : Math.round(qty / target * 100) + '%';
+    const nangSuat = (people, qty) => !people ? '—' : (qty / people).toFixed(1) + ' cái/người';
+
+    function addHourly(moId, slot, people, target, qty, note) {
+      const mo = byId(moId); if (!mo) { toast('Chọn MO', true); return false; }
+      if (!runsOf(mo).some(r => r.status === 'RUN')) { toast('Chỉ khi Đang lắp ráp mới được ghi sản lượng giờ', true); return false; }
+      if (mo.packing?.completedAt) { toast('MO đã Kết thúc đóng thùng — không ghi thêm', true); return false; }
+      qty = Number(qty); if (!qty || qty <= 0) { toast('Sản lượng thực tế phải >0', true); return false; }
+      people = Number(people); if (!people || people <= 0) { toast('Số người phải >0', true); return false; }
+      target = Number(target); if (!target || target <= 0) { toast('Sản lượng yêu cầu phải >0', true); return false; }
+      if (!slot) { toast('Chọn khung giờ', true); return false; }
+      const ngay = ymd(now());                    // MO chạy qua đêm thì cùng khung giờ ngày khác vẫn ghi được
+      const daGhi = (S.hourly || []).filter(h => h.moId === moId && (h.round || 1) === roundOf(mo));
+      if (daGhi.some(h => h.slot === slot && (h.day || '') === ngay)) {
+        toast('Khung ' + ngay + ' ' + slot + ' của ' + mo.code + ' đã ghi rồi — mỗi khung mỗi ngày chỉ ghi một lần', true); return false;
+      }
+      const tong = daGhi.reduce((a, h) => a + h.qty, 0);
+      if (tong + qty > targetOf(mo)) {
+        toast('Tổng sản lượng giờ ' + nfmt(tong + qty) + ' vượt SL cần làm vòng này (' + nfmt(targetOf(mo)) + ')', true); return false;
+      }
+      note = String(note || '').trim();
+      const id = Date.now() + Math.random();
+      if (!S.hourly) S.hourly = [];
+      S.hourly.push({ id, moId, round: roundOf(mo), moCode: mo.code, day: ngay, slot, people, target, qty, note, at: now(), by: ACTOR[4] });
+      log(mo, 4, 'HOURLY_ADD', '', slot,
+        'Thực tế ' + nfmt(qty) + ' / yêu cầu ' + nfmt(target) + ' · ' + people + ' người · giờ ' +
+        (slot || '') + (note ? ' — ' + note : ''), 'sys');
+      toast(mo.code + ' — ' + nfmt(qty) + '/' + nfmt(target) + ' lúc ' + slot +
+        ' (' + datPct(target, qty) + ', ' + nangSuat(people, qty) + ')');
+      return true;
+    }
+
+    /* Ghi số thùng đóng được trong một khung giờ. Chỉ đếm THÙNG ĐẦY.
+
+       Vì sao không cho ghi thùng lẻ ở đây: thùng lẻ chỉ đóng khi biết chắc không còn
+       hàng nào tới nữa — tức là lúc KẾT THÚC đóng thùng, không phải giữa ca. Cho ghi
+       lẻ mỗi giờ thì `thùng × quy cách` hết đúng, mà đó là phép tính cả hệ thống dựa
+       vào. Hàng lẻ trong giờ cứ để trên bàn, giờ sau gom tiếp. */
+    function addPackHourly(moId, slot, boxes, note) {
+      const mo = byId(moId); if (!mo) { toast('Chọn MO', true); return false; }
+      const qc = quyCach(mo);
+      if (!qc) { toast(mo.code + ' chưa khai quy cách (pcs/thùng) — không đếm thùng được', true); return false; }
+      if (!mo.packing?.startedAt) { toast('Chưa bắt đầu đóng thùng — ' + mo.code, true); return false; }
+      if (mo.packing.completedAt) { toast('Đã kết thúc đóng thùng — không ghi thêm', true); return false; }
+      boxes = Number(boxes); if (!boxes || boxes <= 0) { toast('Số thùng phải >0', true); return false; }
+      if (!slot) { toast('Chọn khung giờ', true); return false; }
+      const ngay = ymd(now());
+      const daGhi = (S.packHourly || []).filter(x => x.moId === moId && (x.round || 1) === roundOf(mo));
+      if (daGhi.some(x => x.slot === slot && (x.day || '') === ngay)) {
+        toast('Khung ' + ngay + ' ' + slot + ' của ' + mo.code + ' đã ghi rồi — mỗi khung mỗi ngày một lần', true); return false;
+      }
+      /* Không đóng được nhiều hơn số đã làm ra — hai sổ độc lập, đây là chỗ chúng gặp nhau. */
+      const coTheDong = laRaPcs(mo);
+      const sauKhiGhi = daDongPcs(mo) + boxes * qc;
+      if (sauKhiGhi > coTheDong) {
+        toast('Đóng ' + boxes + ' thùng = ' + nfmt(sauKhiGhi) + ' pcs, vượt số đã làm ra (' +
+          nfmt(coTheDong) + ')' + (mo.sx?.qtyOk == null ? ' — ghi sản lượng giờ trước đã' : ''), true);
+        return false;
+      }
+      note = String(note || '').trim();
+      if (!S.packHourly) S.packHourly = [];
+      S.packHourly.push({
+        id: Date.now() + Math.random(), moId, round: roundOf(mo), moCode: mo.code,
+        day: ngay, slot, boxes, pcsPerBox: qc, note, at: now(), by: ACTOR[4]
+      });
+      const le = leTrenBan(mo);
+      log(mo, 4, 'PACK_HOURLY', '', slot,
+        boxes + ' thùng × ' + nfmt(qc) + ' = ' + nfmt(boxes * qc) + ' pcs · giờ ' + slot +
+        (le ? ' — còn lẻ ' + nfmt(le) : '') + (note ? ' — ' + note : ''), 'sys');
+      toast(mo.code + ' — ghi ' + boxes + ' thùng (' + nfmt(boxes * qc) + ' pcs) lúc ' + slot +
+        (le ? ' · lẻ trên bàn ' + nfmt(le) : ''));
+      return true;
+    }
+
+    /* Đưa giờ xưởng về giờ thật. Dịch mọi mốc đã lưu theo cùng một khoảng,
+       nên mọi khoảng thời gian đo được vẫn y nguyên — chỉ đổi gốc thời gian. */
+    function resetClock() {
+      const d = Date.now() - S.now;
+      if (!d) return;
+      const sh = v => (v == null ? v : v + d);
+      S.mos.forEach(m => {
+        m.completedAt = sh(m.completedAt);
+        Object.keys(m.steps).forEach(k => {
+          const st = m.steps[k]; st.acceptedAt = sh(st.acceptedAt); st.completedAt = sh(st.completedAt);
+        });
+        m.kho.acceptedAt = sh(m.kho.acceptedAt);
+        if (m.veDau === undefined) m.veDau = 0;
+        m.kho.printedAt = sh(m.kho.printedAt);
+        m.kho.handedOverAt = sh(m.kho.handedOverAt);
+        if (m.qc) m.qc.at = sh(m.qc.at);
+        if (m.cancel) m.cancel.at = sh(m.cancel.at);
+        m.runs.forEach(r => {
+          r.addedAt = sh(r.addedAt); r.startedAt = sh(r.startedAt); r.completedAt = sh(r.completedAt);
+          r.segs.forEach(g => { g.from = sh(g.from); g.to = sh(g.to); });
+        });
+        if (m.packing) { m.packing.startedAt = sh(m.packing.startedAt); m.packing.completedAt = sh(m.packing.completedAt); }
+      });
+      S.history.forEach(h => { h.at = sh(h.at); });
+      (S.hourly || []).forEach(h => { h.at = sh(h.at); });
+      (S.packHourly || []).forEach(x => { x.at = sh(x.at); });
+      S.now += d;
+    }
+
+    /* ══ KPI — so THỜI GIAN ═════════════════════════════════
+       Thời gian yêu cầu = thời gian lắp ráp nhập lúc tạo MO (§3A, chỉ dùng cho Step4).
+       actual ≤ required → Đạt · actual > required → Không đạt.
+       Vượt vẫn đếm tiếp để biết trễ bao nhiêu (§12B).
+       Thời gian chờ không tính vào kết quả (§22A).
+       §7.2 — actual = now − startedAt, chưa trừ thời gian dừng máy.        */
+    /* Thực tế = tổng các đoạn "Đang lắp ráp". Chờ = thời gian nằm trong bảng trừ đi phần đó,
+       nên lúc bấm Dừng thì đồng hồ thực tế đứng lại và đồng hồ chờ tự chạy tiếp. */
+    function actualMs(r) { return r.segs.reduce((a, g) => a + ((g.to == null ? now() : g.to) - g.from), 0); }
+    function waitMs(r) {
+      const end = r.completedAt == null ? now() : r.completedAt;
+      return Math.max(0, (end - r.addedAt) - actualMs(r));
+    }
+    function runKpi(r) {
+      if (!r.startedAt) return null;
+      const mo = byId(r.moId);
+      const tq = r.targetQty || mo.qty;
+      const req = Math.max(1000, Math.round(mo.requiredSec * 1000 * (tq / mo.qty)));
+      const act = actualMs(r);
+      return { req, act, ok: act <= req, late: Math.max(0, act - req) };
+    }
+    /* §21A — KPI tổng MO lấy dòng chậm nhất */
+    function moKpi(mo) {
+      const ks = runsOf(mo).map(runKpi).filter(Boolean);
+      if (!ks.length) return null;
+      return { ok: ks.every(k => k.ok), late: Math.max.apply(null, ks.map(k => k.late)) };
+    }
+
+    /* ══ Dữ liệu mẫu ════════════════════════════════════════ */
+    function seed() {
+      S = blank();
+      const T0 = S.now, at = t => { S.now = T0 + t * 60e3; };
+      const P = 'RSMA1004A5-001-3GT5GP-50', Q = 'Nắp chụp F3-B', R = 'Khung kim loại F3-C';
+      const add = (c, p, q, m) => {
+        const x = mkMo(c, p, q, m); S.mos.push(x);
+        log(x, null, 'MO_CREATE', '', 'DRAFT', 'Dữ liệu mẫu'); return x;
+      };
+
+      // MO-001 — chạy trọn vẹn: 2 line, đóng đồng bộ theo §16
+      at(0); const m1 = add('M068820', P, 10000, 180);
+      at(2); submit([m1]);
+      at(5); khoAccept(m1); khoPrint(m1); khoHandover(m1);
+      at(12); accept(m1, 1);
+      at(45); accept(m1, 2);
+      at(60); qcDecide(m1, true);
+      at(66); accept(m1, 3);
+      at(72); accept(m1, 4);
+      at(74); addRun(m1, 1, 6000); addRun(m1, 2, 4000);
+      at(80); runStart(m1.runs[0]);
+      at(95); runStart(m1.runs[1]);
+      at(250); finishAll(m1);
+      at(255); accept(m1, 5); // Đóng thùng — auto-complete SX (§9)
+      at(258); accept(m1, 6); // Nhập kho
+      at(264); finishMo(m1);
+
+      // MO-002 — chạy quá giờ yêu cầu rất nhiều (§12B vẫn đếm tiếp)
+      at(30); const m2 = add('M069680', Q, 8000, 120);
+      at(31); submit([m2]);
+      at(34); khoAccept(m2); khoPrint(m2); khoHandover(m2);
+      at(40); accept(m2, 1); at(66); accept(m2, 2); at(80); qcDecide(m2, true);
+      at(88); accept(m2, 3); at(95); accept(m2, 4);
+      at(96); addRun(m2, 3, 5000); addRun(m2, 4, 3000);
+      at(102); runStart(m2.runs[0]); runStart(m2.runs[1]);
+      at(150); runHold(m2.runs[1], 'Hỏng máy — kẹt cữ đẩy');
+      at(185); runStart(m2.runs[1]);
+
+      // MO-003 — dùng CHUNG line 3 với MO-002 (§14B)
+      at(70); const m3 = add('M069940', R, 4000, 100);
+      at(71); submit([m3]);
+      at(74); khoAccept(m3); khoPrint(m3); khoHandover(m3);
+      at(82); accept(m3, 1); at(108); accept(m3, 2); at(120); qcDecide(m3, true);
+      at(128); accept(m3, 3); at(140); accept(m3, 4);
+      at(141); addRun(m3, 3, 4000);
+      at(146); runStart(m3.runs[0]);
+
+      // MO-004 — nằm Bàn team leader · MO-005 — QC đang giữ · MO-006 — rework sau QC FAIL
+      at(120); const m4 = add('M069960', P, 6000, 160); at(121); submit([m4]);
+      at(124); khoAccept(m4); khoPrint(m4); khoHandover(m4);
+      at(130); accept(m4, 1); at(158); accept(m4, 2); at(170); qcDecide(m4, true); at(176); accept(m4, 3);
+
+      at(150); const m5 = add('M073310', Q, 5000, 140); at(151); submit([m5]);
+      at(154); khoAccept(m5); khoPrint(m5); khoHandover(m5);
+      at(162); accept(m5, 1); at(196); accept(m5, 2);
+
+      at(160); const m6 = add('M073920', R, 3000, 100); at(161); submit([m6]);
+      at(164); khoAccept(m6); khoPrint(m6); khoHandover(m6);
+      at(172); accept(m6, 1); at(200); accept(m6, 2);
+      at(212); qcDecide(m6, false, 'Lỗi khuôn/gá');
+
+      // MO-007 — Setup đang giữ · MO-008 — chờ Setup · MO-009/010 — hàng đợi Kho · MO-011 — DRAFT
+      at(200); const m7 = add('M074000', P, 7000, 170); at(201); submit([m7]);
+      at(204); khoAccept(m7); khoPrint(m7); khoHandover(m7); at(228); accept(m7, 1);
+      at(215); const m8 = add('M074100', Q, 9000, 200); at(216); submit([m8]);
+      at(222); khoAccept(m8); khoPrint(m8); khoHandover(m8);
+      at(230); const m9 = add('M074120', R, 4500, 130); at(231); submit([m9]);
+      at(232); const mA = add('M074450', P, 12000, 240); at(233); submit([mA]);
+      at(234); add('M074950', Q, 2500, 90);
+
+      S.now = T0 + 250 * 60e3; S.tab = 4;
+      S.history.push({
+        at: S.now, mo: '—', step: null, action: 'SEED', user: '—', from: '', to: '',
+        reason: '11 MO mẫu trải khắp 5 bước. Mở tab Sản xuất để xem cột Kết quả và cột Trễ của MO-001.', kind: 'sys'
+      });
+    }
+
+    /* ══ Hiển thị ═══════════════════════════════════════════ */
+    function pills(mo) {
+      const p = [];
+      if (mo.status === 'CANCELLED') p.push('<span class="pill bad">Đã hủy</span>');
+      if (mo.status === 'COMPLETED') p.push('<span class="pill ok">Completed</span>');
+      if (remainOf(mo) > 0 && mo.status !== 'COMPLETED' && (mo.qtyDone || 0) > 0)
+        p.push('<span class="pill warn">Còn ' + nfmt(remainOf(mo)) + ' / ' + nfmt(mo.qty) + '</span>');
+      if ((mo._loops || 1) > 1) p.push('<span class="pill bad">Trả lại lần ' + ((mo._loops || 1) - 1) + '</span>');
+      if (mo.veDau === 3 && mo.step === 3 && remainOf(mo) > 0)
+        p.push('<span class="pill warn">Về Bàn team leader — làm tiếp ' + nfmt(remainOf(mo)) + '</span>');
+      if (mo.step === 0 && /^QC FAIL/.test(mo.lastReturnReason || '')) p.push('<span class="pill bad">Rework</span>');
+      if (mo.qc && mo.qc.result === 'PASS' && mo.step === 2) p.push('<span class="pill ok">QC Pass</span>');
+      return p.join('');
+    }
+    const head = mo => '<div class="rhead"><span class="code">' + esc(mo.code) + '</span>' +
+      '<span class="prod">' + esc(mo.product) + '</span>' + pills(mo) + '</div>';
+    const meta = (mo, x) => {
+      const done = mo.qtyDone || 0;
+      const remain = done ? ('<span>Đã xong <b>' + nfmt(done) + '</b> / Còn <b class="calc late">' + nfmt(remainOf(mo)) + '</b></span>') : '';
+      return '<div class="rmeta"><span>SL <b>' + nfmt(mo.qty) + '</b></span>' + remain +
+        '<span>Yêu cầu Step4 <b>' + dur(requiredMs(mo)) + '</b></span>' + (x || '') + '</div>';
+    };
+
+    /* ── Kế hoạch ── */
+    function viewPlan() {
+      const mode = S.ui.mode || 'batch';
+      const drafts = S.mos.filter(m => m.status === 'DRAFT');
+      const tabs = '<div class="tabs">' +
+        [['single', 'Tạo lẻ'], ['batch', 'Tạo hàng loạt'], ['csv', 'Import CSV']].map(([k, l]) =>
+          '<button data-act="mode" data-mode="' + k + '" aria-pressed="' + (mode === k) + '">' + l + '</button>').join('') + '</div>';
+
+      let form;
+      if (mode === 'csv') {
+        form = '<div class="field"><label for="csv">Mã, Tên con hàng, Số lượng, TG yêu cầu cho Step4 (phút), Quy cách pcs/thùng (tuỳ chọn)</label>' +
+          '<textarea id="csv" rows="5">M076741, RSMA1004A5-001-3GT5GP-50, 10000, 180, 800\nM076742, Nắp chụp F3-B, 6000, 120, 500</textarea></div>' +
+          '<div class="acts"><button class="btn primary" data-act="import">Import</button></div>';
+      } else {
+        const one = mode === 'single';
+        form = '<div class="formgrid">' +
+          (one ? '<div class="field"><label for="p-code">Mã MO (M + 6 số)</label><input type="text" id="p-code" value="M067690"></div>'
+            : '<div class="field"><label for="p-start">Số bắt đầu</label><input type="number" id="p-start" value="76740" min="1" max="999999"></div>' +
+            '<div class="field"><label for="p-count">Số MO (10–100)</label><input type="number" id="p-count" value="20" min="1" max="100"></div>') +
+          '<div class="field"><label for="p-prod">Tên con hàng</label><input type="text" id="p-prod" value="RSMA1004A5-001-3GT5GP-50"></div>' +
+          '<div class="field"><label for="p-qty">Số lượng</label><input type="number" id="p-qty" value="10000" min="1"></div>' +
+          '<div class="field"><label for="p-mins">TG yêu cầu — Step4 (phút)</label><input type="number" id="p-mins" value="180" min="1"></div>' +
+          '<div class="field"><label for="p-box">Quy cách (pcs/thùng)</label><input type="number" id="p-box" value="800" min="0"><span class="calc">0 = không đóng thùng. Thùng cuối được đóng thiếu.</span></div></div>' +
+          '<div class="acts"><button class="btn primary" data-act="create" data-one="' + (one ? 1 : 0) + '">' +
+          (one ? 'Tạo MO' : 'Tạo hàng loạt') + '</button></div>';
+      }
+
+      const rows = S.mos.map(mo => {
+        const locked = mo.status !== 'DRAFT';
+        return '<tr><td class="c">' + esc(mo.code) + (locked ? ' <span class="pill">khóa</span>' : '') + '</td>' +
+          '<td>' + esc(mo.product) + '</td><td class="n">' + nfmt(mo.qty) + '</td>' +
+          '<td class="n">' + dur(mo.requiredSec * 1000) + '</td>' +
+          '<td>' + esc(mo.status) + (mo.cancel ? '<span class="calc">' + esc(mo.cancel.reason) + '</span>' : '') + '</td>' +
+          '<td>' + (mo.step == null ? '—' : STEP_NM[mo.step]) + '</td>' +
+          '<td class="acts">' +
+          (mo.status === 'DRAFT' ? '<button class="btn primary sm" data-act="submit-one" data-mo="' + mo.id + '">Submit</button>' : '') +
+          (mo.status !== 'CANCELLED' && mo.status !== 'COMPLETED'
+            ? '<button class="btn ghost sm" data-act="cancel-open" data-mo="' + mo.id + '">Hủy</button>' : '') +
+          '</td></tr>' +
+          (S.ui.cancel === mo.id ? '<tr><td colspan="7"><div class="inline-form"><span class="lb">Lý do hủy</span>' +
+            '<input type="text" id="cr-' + mo.id + '" value="Nhập sai số lượng" style="flex:1;min-width:180px">' +
+            '<button class="btn danger sm" data-act="cancel" data-mo="' + mo.id + '">Xác nhận hủy</button>' +
+            '<span class="lb">§4A — không sửa được, chỉ hủy rồi tạo MO mới</span></div></td></tr>' : '');
+      }).join('');
+
+      return '<div class="cols two plan">' +
+        '<section class="panel"><header><h2>Tạo lệnh sản xuất</h2><span class="meta">§2.2 · 1C · 2C</span></header>' +
+        '<div class="body">' + tabs + form +
+        '<div class="acts"><button class="btn" data-act="submit-all"' + (drafts.length ? '' : ' disabled') +
+        '>Submit hàng loạt (' + drafts.length + ' DRAFT)</button></div>' +
+        '<p class="note">Cả lô chạy trong một transaction: trùng một mã thì <u>không tạo dòng nào</u>. Sau Submit, ' +
+        '<u>moCode / product / quantity / requiredProductionTime</u> khóa cứng — nhập sai chỉ còn cách hủy và tạo MO mới (§4A).</p>' +
+        '</div></section>' +
+        '<section class="panel"><header><h2>Sổ lệnh</h2><span class="meta">' + S.mos.length + ' MO</span></header>' +
+        '<div class="body flush"><div class="tscroll tall"><table><thead><tr><th>Mã MO</th><th>Con hàng</th><th>SL</th>' +
+        '<th>Yêu cầu Step4</th><th>Status</th><th>Bước</th><th></th></tr></thead><tbody>' +
+        (rows || '<tr><td colspan="7" class="empty">Chưa có MO nào — tạo ở khung bên trái rồi Submit để lệnh chạy sang tab Kho.</td></tr>') + '</tbody></table></div></div></section></div>';
+    }
+
+    /* ── Kho ── */
+    function slip(mo) {
+      return '<div class="slip"><div class="ft">PHIẾU LỆNH SẢN XUẤT</div>' +
+        '<div class="sc">' + esc(mo.code) + '</div>' +
+        '<dl><dt>Tên con hàng</dt><dd>' + esc(mo.product) + '</dd>' +
+        '<dt>Số lượng</dt><dd>' + nfmt(mo.qty) + ' ' + mo.unit + '</dd>' +
+        '<dt>TG yêu cầu — Step4</dt><dd>' + dur(mo.requiredSec * 1000) + '</dd></dl>' +
+        '<div class="qr">vùng in QR / barcode của MO Code</div>' +
+        '<div class="ft">Không cần ký nhận. Step1 nhập MO Code + Accept là xem như đồng ý toàn bộ thông tin trên phiếu (§3).</div></div>';
+    }
+    function view0() {
+      const q = queue(0), h = S.mos.filter(m => m.kho.acceptedAt && !m.kho.handedOverAt && m.status === 'PROCESSING');
+      const qr = q.map(mo => '<div class="row" data-act="pick" data-code="' + esc(mo.code) + '">' + head(mo) + meta(mo) +
+        '<div class="acts"><span class="pill">chờ quét</span>' +
+        '<span class="pill acc">bấm dòng để nạp mã vào ô quét</span></div></div>').join('');
+      const hr = h.map(mo => '<div class="row live">' + head(mo) + meta(mo) +
+        '<div class="acts">' +
+        '<button class="btn sm" data-act="slip" data-mo="' + mo.id + '">Xem phiếu</button>' +
+        '<button class="btn primary sm" data-act="kho-handover" data-mo="' + mo.id + '">' +
+        'Bàn giao → Setup</button></div>' +
+        (S.ui.slip === mo.id ? slip(mo) : '') + '</div>').join('');
+
+      return '<div class="cols two">' +
+        '<section class="panel"><header><h2>Queue — MO SUBMITTED</h2><span class="meta">' + q.length + ' lệnh</span></header>' +
+        '<div class="body">' +
+        hopQuet(0, 'Quét QR để Kho nhận lệnh. Nhận cả lô thì dùng nút bên dưới (§7A).') +
+        (qr || '<p class="empty">Không có lệnh chờ.</p>') +
+        (q.length ? '<div class="acts"><button class="btn" data-act="kho-accept-all">Accept tất cả (' + q.length + ')</button></div>' : '') +
+        '</div></section>' +
+        '<section class="panel"><header><h2>Bàn giao xuống xưởng</h2><span class="meta">§6B · 7A</span></header>' +
+        '<div class="body">' + (hr || '<p class="empty">Chưa Accept lệnh nào.</p>') +
+        (h.length ? '<div class="acts"><button class="btn" data-act="kho-handover-all">Bàn giao tất cả (' + h.length + ')</button></div>' : '') +
+        '<p class="note">Nhận lệnh xong là <u>bàn giao</u> luôn — không còn bước In phiếu, bớt một lần bấm. ' +
+        'Chưa <u>HANDOVER</u> thì Setup không được Accept — BE chặn (§3.2). Mỗi MO ghi riêng ' +
+        '<u>acceptedBy/At</u>, <u>handedOverBy/At</u>. <u>Xem phiếu</u> chỉ để xem hoặc in bằng trình duyệt, ' +
+        'hệ thống không ghi sổ.</p></div></section></div>';
+    }
+
+    /* ── Trạm 1..5 ── */
+    function stationRows(n) {
+      return atStep(n).map(mo => {
+        const s = mo.steps[n], el = stepElapsed(mo, n);
+        let acts = '', extra = '';
+        if (n === 2) {
+          const open = S.ui.qc === mo.id;
+          acts = mo.qc && mo.qc.result === 'PASS'
+            ? '<span class="pill ok">PASS — chờ Bàn team leader Accept để đóng Step2</span>'
+            : '<button class="btn primary sm" data-act="qc-open" data-mo="' + mo.id + '">Ra kết quả QC</button>';
+          if (open) extra = '<div class="inline-form">' +
+            '<button class="btn good sm" data-act="qc-pass" data-mo="' + mo.id + '">PASS</button>' +
+            '<span class="lb">hoặc FAIL, bắt buộc lý do</span>' +
+            '<select id="qr-' + mo.id + '">' + QC_REASONS.map(r => '<option>' + esc(r) + '</option>').join('') + '</select>' +
+            '<button class="btn danger sm" data-act="qc-fail" data-mo="' + mo.id + '">FAIL → Rework</button></div>';
+        } else if (n === 5) {
+          acts = '<button class="btn primary sm" data-act="finish-mo" data-mo="' + mo.id + '">Hoàn thành</button>' +
+            '<span class="pill acc">bước cuối — nút Complete duy nhất còn lại</span>';
+        } else {
+          acts = '<span class="pill acc">Không có nút Complete — đóng khi ' + STEP_NM[n + 1] + ' Accept</span>';
+        }
+        const extraMeta = (n === 5 && mo.packing?.qtyPacked) ? '<span>SL đóng <b>' + nfmt(mo.packing.qtyPacked) + '</b></span><span>Lý do <b>' + esc(mo.packing.packingReason || '') + '</b></span>' : '';
+        return '<div class="row live">' + head(mo) +
+          meta(mo, '<span>Timer bước ' + n + ' <b data-live="step:' + mo.id + ':' + n + '">' + dur(el) + '</b></span>' +
+            '<span>Accept lúc <b>' + hhmm(s.acceptedAt) + '</b> · ' + esc(s.by) + '</span>' + extraMeta) +
+          '<div class="acts">' + acts + '</div>' + extra + '</div>';
+      }).join('');
+    }
+    /* Ô quét dùng chung cho mọi trạm. Ba đường vào — camera, đầu đọc cắm USB,
+       gõ tay — đều đi qua cùng một bộ đọc nên quy tắc giống hệt nhau. */
+    const ICON_CAM = '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3M16 3h3a2 2 0 0 1 2 2v3M21 16v3a2 2 0 0 1-2 2h-3M8 21H5a2 2 0 0 1-2-2v-3"/><path d="M3 12h18"/></svg>';
+    function hopQuet(n, hint) {
+      return '<div class="scan">' +
+        '<input type="text" id="scan-' + n + '" placeholder="Quét / nhập MO Code…" autocomplete="off">' +
+        '<button class="btn btn-cam" data-act="cam-open" title="Mở camera quét QR">' + ICON_CAM + 'Camera</button>' +
+        '<button class="btn primary" data-act="scan" data-step="' + n + '">Nhận</button>' +
+        '<span class="hint">' + esc(hint) + '</span></div>';
+    }
+
+    function station(n, opt) {
+      const q = queue(n);
+      /* Không còn nút Accept trên từng dòng: nhiều đơn cùng lúc thì rất dễ bấm
+         trúng MO bên cạnh. Muốn nhận thì phải quét đúng mã của tờ phiếu đang cầm. */
+      const qr = q.map(mo => '<div class="row" data-act="pick" data-code="' + esc(mo.code) + '">' +
+        head(mo) + meta(mo, opt.qmeta ? opt.qmeta(mo) : '') +
+        '<div class="acts"><span class="pill">chờ quét</span>' +
+        '<span class="pill acc">bấm dòng để nạp mã vào ô quét</span></div></div>').join('');
+
+      return '<div class="cols two">' +
+        '<section class="panel"><header><h2>Đang ở bước ' + n + '</h2><span class="meta">' + atStep(n).length + ' MO</span></header>' +
+        '<div class="body">' + (stationRows(n) || '<p class="empty">Trạm đang trống.</p>') +
+        (opt.note ? '<p class="note">' + opt.note + '</p>' : '') + '</div></section>' +
+        '<section class="panel"><header><h2>Hàng đợi</h2><span class="meta">' + q.length + ' MO</span></header>' +
+        '<div class="body">' +
+        hopQuet(n, opt.scanHint) +
+        (qr || '<p class="empty">Không có MO nào chờ.</p>') +
+        '</div></section></div>';
+    }
+
+    const view1 = () => station(1, {
+      scan: true, acceptLabel: 'Accept / Bắt đầu Setup',
+      scanHint: '§8B — quét QR là nhận luôn, không cần bấm nút. Ký tự tiền tố đầu đọc chèn vào sẽ tự bỏ. §9A — sai mã hoặc chưa bàn giao thì chặn.',
+      note: 'UI Step1 chỉ có <u>một nút duy nhất</u>. Setup làm xong không bấm gì — bước này chỉ đóng khi QC Accept, và <u>completedAt = QC.acceptedAt</u>. Trách nhiệm đốc thúc QC thuộc về người Step1 (§4).'
+    });
+
+    const view2 = () => station(2, {
+      scan: true, acceptLabel: 'Accept QC',
+      scanHint: 'Quét QR là QC nhận luôn, Step1 tự đóng. Không cần bấm nút.',
+      note: 'QC Accept làm Step1 auto-complete. Bản thân Step2 chỉ đóng khi <u>Bàn team leader Accept</u>. FAIL bắt buộc nhập lý do, ghi <u>QC_FAIL</u> và quay về Step1 (§23A).'
+    });
+
+    const view3 = () => station(3, {
+      scan: true,
+      scanHint: 'Quét QR để Bàn team leader nhận — QC tự đóng. Bấm dòng bên dưới để nạp mã nếu không có đầu đọc.',
+      qmeta: mo => '<span>QC Pass lúc <b>' + hhmm(mo.qc.at) + '</b></span>',
+      note: 'Bàn team leader Accept làm Step2 auto-complete. Step3 đóng khi <u>Line Leader Accept</u> (§6). MO <u>chưa đủ SL</u> quay về đây chứ không về Kho — máy đã setup đúng, hàng đã qua QC, chỉ là chưa làm đủ số nên không phải in lại phiếu.'
+    });
+
+    const view5 = () => station(5, {
+      scan: true,
+      scanHint: 'Quét QR để Nhập kho nhận — bước Sản xuất tự đóng.',
+      qmeta: mo => {
+        const k = moKpi(mo); const pk = mo.packing; return '<span>SL đóng <b>' + nfmt(pk.qtyPacked || 0) + '</b></span>' +
+          '<span>KPI tổng <b>' + (k ? (k.ok ? 'ĐẠT' : 'KHÔNG ĐẠT') : '—') + '</b></span>' +
+          (pk.startedAt ? '<span>Đóng thùng <b>' + dur((pk.completedAt || now()) - pk.startedAt) + '</b></span>' : '');
+      },
+      note: 'Nhập kho hiển thị <u>SL đã đóng thùng</u> đã nhập ở Kết thúc đóng thùng để đối soát. Accept Nhập kho → Timer Nhập kho START, Hoàn thành → MO COMPLETED (§8).'
+    });
+
+    /* ── Step4 ── */
+    /* Line đã từng chạy nhưng hiện ở WAIT = đang dừng (§15A giữ 3 trạng thái,
+       chỉ hiển thị thêm badge đỏ để phân biệt với line chưa chạy lần nào).        */
+    const heldRuns = mo => runsOf(mo).filter(r => r.status === 'WAIT' && r.startedAt);
+
+    /* C1 — Kết quả THỜI GIAN, chạy live suốt quá trình sản xuất */
+    function timeCell(mo) {
+      const rs = runsOf(mo).filter(r => r.startedAt);
+      if (!rs.length) return '<span class="pill">chưa chạy</span>';
+      const req = requiredMs(mo), act = Math.max.apply(null, rs.map(actualMs));   // hạn mức của VÒNG
+      return act <= req
+        ? '<span class="pill ok">Đạt</span>'
+        : '<span class="pill bad">Quá giờ ' + dur(act - req) + '</span>';
+    }
+    /* C1 — SẢN LƯỢNG, chỉ có sau khi Kết thúc đóng thùng */
+    function qtyCell(mo) {
+      const sx = mo.sx, target = targetOf(mo);
+      if (!sx || sx.qtyOk == null) return '<span class="pill">Chưa xong SX</span>';
+      const packed = mo.packing?.qtyPacked;
+      /* Cột này so SL ĐẠT với mục tiêu vòng. KHÔNG gọi phần chênh là "thiếu":
+         từ "thiếu" đã có nghĩa riêng ở bước Sản xuất (SL không làm ra được),
+         trong khi phần chênh ở đây = hỏng + thiếu — cả hai đều phải làm bù.
+         Gọi trùng tên thì bảng báo "Thiếu 1.000" trong khi người vận hành vừa
+         khai "thiếu 500", đọc vào tưởng hệ thống tính sai. */
+      const buHang = target - sx.qtyOk;
+      if (buHang <= 0)
+        return '<span class="pill ok">Đạt ' + nfmt(sx.qtyOk) + '</span>' +
+          (packed != null ? '<span class="calc">đã đóng thùng ' + nfmt(packed) + '</span>' : '');
+      /* Một dòng, hết. Bảng này là bảng treo tường — liếc để biết đơn nào chưa đủ.
+         Hỏng bao nhiêu · thiếu bao nhiêu · vì sao là câu hỏi thứ hai, và người hỏi
+         câu thứ hai thì bấm vào truy cứu MO xem (bảng Các vòng, có cả vòng đang chạy). */
+      return '<span class="pill warn">Đạt ' + nfmt(sx.qtyOk) + '/' + nfmt(target) + '</span>';
+    }
+
+    /* Sau khi Accept, Leader tick các line muốn chạy rồi nhập SL cho từng line */
+    function linePicker(mo) {
+      const rs = runsOf(mo);
+      const done = rs.length && rs.every(r => r.status === 'DONE');
+      const pick = (S.ui.pick && S.ui.pick.mo === mo.id) ? S.ui.pick.lines : [];
+
+      const grid = Array.from({ length: LINES }, (_, i) => i + 1).map(l => {
+        const busy = activeRuns().filter(r => r.line === l && r.status !== 'DONE').length;
+        return '<button class="lchip" data-act="pick-line" data-mo="' + mo.id + '" data-line="' + l + '"' +
+          ' aria-pressed="' + (pick.indexOf(l) >= 0) + '">L' + String(l).padStart(2, '0') +
+          '<small>' + (busy ? busy + ' MO' : 'trống') + '</small></button>';
+      }).join('');
+
+      const hasLines = rs.length > 0;
+      const qtyForm = !hasLines && pick.length
+        ? '<div class="inline-form"><button class="btn primary sm" data-act="add-picked" data-mo="' + mo.id + '">Thêm ' + pick.length + ' line vào bảng</button><span class="lb">' + pick.map(l => 'L' + String(l).padStart(2, '0')).join(', ') + '</span></div>'
+        : (hasLines && pick.length ? '<div class="inline-form"><button class="btn primary sm" data-act="add-picked" data-mo="' + mo.id + '">Thêm ' + pick.length + ' line vào bảng</button><span class="lb">' + pick.map(l => 'L' + String(l).padStart(2, '0')).join(', ') + '</span></div>' : '');
+
+      const sxDone = mo.steps[4]?.completedAt;
+      const sxBlock = sxDone
+        ? '<span class="pill ok">SX xong ' + dur(sxDone - mo.steps[4].acceptedAt) + '</span>'
+        : (rs.length ? '<button class="btn good sm" data-act="finish-all" data-mo="' + mo.id + '">Hoàn thành (đồng bộ tất cả line)</button>' : '');
+      const sxSo = (sxDone && mo.sx && mo.sx.qtyOk != null)
+        ? '<span class="pill ok">đạt ' + nfmt(mo.sx.qtyOk) + '</span>' +
+        (mo.sx.qtyNg ? '<span class="pill bad">hỏng ' + nfmt(mo.sx.qtyNg) +
+          (mo.sx.ngReason ? ' — ' + esc(mo.sx.ngReason) : '') + '</span>' : '') +
+        (mo.sx.qtyShort ? '<span class="pill warn">thiếu ' + nfmt(mo.sx.qtyShort) +
+          (mo.sx.shortReason ? ' — ' + esc(mo.sx.shortReason) : '') + '</span>'
+          : (mo.sx.shortReason ? '<span class="pill warn">thiếu — ' + esc(mo.sx.shortReason) + '</span>' : ''))
+        : '';
+      const sxForm = (!sxDone && S.ui.sxDone === mo.id)
+        ? '<div class="inline-form"><span class="lb">SL đạt</span>' +
+        '<input type="number" class="num-in" id="sxok-' + mo.id + '" value="' + targetOf(mo) + '" min="0" max="' + targetOf(mo) + '" oninput="sxTong(' + mo.id + ')">' +
+        '<span class="lb">SL hỏng</span>' +
+        '<input type="number" class="num-in" id="sxng-' + mo.id + '" value="0" min="0" max="' + targetOf(mo) + '" oninput="sxTong(' + mo.id + ')">' +
+        '<span class="lb">SL thiếu</span>' +
+        '<input type="number" class="num-in" id="sxth-' + mo.id + '" value="0" min="0" max="' + targetOf(mo) + '" oninput="sxTong(' + mo.id + ')">' +
+        '<span class="pill ok" id="sxsum-' + mo.id + '">Σ ' + nfmt(targetOf(mo)) + ' — khớp</span>' +
+        '<span class="lb">Lý do hỏng</span>' +
+        '<input type="text" id="sxngr-' + mo.id + '" placeholder="bắt buộc nếu có hỏng" style="flex:1;min-width:150px">' +
+        '<span class="lb">Lý do thiếu</span>' +
+        '<input type="text" id="sxthr-' + mo.id + '" placeholder="bắt buộc nếu làm thiếu" style="flex:1;min-width:150px">' +
+        '<button class="btn good sm" data-act="sx-done-ok" data-mo="' + mo.id + '">Xác nhận</button>' +
+        '<button class="btn ghost sm" data-act="sx-done-cancel" data-mo="' + mo.id + '">Hủy</button></div>'
+        : '';
+      const linesTxt = rs.length ? rs.map(r => 'L' + String(r.line).padStart(2, '0')).join(', ') : '';
+      const gridSection = hasLines ? '' : '<div class="lines">' + grid + '</div>' + qtyForm;
+      return '<div class="row live">' + head(mo) +
+        meta(mo, '<span>SL <b>' + nfmt(mo.qty) + '</b></span>' +
+          (linesTxt ? '<span>Line <b>' + esc(linesTxt) + '</b></span>' : '<span style="color:var(--warn)">chưa chọn line</span>') +
+          (sxDone ? '<span>SX <b data-live="step:' + mo.id + ':4">' + dur(sxDone - mo.steps[4].acceptedAt) + '</b></span>' : '<span>SX <b data-live="step:' + mo.id + ':4">' + dur(stepElapsed(mo, 4)) + '</b></span>')) +
+        gridSection +
+        '<div class="acts">' + sxBlock + sxSo + '</div>' + sxForm +
+        '</div>';
+    }
+
+    function view4() {
+      const q = queue(4), h = atStep(4);
+      const qr = q.map(mo => '<div class="row" data-act="pick" data-code="' + esc(mo.code) + '">' + head(mo) +
+        meta(mo, '<span>Bàn team leader <b data-live="step:' + mo.id + ':3">' + dur(stepElapsed(mo, 3)) + '</b></span>') +
+        '<div class="acts"><span class="pill">chờ quét</span>' +
+        '<span class="pill acc">bấm dòng để nạp mã vào ô quét</span></div></div>').join('');
+
+      // Gộp theo MO: 1 MO = 1 row, cột Line hiển thị L01, L02
+      const mosWithRuns = h.filter(mo => runsOf(mo).length).sort((a, b) => a.code.localeCompare(b.code));
+      function moAggregatedRow(mo) {
+        const rs = runsOf(mo);
+        const linesTxt = rs.map(r => 'L' + String(r.line).padStart(2, '0')).join(', ');
+        const tgCho = rs.length ? dur(Math.max(...rs.map(r => waitMs(r)))) : '—';
+        const tgThuc = rs.length ? dur(Math.max(...rs.map(r => actualMs(r)))) : '—';
+        const hasRun = rs.some(r => r.status === 'RUN');
+        const hasWait = rs.some(r => r.status === 'WAIT');
+        const held = heldRuns(mo);
+        let st = hasRun ? '<span class="pill acc">Đang lắp ráp</span>'
+          : hasWait ? '<span class="pill">Chờ xử lý</span>'
+            : '<span class="pill ok">Hoàn thành</span>';
+        if (held.length) st += ' <span class="pill bad">ĐANG DỪNG ' + esc(lineList(held)) + '</span>' +
+          '<span class="calc late">' + esc(held[0].holdReason || 'chưa ghi lý do') + '</span>';
+        const acts = hasRun ? '<button class="btn sm" data-act="mo-pause" data-mo="' + mo.id + '">Dừng</button>'
+          : hasWait ? '<button class="btn primary sm" data-act="mo-run-start" data-mo="' + mo.id + '">Đang lắp ráp</button>'
+            : '<span class="pill">đóng theo MO</span>';
+        const holdForm = S.ui.hold === mo.id
+          ? '<tr><td colspan="11"><div class="inline-form"><span class="lb">Lý do dừng (bắt buộc §17)</span>' +
+          '<input type="text" id="hold-' + mo.id + '" value="Hỏng máy — kẹt cữ đẩy" style="flex:1;min-width:200px">' +
+          '<button class="btn danger sm" data-act="mo-hold-ok" data-mo="' + mo.id + '">Xác nhận dừng ' +
+          esc(lineList(rs.filter(r => r.status === 'RUN'))) + '</button>' +
+          '<button class="btn ghost sm" data-act="mo-hold-cancel" data-mo="' + mo.id + '">Hủy</button></div></td></tr>' : '';
+        return '<tr><td class="c">' + esc(mo.code) + '</td><td>' + esc(mo.product) + '</td>' +
+          '<td class="n">' + nfmt(mo.qty) + '</td><td class="n">' + esc(linesTxt) + '</td>' +
+          '<td class="n">' + dur(requiredMs(mo)) +
+          (roundTarget(mo) < mo.qty ? '<span class="calc">vòng ' + roundOf(mo) + ' · ' +
+            nfmt(roundTarget(mo)) + '/' + nfmt(mo.qty) + '</span>' : '') + '</td>' +
+          '<td class="n" data-live="mowait:' + mo.id + '">' + tgCho + '</td>' +
+          '<td class="n" data-live="moact:' + mo.id + '">' + tgThuc + '</td>' +
+          '<td>' + st + '</td>' +
+          '<td data-live="motime:' + mo.id + '">' + timeCell(mo) + '</td>' +
+          '<td data-live="moqty:' + mo.id + '">' + qtyCell(mo) + '</td>' +
+          '<td class="acts">' + acts + '</td></tr>' + holdForm;
+      }
+      const table = mosWithRuns.length
+        ? '<div class="tscroll"><table><thead><tr><th>MO</th><th>Tên con hàng</th><th>Số lượng</th><th>Line</th>' +
+        '<th>TG yêu cầu</th><th>TG chờ</th><th>TG thực tế</th><th>Hiện trạng Line</th>' +
+        '<th>Kết quả thời gian</th><th>Sản lượng</th><th></th>' +
+        '</tr></thead><tbody>' + mosWithRuns.map(moAggregatedRow).join('') + '</tbody></table></div>'
+        : '<p class="empty">Chưa có line nào được thêm vào bảng.</p>';
+
+      // Đóng thùng tách riêng trong Step4
+      const packingMos = h.filter(mo => runsOf(mo).length);
+      const packingRows = packingMos.map(mo => {
+        const pk = mo.packing;
+        const isRunning = runsOf(mo).some(r => r.status === 'RUN' || r.status === 'DONE');
+        const isPackForm = S.ui.packFinish === mo.id;
+        const sxDoneForPack = !!mo.steps[4]?.completedAt;
+        const linesTxt = lineList(runsOf(mo));
+        let packBlock;
+        if (!pk.startedAt) {
+          packBlock = isRunning
+            ? '<div class="acts nowrap"><button class="btn primary sm" data-act="pack-start" data-mo="' + mo.id + '">Bắt đầu đóng thùng</button><span class="pill">song song với SX</span></div>'
+            : '<div class="acts nowrap"><span class="pill">Chờ SX Đang lắp ráp mới được đóng thùng</span></div>';
+        } else if (!pk.completedAt) {
+          if (isPackForm) {
+            packBlock = sxDoneForPack
+              ? '<div class="inline-form" style="align-items:flex-start"><span class="lb">SL đã đóng thùng</span><input type="number" class="num-in" id="packqty-' + mo.id + '" value="' + sxOkOf(mo) + '" min="1" max="' + sxOkOf(mo) + '"><span class="lb">SX đạt ' + nfmt(sxOkOf(mo)) + (hourlySum(mo) ? ' · Σ giờ ' + nfmt(hourlySum(mo)) : '') +
+                (quyCach(mo) ? ' · ' + moTaThung(sxOkOf(mo), quyCach(mo)) : '') + '</span><span class="lb">Lý do</span><input type="text" id="packreason-' + mo.id + '" value="Đủ" placeholder="bắt buộc" style="flex:1;min-width:170px"><button class="btn good sm" data-act="pack-finish-ok" data-mo="' + mo.id + '">Xác nhận</button><button class="btn ghost sm" data-act="pack-finish-cancel" data-mo="' + mo.id + '">Hủy</button></div>'
+              : '<div class="acts nowrap"><span class="pill warn">Chờ Hoàn thành (đồng bộ) SX mới được kết thúc đóng thùng</span><button class="btn ghost sm" disabled title="Phải Hoàn thành SX trước">Kết thúc đóng thùng</button></div>';
+          } else {
+            packBlock = '<div class="acts nowrap"><span class="pill acc pack-timer">Đang đóng thùng <b data-live="pack:' + mo.id + '">' + dur(now() - pk.startedAt) + '</b> · ' + esc(pk.by) + '</span><button class="btn good sm" data-act="pack-finish-open" data-mo="' + mo.id + '"' + (sxDoneForPack ? '' : ' disabled title="Phải Hoàn thành SX trước"') + '>Kết thúc đóng thùng</button></div>';
+          }
+        } else {
+          const duoi = mo.steps[4]?.completedAt ? Math.max(0, pk.completedAt - mo.steps[4].completedAt) : null;
+          packBlock = '<div class="acts"><span class="pill ok">Đóng thùng xong ' + dur(pk.completedAt - pk.startedAt) + ' · ' + nfmt(pk.qtyPacked) + ' PCS</span>' +
+            ((mo.sx && mo.sx.qtyNg) ? '<span class="pill bad">SX hỏng ' + nfmt(mo.sx.qtyNg) + '</span>' : '') +
+            (duoi != null ? '<span class="pill warn">Đuôi sau SX ' + dur(duoi) + '</span>' : '') +
+            '<span class="calc">' + esc(pk.packingReason || '') + '</span></div>';
+        }
+        const sxDone = !!mo.steps[4]?.completedAt;
+        return '<div class="row live">' + head(mo) + meta(mo, '<span>Line <b>' + esc(linesTxt) + '</b></span><span>SX <b data-live="step:' + mo.id + ':4">' + (sxDone ? dur(mo.steps[4].completedAt - mo.steps[4].acceptedAt) : dur(stepElapsed(mo, 4))) + '</b></span>' + (pk.startedAt ? '<span>Đóng thùng <b data-live="pack:' + mo.id + '">' + dur((pk.completedAt || now()) - pk.startedAt) + '</b></span>' : '')) + packBlock + '</div>';
+      }).join('');
+      const packingPanel = '<div class="cols"><section class="panel" style="margin-top:16px"><header><h2>Đóng thùng (song song) — trong Step4</h2><span class="meta">' + packingMos.length + ' MO</span></header><div class="body">' + (packingRows || '<p class="empty">Chưa có MO nào để đóng thùng — cần Đang lắp ráp trước.</p>') + '<p class="note">Tách riêng khỏi chọn line để tránh nhầm. <u>Bắt đầu</u> khi Đang lắp ráp, <u>Kết thúc</u> phải sau <u>Hoàn thành (đồng bộ)</u>. SL hỏng ghi ở bước Sản xuất, nên ở đây chỉ đếm số đã đóng và không được vượt SL đạt của SX.</p></div></section></div>';
+
+      // hourly panel - chỉ hiện khi đang tiến hành
+      const runningMos = h.filter(m => runsOf(m).some(r => r.status === 'RUN'));
+      /* Đủ 24 khung, xếp vòng bắt đầu 06:00 cho hợp ca xưởng — ca đêm vẫn ghi được */
+      const gioHienTai = new Date(now()).getHours();
+      const hourOpts = Array.from({ length: 24 }, (_, i) => {
+        const hh = (6 + i) % 24;
+        const s = String(hh).padStart(2, '0') + ':00-' + String((hh + 1) % 24).padStart(2, '0') + ':00';
+        return '<option value="' + s + '"' + (gioHienTai === hh ? ' selected' : '') + '>' + s + '</option>';
+      }).join('');
+      const moOpts = runningMos.map(m => '<option value="' + m.id + '">' + esc(m.code) + ' - ' + esc(m.product) + '</option>').join('') || '<option value="">— chưa có MO đang tiến hành —</option>';
+
+      /* ══ Đóng thùng theo giờ ═══════════════════════════════════
+         PHẢI đặt sau `hourOpts` / `moOpts` — khối này dùng lại `hourOpts`, mà nó
+         khai bằng `const` nên đọc trước lúc khai là ReferenceError (TDZ), và
+         `render()` chết giữa chừng: màn hình đứng ở lần vẽ trước, bấm nút nào
+         cũng tưởng không ăn.
+         Song song với panel Sản lượng theo giờ, nhưng đơn vị khác: bên kia đếm PCS
+         làm ra, bên này đếm THÙNG đóng được. Dòng `lẻ trên bàn` là thứ quan trọng
+         nhất ở đây — nó cho thấy phần chênh giữa hai sổ KHÔNG phải hàng thiếu. */
+      const packingNow = h.filter(m => m.packing?.startedAt && !m.packing.completedAt && quyCach(m) > 0);
+      const packMoOpts = packingNow.map(m =>
+        '<option value="' + m.id + '">' + esc(m.code) + ' - ' + esc(m.product) +
+        ' (' + nfmt(quyCach(m)) + ' pcs/thùng)</option>').join('');
+      const packHourRows = (S.packHourly || [])
+        .filter(x => h.some(m => m.id === x.moId && (x.round || 1) === roundOf(m)))
+        .slice(-30)
+        .map(x => '<tr><td class="n">' + esc(x.day || '—') + '</td><td class="n">' + esc(x.slot) + '</td>' +
+          '<td class="c">' + esc(x.moCode) + '</td><td class="n">' + x.boxes + '</td>' +
+          '<td class="n">' + nfmt(x.pcsPerBox) + '</td><td class="n">' + nfmt(x.boxes * x.pcsPerBox) + '</td>' +
+          '<td>' + esc(x.note || '') + '</td><td class="n">' + hhmm(x.at) + '</td><td>' + esc(x.by) + '</td></tr>').join('');
+      const packHourTable = packHourRows
+        ? '<div class="tscroll"><table><thead><tr><th>Ngày</th><th>Giờ</th><th>MO</th><th>Số thùng</th>' +
+          '<th>Quy cách</th><th>= pcs</th><th>Ghi chú</th><th>Ghi lúc</th><th>Người ghi</th></tr></thead><tbody>' +
+          packHourRows + '</tbody></table></div>'
+        : '<p class="empty">Chưa ghi thùng nào.</p>';
+      const packTinhTrang = packingNow.map(m => {
+        const le = leTrenBan(m);
+        return '<div class="calc"><b>' + esc(m.code) + '</b> — đã đóng <b>' + thungGioSum(m) + ' thùng</b> = ' +
+          nfmt(daDongPcs(m)) + ' pcs · làm ra ' + nfmt(laRaPcs(m)) + ' pcs · ' +
+          (le
+            ? '<span style="color:var(--warn)">lẻ trên bàn <b>' + nfmt(le) + '</b> — chờ gom, KHÔNG phải hàng thiếu</span>'
+            : '<span style="color:var(--ok)">không còn hàng lẻ</span>') + '</div>';
+      }).join('');
+      const packHourForm = packingNow.length
+        ? '<div class="inline-form"><span class="lb">MO</span><select id="pbox-mo">' + packMoOpts + '</select>' +
+          '<span class="lb">Khung giờ</span><select id="pbox-slot">' + hourOpts + '</select>' +
+          '<span class="lb">Số thùng ĐẦY</span><input type="number" class="num-in" id="pbox-n" placeholder="1" min="1" step="1">' +
+          '<span class="lb">Ghi chú</span><input type="text" id="pbox-note" placeholder="hết băng keo..." style="flex:1;min-width:140px">' +
+          '<button class="btn primary sm" data-act="pbox-add">Ghi</button></div>'
+        : '<p class="empty">Chỉ hiện khi có MO <b>đang đóng thùng</b> và đã khai <b>quy cách</b> (pcs/thùng).</p>';
+      const packHourlyPanel = '<div class="cols"><section class="panel" style="margin-top:16px">' +
+        '<header><h2>Đóng thùng theo giờ</h2><span class="meta">' + packingNow.length + ' MO</span></header>' +
+        '<div class="body">' + packHourForm + packTinhTrang + packHourTable +
+        '<p class="note">Mỗi giờ chỉ đếm <b>thùng ĐẦY</b>. Hàng chưa đủ một thùng để nguyên trên bàn — ' +
+        '<u>đó không phải hàng thiếu</u>, giờ sau gom tiếp. ' +
+        '<b>Thùng cuối của đơn được đóng thiếu</b>, nên phần lẻ cuối cùng vẫn nhập kho được và đơn vẫn đóng đủ. ' +
+        'Tiến độ MO luôn tính bằng <b>PCS</b> — thùng chỉ là cách đếm cho nhanh (§7b.2).</p></div></section></div>';
+      const hourlyRows = (S.hourly || []).filter(hr => h.some(m => m.id === hr.moId && (hr.round || 1) === roundOf(m))).slice(-30).map(hr => '<tr><td class="n">' + esc(hr.day || '—') + '</td><td class="n">' + esc(hr.slot) + '</td><td class="c">' + esc(hr.moCode) + '</td><td class="n">' + (hr.people || '—') + '</td><td class="n">' + (hr.target ? nfmt(hr.target) : '—') + '</td><td class="n">' + nfmt(hr.qty) + '</td><td class="n">' + datPct(hr.target, hr.qty) + '</td><td class="n">' + nangSuat(hr.people, hr.qty) + '</td><td>' + esc(hr.note || '') + '</td><td class="n">' + hhmm(hr.at) + '</td><td>' + esc(hr.by) + '</td></tr>').join('');
+      const hourlyTable = hourlyRows ? '<div class="tscroll"><table><thead><tr><th>Ngày</th><th>Giờ</th><th>MO</th><th>Số người</th><th>SL yêu cầu</th><th>SL thực tế</th><th>Đạt</th><th>Năng suất</th><th>Ghi chú</th><th>Ghi lúc</th><th>Người ghi</th></tr></thead><tbody>' + hourlyRows + '</tbody></table></div>' : '<p class="empty">Chưa ghi sản lượng giờ nào.</p>';
+      const hourlyForm = runningMos.length
+        ? '<div class="inline-form"><span class="lb">MO</span><select id="hour-mo">' + moOpts + '</select><span class="lb">Khung giờ</span><select id="hour-slot">' + hourOpts + '</select><span class="lb">Số người</span><input type="number" class="num-in" id="hour-people" placeholder="12" min="1" step="1"><span class="lb">Sản lượng yêu cầu</span><input type="number" class="num-in" id="hour-target" placeholder="600" min="1"><span class="lb">Sản lượng thực tế</span><input type="number" class="num-in" id="hour-qty" placeholder="500" min="1"><span class="lb">Ghi chú</span><input type="text" id="hour-note" placeholder="ca đêm, máy chậm..." style="flex:1;min-width:140px"><button class="btn primary sm" data-act="hour-add">Ghi</button></div>'
+        : '<p class="empty">Chỉ khi <b>Đang lắp ráp</b> mới được ghi sản lượng giờ.</p>';
+      const hourlyPanel = '<div class="cols"><section class="panel" style="margin-top:16px"><header><h2>Sản lượng theo giờ (theo MO)</h2><span class="meta">Chỉ hiện khi Đang lắp ráp</span></header>' +
+        '<div class="body">' + hourlyForm + hourlyTable + '<p class="note">Mỗi khung giờ ghi <b>ba số</b>: số người đứng chuyền, sản lượng <u>yêu cầu</u> và sản lượng <u>thực tế</u>. ' +
+        'Từ đó ra <b>Đạt %</b> (thực tế / yêu cầu) và <b>Năng suất</b> (thực tế / số người) — một mình con số thực tế không nói được nhanh hay chậm. ' +
+        'Ghi <u>theo MO</u>, không theo line — vd L03 chạy 2 MO thì chọn MO để ghi 500 cho MO đó. Slot 8h-9h, 9h-10h ... theo giờ xưởng. Chỉ khi trạng thái <b>Đang lắp ráp</b> mới được hiện và nhập.</p></div></section></div>';
+
+      return '<div class="cols two">' +
+        '<section class="panel"><header><h2>Chọn line</h2><span class="meta">' + h.length +
+        ' MO · ' + LINES + ' line</span></header>' +
+        '<div class="body">' + (h.length ? h.map(linePicker).join('') : '<p class="empty">Chưa Accept MO nào.</p>') +
+        '<p class="note">Accept xong thì tick các line muốn chạy (chọn nhiều cùng lúc) rồi <u>Thêm line vào bảng</u> — 1 MO gộp 1 dòng, cột Line hiển thị <u>L01, L02</u>, không chia SL theo line. §14B một line nhận nhiều MO. §16 tất cả line của một MO <u>đóng cùng một mốc giờ</u>.</p></div></section>' +
+        '<section class="panel"><header><h2>Hàng đợi từ Bàn team leader</h2><span class="meta">' + q.length + ' MO</span></header>' +
+        '<div class="body">' +
+        hopQuet(4, 'Quét QR để Line Leader nhận — Bàn team leader tự đóng. Nhận xong mới chọn được line.') +
+        (qr || '<p class="empty">Không có MO nào chờ.</p>') + '</div></section></div>' +
+        '<div class="cols"><section class="panel" style="margin-top:16px"><header><h2>Bảng đang chạy</h2>' +
+        '<span class="meta">§7.2 · 11B · 12B</span></header><div class="body flush">' + table + '</div>' +
+        '<div class="body"><p class="note">Line mới thêm vào ở trạng thái <u>Chờ xử lý</u> và bắt đầu chạy ' +
+        '<u>TG chờ</u>. Bấm <u>Đang lắp ráp</u> thì TG chờ dừng, <u>TG thực tế</u> bắt đầu đếm. Bấm <u>Dừng</u> thì line quay lại Chờ xử lý — TG thực tế đứng lại, TG chờ chạy tiếp. ' +
+        'Hai cột kết quả tách riêng vì trả lời hai câu khác nhau: <u>Kết quả thời gian</u> chạy live ' +
+        '(Đạt / Quá giờ bao nhiêu), <u>Sản lượng</u> chỉ có sau khi chốt sổ Sản xuất — hiện <u>SL đạt trên mục tiêu vòng</u>, ' +
+        'tách rõ hỏng bao nhiêu · thiếu bao nhiêu · phải bù bao nhiêu ở vòng sau. ' +
+        'Line đang hỏng máy hiện badge đỏ <u>ĐANG DỪNG</u> kèm lý do để phân biệt với line chưa chạy.</p>' +
+        '</div></section></div>' + hourlyPanel + packingPanel + packHourlyPanel;
+    }
+
+    /* Tổng thời gian MO đã nằm ở một bước, CỘNG DỒN QUA MỌI VÒNG.
+       Trước đây bảng chỉ đọc mo.steps — tức vòng hiện tại — nên MO đi qua Setup ba
+       lần vẫn hiện "—" nếu vòng cuối không qua Setup. Nhìn vào tưởng chưa từng setup.
+       Trả về { ms, soVong, dangChay } để hiện thêm "n vòng" khi có nhiều lần. */
+    function stepTong(mo, n) {
+      let ms = 0, soVong = 0, dangChay = false;
+      (mo.stepsHistory || []).forEach(v => {
+        const st = (v.steps || {})[n];
+        if (!st || !st.acceptedAt) return;
+        soVong++;
+        if (st.completedAt) ms += st.completedAt - st.acceptedAt;
+      });
+      const cur = mo.steps[n];
+      if (cur && cur.acceptedAt) {
+        soVong++;
+        ms += (cur.completedAt || now()) - cur.acceptedAt;
+        if (!cur.completedAt) dangChay = true;
+      }
+      return soVong ? { ms: ms, soVong: soVong, dangChay: dangChay } : null;
+    }
+
+    /* Một bảng "Đi qua các bước" cho MỘT vòng — cùng đúng định dạng dùng cho vòng
+       đang chạy, chỉ khác nguồn dữ liệu. Vòng cũ lấy từ stepsHistory, vòng đang chạy
+       lấy thẳng từ mo. Nhờ vậy xem lại vòng 1 cũng biết ai nhận, ai đóng, mất bao lâu. */
+    function bangMotVong(mo, v) {
+      const line = [];
+      if (v.khoAcceptedAt) line.push({
+        st: '0 · Kho', by: ACTOR[0], acc: v.khoAcceptedAt, close: v.handedOverAt,
+        note: 'bàn giao ' + (v.handedOverAt ? hhmm(v.handedOverAt) : 'chưa')
+      });
+      [1, 2, 3, 4, 5].forEach(n => {
+        const st = (v.steps || {})[n]; if (!st || !st.acceptedAt) return;
+        line.push({
+          buoc: n,
+          st: n + ' · ' + STEP_NM[n], by: st.by || ACTOR[n], acc: st.acceptedAt, close: st.completedAt,
+          note: n < 5 ? 'đóng khi ' + STEP_NM[n + 1] + ' Accept' : 'đóng bằng nút Hoàn thành',
+          closedBy: n < 5 ? ACTOR[n + 1] : ACTOR[5]
+        });
+      });
+      if (v.pack && v.pack.startedAt) line.push({
+        st: '4b · Đóng thùng (song song)', by: v.pack.by || ACTOR_PACK,
+        acc: v.pack.startedAt, close: v.pack.completedAt,
+        note: 'chạy // SX, Kết thúc SX và Kết thúc đóng thùng riêng', closedBy: '—'
+      });
+
+      /* Riêng dòng Sản xuất bấm được: bên trong nó còn mấy line chạy song song,
+         line nào dừng vì gì, mỗi giờ ra bao nhiêu cái. Để bung sẵn thì bảng dài
+         gấp đôi dù phần lớn lúc người ta chỉ xem giờ giấc các bước. */
+      const khoaSX = mo.id + ':' + v.round;
+      const moSX = S.ui.sxTrace === khoaSX;
+      const rows = line.map(x => {
+        const laSX = x.buoc === 4;
+        const tr = '<tr' + (laSX ? ' class="clickable' + (moSX ? ' open' : '') +
+            '" data-act="sx-trace" data-mo="' + mo.id + '" data-round="' + v.round + '"' : '') +
+          '><td class="c">' + esc(x.st) +
+          (laSX ? '<span class="calc acc">' + (moSX ? '▾ đang mở' : '▸ bấm xem năng suất & sản lượng') +
+            '</span>' : '') + '</td>' +
+          '<td>' + esc(x.by) + '</td>' +
+          '<td class="n">' + hhmm(x.acc) + '</td>' +
+          '<td class="n">' + (x.close ? hhmm(x.close) : '—') + '</td>' +
+          '<td class="n">' + dur((x.close == null ? now() : x.close) - x.acc) + '</td>' +
+          '<td>' + (x.closedBy ? esc(x.closedBy) : '—') +
+          '<span class="calc">' + esc(x.note) + '</span></td></tr>';
+        return tr + (laSX && moSX
+          ? '<tr><td class="detail sub2" colspan="6">' + khoiSanXuat(mo, v) + '</td></tr>' : '');
+      }).join('');
+
+      return '<h3>Đi qua các bước — Vòng ' + v.round +
+        (v.live ? (mo.status === 'COMPLETED' ? ' (vòng cuối)' : ' (đang chạy)') : '') + '</h3>' +
+        '<div class="tscroll"><table class="sub"><thead><tr>' +
+        '<th>Bước</th><th>Người Accept</th><th>Accept lúc</th><th>Đóng lúc</th>' +
+        '<th>Thời lượng</th><th>Đóng bởi</th></tr></thead><tbody>' +
+        (rows || '<tr><td colspan="6" class="empty">Chưa vào bước nào.</td></tr>') +
+        '</tbody></table></div>';
+    }
+
+    /* Bước Sản xuất là bước duy nhất có nhiều thứ xảy ra bên trong: mấy line chạy,
+       line nào dừng vì gì, mỗi giờ ra bao nhiêu cái. Nhét hết vào một dòng "4 · Sản xuất"
+       thì mất sạch; nên bung ra ngay dưới bảng bước của chính vòng đó. */
+    function khoiSanXuat(mo, v) {
+      const runs = (mo.runs || []).filter(r => (r.round || 1) === v.round)
+        .sort((a, b) => a.line - b.line);
+      const hrs = (S.hourly || []).filter(x => x.moId === mo.id && (x.round || 1) === v.round)
+        .sort((a, b) => a.at - b.at);
+      if (!runs.length && !hrs.length) return '';
+
+      const TT = { WAIT: 'Chờ xử lý', RUN: 'Đang lắp ráp', DONE: 'Hoàn thành' };
+      const lineRows = runs.map(r => {
+        const k = runKpi(r);
+        return '<tr><td class="c">L' + String(r.line).padStart(2, '0') + '</td>' +
+          '<td class="n">' + dur(waitMs(r)) + '</td>' +
+          '<td class="n">' + dur(actualMs(r)) + '</td>' +
+          '<td class="n">' + (k ? dur(k.req) : '—') + '</td>' +
+          '<td>' + (k
+            ? '<span class="pill ' + (k.ok ? 'ok' : 'bad') + '">' + (k.ok ? 'Đạt' : 'Quá giờ') + '</span>' +
+              (k.late ? '<span class="calc late">trễ ' + dur(k.late) + '</span>' : '')
+            : '<span class="pill">chưa chạy</span>') + '</td>' +
+          '<td>' + (TT[r.status] || r.status) +
+          (r.holdReason ? '<span class="calc late">' + esc(r.holdReason) + '</span>' : '') +
+          '</td></tr>';
+      }).join('');
+
+      const bangLine = !runs.length ? '' :
+        '<div class="tscroll"><table class="sub"><thead><tr><th>Line</th><th>TG chờ</th>' +
+        '<th>TG thực tế</th><th>Hạn mức vòng</th><th>Kết quả thời gian</th><th>Trạng thái</th>' +
+        '</tr></thead><tbody>' + lineRows + '</tbody></table></div>' +
+        '<p class="note">Hạn mức là thời gian yêu cầu của cả MO <b>chia theo SL của vòng này</b>. ' +
+        'KPI của vòng lấy line <u>chạy lâu nhất</u> (§21A).</p>';
+
+      const sxOk = v.live ? (mo.sx?.qtyOk) : v.sxOk;
+      const tongGio = hrs.reduce((a, x) => a + x.qty, 0);
+      const tongYeuCau = hrs.reduce((a, x) => a + (x.target || 0), 0);
+      const doiSoat = sxOk == null
+        ? '<span style="color:var(--ink-3)">Chưa chốt sổ SX nên chưa đối soát được</span>'
+        : tongGio === sxOk
+          ? '<span style="color:var(--ok)">Khớp với SL đạt của vòng (' + nfmt(sxOk) + ')</span>'
+          : tongGio < sxOk
+            ? '<span style="color:var(--warn)">Mới ghi <b>' + nfmt(tongGio) + '</b> / SX đạt <b>' +
+              nfmt(sxOk) + '</b></span><span class="calc">còn ' + nfmt(sxOk - tongGio) +
+              ' làm ra nhưng chưa ghi khung giờ nào</span>'
+            : '<span style="color:var(--bad)">Ghi giờ <b>' + nfmt(tongGio) +
+              '</b> nhiều hơn SX đạt <b>' + nfmt(sxOk) + '</b></span>' +
+              '<span class="calc late">dư ' + nfmt(tongGio - sxOk) + ' — cần rà lại</span>';
+
+      const bangGio = !hrs.length ? '' :
+        '<div class="tscroll"><table class="sub"><thead><tr><th>Ngày</th><th>Khung giờ</th>' +
+        '<th>Số người</th><th>SL yêu cầu</th><th>SL thực tế</th><th>Đạt</th><th>Năng suất</th>' +
+        '<th>Ghi chú</th><th>Ghi lúc</th><th>Người ghi</th></tr></thead><tbody>' +
+        hrs.map(x => '<tr><td class="n">' + esc(x.day || '—') + '</td>' +
+          '<td class="n">' + esc(x.slot) + '</td>' +
+          '<td class="n">' + (x.people || '—') + '</td>' +
+          '<td class="n">' + (x.target ? nfmt(x.target) : '—') + '</td>' +
+          '<td class="n">' + nfmt(x.qty) + '</td>' +
+          '<td class="n">' + datPct(x.target, x.qty) + '</td>' +
+          '<td class="n">' + nangSuat(x.people, x.qty) + '</td>' +
+          '<td>' + esc(x.note || '') + '</td>' +
+          '<td class="n">' + hhmm(x.at) + '</td>' +
+          '<td>' + esc(x.by) + '</td></tr>').join('') +
+        '<tr class="sum"><td class="c"><b>Tổng</b></td><td></td><td></td>' +
+        '<td class="n"><b>' + (tongYeuCau ? nfmt(tongYeuCau) : '—') + '</b></td>' +
+        '<td class="n"><b>' + nfmt(tongGio) + '</b></td>' +
+        '<td class="n"><b>' + datPct(tongYeuCau, tongGio) + '</b></td><td></td>' +
+        '<td colspan="3">' + doiSoat + '</td></tr></tbody></table></div>';
+
+      if (!bangLine && !bangGio)
+        return '<p class="empty">Vòng này chưa gán line, chưa ghi sản lượng giờ nào.</p>';
+      return (bangLine ? '<h4>Năng suất từng line</h4>' + bangLine : '') +
+        (bangGio ? '<h4>Sản lượng theo giờ</h4>' + bangGio : '');
+    }
+
+    /* Danh sách vòng để dựng bảng: các vòng đã chốt sổ, rồi tới vòng đang chạy. */
+    function dsVongTrace(mo) {
+      const pkCua = r => (mo.packingHistory || []).find(x => x.round === r);
+      const ds = (mo.stepsHistory || []).map(v => ({
+        round: v.round, steps: v.steps || {}, pack: pkCua(v.round),
+        khoAcceptedAt: v.khoAcceptedAt, handedOverAt: v.handedOverAt, live: false
+      }));
+      if (mo.status !== 'COMPLETED' || !ds.length)
+        ds.push({
+          round: roundOf(mo), steps: mo.steps, pack: mo.packing,
+          khoAcceptedAt: mo.kho.acceptedAt, handedOverAt: mo.kho.handedOverAt, live: true
+        });
+      return ds;
+    }
+
+    /* ── Lịch sử & KPI ── */
+    /* Nhật ký truy cứu của một MO: ai Accept ở bước nào, lúc mấy giờ.
+       Vì không có nút Complete, bước N đóng do người bước N+1 Accept — cột "Đóng bởi"
+       ghi lại đúng người đó, sau này gắn phân quyền là truy được trách nhiệm. */
+    function moTrace(mo) {
+      const hs = S.history.filter(h => h.mo === mo.code);
+      const logs = hs.map(h => '<tr><td class="n">' + hhmm(h.at) + '</td>' +
+        '<td>' + esc(h.user) + '</td><td class="c">' + esc(h.action) + '</td>' +
+        '<td>' + (h.from || h.to ? esc(h.from) + ' → ' + esc(h.to) : '') +
+        (h.reason ? '<span class="calc">' + esc(h.reason) + '</span>' : '') + '</td></tr>').join('');
+
+      const rework = hs.some(h => h.action === 'QC_FAIL');
+
+      /* Bảng này trước chỉ liệt kê vòng ĐÃ đóng sổ, nên trong cửa sổ
+         "đã chốt sổ SX → chưa nhập kho" bấm truy cứu không thấy dòng nào —
+         đúng lúc người ta cần xem hỏng/thiếu vừa khai. Nối thêm vòng đang chạy,
+         các ô điền dần theo tiến độ, đánh dấu rõ là số chưa chốt. */
+      const daChot = mo.stepsHistory || [];
+      const coSoLieu = mo.sx?.qtyOk != null || mo.packing?.qtyPacked != null;
+      const vongLive = (mo.status !== 'COMPLETED' && (daChot.length || coSoLieu))
+        ? [{
+          round: roundOf(mo), steps: mo.steps, khoAcceptedAt: mo.kho.acceptedAt,
+          batDauTu: mo.veDau == null ? 0 : mo.veDau,
+          qtyPacked: mo.packing?.qtyPacked,
+          sxOk: mo.sx?.qtyOk != null ? mo.sx.qtyOk : null,
+          qtyNg: mo.sx?.qtyNg || 0, sxShort: mo.sx?.qtyShort || 0,
+          sxNgReason: mo.sx?.ngReason || '', sxShortReason: mo.sx?.shortReason || '',
+          packingReason: mo.packing?.packingReason || '', reason: '', dangChay: true
+        }]
+        : [];
+      const vongCu = daChot.concat(vongLive).map(v => {
+        /* Đọc THẲNG nơi vòng đó bắt đầu, không suy từ các bước đã đi.
+           Suy thì vòng vừa mở — chưa nhận bước nào — luôn bị đoán nhầm thành
+           "Bàn team leader", kể cả khi nó vừa bị QC FAIL trả về Kho. Dữ liệu cũ chưa có
+           ô này thì mới suy tạm như trước. */
+        const st = v.steps || {};
+        const bd = v.batDauTu != null ? v.batDauTu
+                 : (st[1] && st[1].acceptedAt ? 0 : 3);
+        const batDau = bd === 3
+          ? { ten: 'Bàn team leader', luc: st[3] && st[3].acceptedAt }
+          : { ten: 'Kho', luc: v.khoAcceptedAt };
+        const mocCuoi = st[5] && st[5].completedAt;
+        return '<tr' + (v.dangChay ? ' class="live"' : '') + '><td class="c">Vòng ' + v.round +
+          (v.dangChay ? '<span class="pill acc">đang chạy</span>' : '') + '</td>' +
+          '<td class="bd">' + esc(batDau.ten) +
+          (batDau.luc ? '<span class="calc">' + hhmm(batDau.luc) + '</span>' : '') + '</td>' +
+          '<td class="n">' + (mocCuoi ? hhmm(mocCuoi) : '—') + '</td>' +
+          /* Số ở cột số, chữ ở cột chữ — nhét lý do xuống dưới con số thì
+             cột số hết đọc lướt được, mà lý do cũng bị co nhỏ khó đọc. */
+          '<td class="n">' + (v.sxOk != null ? nfmt(v.sxOk) : '—') + '</td>' +
+          '<td class="n">' + (v.qtyNg ? nfmt(v.qtyNg) : '—') + '</td>' +
+          '<td class="n">' + (v.sxShort ? nfmt(v.sxShort) : '—') + '</td>' +
+          '<td class="n">' + nfmt(v.qtyPacked) + '</td>' +
+          '<td>' + (v.sxNgReason ? esc(v.sxNgReason) : '—') + '</td>' +
+          '<td>' + (v.sxShortReason ? esc(v.sxShortReason) : '—') + '</td>' +
+          '<td>' + (v.packingReason ? esc(v.packingReason) : '—') + '</td>' +
+          '<td>' + (v.dangChay
+            ? '<span class="calc">vòng chưa chốt sổ — số còn thay đổi</span>'
+            : esc(v.reason)) + '</td></tr>';
+      }).join('');
+
+      return (vongCu
+        ? '<h3>Các vòng · hiện đang ở vòng ' + roundOf(mo) + '</h3><div class="tscroll">' +
+        '<table class="sub"><thead><tr><th>Vòng</th><th>Bắt đầu từ</th><th>Nhập kho xong</th>' +
+        '<th>SX đạt</th><th>SL hỏng</th><th>SL thiếu</th><th>Đã đóng thùng</th>' +
+        '<th>Lý do hỏng</th><th>Lý do thiếu</th><th>ghi chú đóng thùng</th><th>Lý do trả lại</th>' +
+        '</tr></thead><tbody>' + vongCu + '</tbody></table></div>'
+        : '') +
+        dsVongTrace(mo).map(v => bangMotVong(mo, v)).join('') +
+        (rework ? '<p class="note">MO này đã QC FAIL và chạy lại. Bảng <u>Timer từng bước</u> ở trên ' +
+          '<b>cộng dồn thời gian qua mọi vòng</b> và ghi rõ đi qua mấy vòng; bảng ngay đây chỉ là ' +
+          '<b>vòng đang chạy</b>. Muốn xem riêng từng vòng thì nhìn bảng <u>Các vòng</u> phía trên.</p>' : '') +
+        '<h3>Nhật ký đầy đủ · ' + hs.length + ' bản ghi</h3><div class="tscroll"><table class="sub"><thead><tr>' +
+        '<th>Giờ</th><th>Người</th><th>Hành động</th><th>Chuyển trạng thái / lý do</th>' +
+        '</tr></thead><tbody>' + logs + '</tbody></table></div>';
+    }
+    function viewKpi() {
+      const done = S.mos.filter(m => m.status === 'COMPLETED');
+      const okN = done.filter(m => { const k = moKpi(m); return k && k.ok; }).length;
+      const lateN = done.filter(m => { const k = moKpi(m); return k && k.late > 0; }).length;
+      const wip = S.mos.filter(m => m.status === 'PROCESSING').length;
+      const rework = S.mos.filter(m => (m.qc && m.qc.result === 'FAIL') ||
+        (m.qcHistory || []).some(q => q.result === 'FAIL')).length;
+
+      const tiles = '<div class="tiles">' +
+        '<div class="tile"><span class="k">Đang chạy</span><span class="v">' + wip + '</span><span class="s">MO trong chuyền</span></div>' +
+        '<div class="tile"><span class="k">Completed</span><span class="v">' + done.length + '</span><span class="s">đã nhập kho</span></div>' +
+        '<div class="tile ' + (!done.length ? '' : okN === done.length ? 'ok' : 'bad') + '"><span class="k">Đạt thời gian</span>' +
+        '<span class="v">' + okN + '/' + done.length + '</span><span class="s">§21A — lấy line chạy lâu nhất</span></div>' +
+        '<div class="tile ' + (lateN ? 'warn' : '') + '"><span class="k">Quá giờ</span>' +
+        '<span class="v">' + lateN + '/' + done.length + '</span><span class="s">vượt thời gian yêu cầu</span></div>' +
+        '<div class="tile ' + (rework ? 'warn' : '') + '"><span class="k">QC Fail</span><span class="v">' + rework + '</span>' +
+        '<span class="s">đã quay về Kho</span></div>' +
+        '<div class="tile ' + (S.mos.some(m => ngTotal(m)) ? 'warn' : '') + '"><span class="k">SL hỏng</span>' +
+        '<span class="v">' + nfmt(S.mos.reduce((a, m) => a + ngTotal(m), 0)) + '</span>' +
+        '<span class="s">phải làm bù ở vòng sau</span></div>' +
+        '<div class="tile"><span class="k">Đã hủy</span><span class="v">' + S.mos.filter(m => m.status === 'CANCELLED').length +
+        '</span><span class="s">§4A — không hard delete</span></div>' +
+        '</div>';
+
+      const rows = S.mos.filter(m => m.step != null && m.status !== 'DRAFT').map(mo => {
+        const cells = [1, 2, 3, 4, 5].map(n => {
+          const t = stepTong(mo, n);
+          if (!t) return '<td class="n">—</td>';
+          return '<td class="n' + (t.dangChay ? ' running' : '') + '"' +
+            (t.dangChay ? ' data-live="steptong:' + mo.id + ':' + n + '"' : '') + '>' + dur(t.ms) +
+            (t.soVong > 1 ? '<span class="calc">' + t.soVong + ' vòng</span>' : '') + '</td>';
+        }).join('');
+        // cột Đóng thùng song song (không phải step) — nếu đang ở Kho vòng mới thì hiện lịch sử vòng trước
+        const pk = mo.packing;
+        const pkHist = (!pk.startedAt && mo.packingHistory && mo.packingHistory.length) ? mo.packingHistory[mo.packingHistory.length - 1] : null;
+        const pkShow = pk.startedAt ? pk : pkHist;
+        const pkCell = !pkShow || !pkShow.startedAt ? '<td class="n">—</td>' : '<td class="n' + (!pkShow.completedAt ? ' running' : '') + '"' + (!pkShow.completedAt ? ' data-live="pack:' + mo.id + '"' : '') + '>' + dur((pkShow.completedAt || now()) - pkShow.startedAt) + '</td>';
+        const k = moKpi(mo), open = S.ui.detail === mo.id;
+        /* Cộng dồn qua các vòng: vòng 2 đóng nốt 1.000 của MO 10.000 là ĐÃ XONG,
+           không được so lẻ 1.000 < 10.000 rồi báo chưa hoàn thành. */
+        /* Hai cột tách riêng — KPI là chuyện THỜI GIAN, tiến độ là chuyện SỐ LƯỢNG.
+           Gộp chung thì chữ "Đạt" bị đọc thành "xong đơn rồi" trong khi MO còn thiếu hàng,
+           và ngược lại khi thiếu hàng thì mất luôn kết quả thời gian. */
+        const tongDaXong = (mo.qtyDone || 0) + (mo.packing?.qtyPacked || 0);
+        const duSL = tongDaXong >= mo.qty;
+        const kpi2 = k
+          ? '<span class="pill ' + (k.ok ? 'ok' : 'bad') + '">' + (k.ok ? 'Đạt' : 'Quá giờ') + '</span>'
+          : '<span class="pill">chưa chạy</span>';
+        const sl2 = duSL
+          ? '<span class="pill ok">Đủ ' + nfmt(mo.qty) + '</span>' +
+          (mo.status !== 'COMPLETED' ? '<span class="calc">chờ bấm Hoàn thành ở Nhập kho</span>' : '')
+          : '<span class="pill warn">Còn ' + nfmt(mo.qty - tongDaXong) + '</span>' +
+          '<span class="calc">' + nfmt(tongDaXong) + '/' + nfmt(mo.qty) + '</span>';
+        const late2 = k && k.late ? dur(k.late) : '—';
+        return '<tr class="clickable' + (open ? ' open' : '') + '" data-act="mo-detail" data-mo="' + mo.id + '">' +
+          '<td class="c">' + esc(mo.code) + '</td>' + cells + pkCell +
+          '<td>' + sl2 + '</td>' +
+          '<td>' + kpi2 + '</td>' +
+          '<td class="n">' + late2 + '</td></tr>' +
+          (open ? '<tr><td class="detail" colspan="10">' + moTrace(mo) + '</td></tr>' : '');
+      }).join('');
+
+      const showLog = !!S.ui.log;
+      const logs = !showLog ? '' : S.history.slice(-300).map(h =>
+        '<div class="logrow ' + esc(h.kind) + '"><span class="t">' + hhmm(h.at) + '</span>' +
+        '<span class="u">' + esc(h.user) + '</span><span class="a">' + esc(h.action) + '</span>' +
+        '<span class="d"><b class="mono">' + esc(h.mo) + '</b>' +
+        (h.from || h.to ? ' · ' + esc(h.from) + ' → ' + esc(h.to) : '') +
+        (h.reason ? ' · ' + esc(h.reason) : '') + '</span></div>').join('');
+
+      return tiles +
+        '<div class="cols"><section class="panel" style="margin-top:16px"><header><h2>Timer từng bước</h2>' +
+        '<span class="meta">§9 — SX & Đóng thùng chạy song song, mỗi cái 1 timer riêng</span></header>' +
+        '<div class="body flush"><div class="tscroll"><table><thead><tr><th>MO</th>' +
+        [1, 2, 3, 4, 5].map(n => '<th>' + n + ' · ' + STEP_NM[n] + '</th>').join('') + '<th>Đóng thùng</th>' +
+        '<th>Tiến độ SL</th><th>KPI thời gian</th><th>Trễ</th></tr></thead><tbody>' +
+        (rows || '<tr><td colspan="9" class="empty">Chưa có dữ liệu.</td></tr>') + '</tbody></table></div></div>' +
+        '<div class="body"><p class="note"><b>Bấm vào một dòng</b> để xem MO đó đi qua từng bước, ai Accept lúc mấy giờ và ai làm bước trước đóng lại. Số tô xanh là bước đang chạy. Mỗi bước một timer riêng, không dùng timer chung (§1). Con số này gộp cả ' +
+        'thời gian làm việc lẫn thời gian nằm chờ người bước sau Accept — v2 không tách hai phần đó.</p></div></section></div>' +
+        '<div class="cols"><section class="panel" style="margin-top:16px"><header><h2>Nhật ký toàn xưởng</h2>' +
+        '<span class="meta">§25A — append-only, ' + S.history.length + ' bản ghi</span>' +
+        '<button class="btn ghost sm" data-act="toggle-log">' + (showLog ? 'Thu gọn' : 'Mở') + '</button></header>' +
+        (showLog
+          ? '<div class="body flush"><div class="log">' + logs + '</div></div>'
+          : '<div class="body"><p class="note">Nhật ký chéo toàn xưởng theo dòng thời gian — dùng khi cần soi cả ca, ' +
+          'ví dụ nhiều line cùng dừng một lúc thì nhìn ra ngay là mất điện chứ không phải hỏng máy. ' +
+          'Muốn tra <b>một đơn hàng cụ thể</b> thì bấm thẳng vào dòng của nó ở bảng phía trên — nhanh hơn.</p></div>') +
+        '</section></div>';
+    }
+
+    /* ══ Vẽ ═════════════════════════════════════════════════ */
+    /* Số MO ĐANG NẰM ở trạm — con số trên thanh trạm.
+       Kho phải đếm cả lệnh ĐÃ nhận nhưng CHƯA bàn giao: hàng vẫn còn ở kho, vẫn cần
+       người làm tiếp. Trước đây badge Kho chỉ đếm hàng đợi nên hiện 0 trong khi kho
+       còn lệnh nằm đó. Hai nhóm không chồng nhau vì một bên là chưa nhận, một bên là đã nhận. */
+    function soLenhTaiTram(n) {
+      if (n === 0) return queue(0).length +
+        S.mos.filter(m => m.kho.acceptedAt && !m.kho.handedOverAt && m.status === 'PROCESSING').length;
+      return queue(n).length + atStep(n).length;
+    }
+    function rail() {
+      return STATIONS.map(s => {
+        let ct = '';
+        if (typeof s.n === 'number') ct = String(soLenhTaiTram(s.n));
+        else if (s.n === 'plan') ct = String(S.mos.filter(m => m.status === 'DRAFT').length);
+        return '<button class="st" role="tab" data-tab="' + s.n + '" aria-selected="' + (String(S.tab) === String(s.n)) + '">' +
+          '<span class="num">' + s.num + '</span><span class="nm">' + s.nm + '</span>' +
+          (ct ? '<span class="ct">' + ct + '</span>' : '') + '</button>';
+      }).join('');
+    }
+    /* Cho mỗi <th> lấy căn lề của ô dữ liệu cùng cột. Chạy sau mỗi lần vẽ nên
+       bảng nào thêm sau này cũng tự khớp, không phải sửa tay từng cái. */
+    function alignHeaders() {
+      document.querySelectorAll('table').forEach(t => {
+        const hr = t.tHead && t.tHead.rows[0];
+        const tb = t.tBodies && t.tBodies[0];
+        if (!hr || !tb) return;
+        const br = Array.from(tb.rows).find(r => r.cells.length === hr.cells.length);
+        if (!br) return;
+        for (let i = 0; i < hr.cells.length; i++) {
+          hr.cells[i].classList.toggle('n', br.cells[i].classList.contains('n'));
+        }
+      });
+    }
+
+    function render() {
+      $('#rail').innerHTML = rail();
+      const t = String(S.tab);
+      $('#view').innerHTML = t === 'plan' ? viewPlan() : t === 'kpi' ? viewKpi()
+        : t === '0' ? view0() : t === '1' ? view1() : t === '2' ? view2()
+          : t === '3' ? view3() : t === '4' ? view4() : view5();
+      $('#speeds').innerHTML = SPEEDS.map(s => '<button data-speed="' + s + '" aria-pressed="' + (S.speed === s) + '">' + s + '×</button>').join('');
+      $('#clock').textContent = hhmm(now());
+      alignHeaders();
+      acc = 0;          // mỗi lần vẽ lại thì hẹn giờ tick chạy lại từ đầu
+      save();
+    }
+    function live() {
+      $('#clock').textContent = hhmm(now());
+      document.querySelectorAll('[data-live]').forEach(el => {
+        const [k, a, b] = el.getAttribute('data-live').split(':');
+        if (k === 'step') { const mo = byId(+a); if (mo) el.textContent = dur(stepElapsed(mo, +b)); return; }
+        if (k === 'steptong') {
+          const mo = byId(+a), t = mo && stepTong(mo, +b);
+          if (t) el.innerHTML = dur(t.ms) + (t.soVong > 1 ? '<span class="calc">' + t.soVong + ' vòng</span>' : '');
+          return;
+        }
+        if (k === 'pack') { const mo = byId(+a); if (mo && mo.packing?.startedAt) el.textContent = dur((mo.packing.completedAt || now()) - mo.packing.startedAt); return; }
+        if (k === 'mowait') { const mo = byId(+a), rs = mo ? runsOf(mo) : []; if (rs.length) el.textContent = dur(Math.max(...rs.map(waitMs))); return; }
+        if (k === 'moact') { const mo = byId(+a), rs = mo ? runsOf(mo) : []; if (rs.length) el.textContent = dur(Math.max(...rs.map(actualMs))); return; }
+        if (k === 'motime') { const mo = byId(+a); if (mo) el.innerHTML = timeCell(mo); return; }
+        if (k === 'moqty') { const mo = byId(+a); if (mo) el.innerHTML = qtyCell(mo); return; }
+        const r = runById(a); if (!r) return;
+        if (k === 'rwait') el.textContent = dur(waitMs(r));
+      });
+    }
+
+    /* ══ Camera quét QR ═════════════════════════════════════
+       Dùng html5-qrcode: nó tự quản luồng camera và tự chuyển sang
+       BarcodeDetector của trình duyệt khi có (nhanh hơn, dùng phần cứng).
+    
+       Đánh số phiên thay vì dùng cờ bật/tắt. Cờ rất dễ kẹt: nếu đóng camera
+       lúc nó còn đang khởi động thì cờ bật lên SAU khi phiên đã huỷ, và mọi
+       lần mở sau đều bị chặn im lặng. */
+    let camQ = null, camPhien = 0;
+
+    function camBao(html, err) {
+      const m = $('#cam-msg');
+      if (m) { m.innerHTML = html; m.className = err ? 'err' : ''; }
+    }
+
+    function moCam() {
+      dongCam();                                  // dọn sạch phiên trước, dù nó đang ở trạng thái nào
+      const box = $('#cam'); if (!box) return;
+      const phien = ++camPhien;
+      box.hidden = false;
+      camBao('Đang mở camera…');
+
+      if (typeof Html5Qrcode !== 'function') {
+        camBao('Chưa tải được bộ giải mã QR. Kiểm tra mạng rồi mở lại, hoặc dùng đầu đọc cắm USB.', true);
+        return;
+      }
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        camBao('Trình duyệt này không cho truy cập camera. Dùng đầu đọc QR cắm USB, hoặc nhập tay.', true);
+        return;
+      }
+
+      let q;
+      try { q = new Html5Qrcode('cam-view', { useBarCodeDetectorIfSupported: true, verbose: false }); }
+      catch (e) { camBao('Không khởi tạo được bộ quét: ' + ((e && e.message) || e), true); return; }
+      camQ = q;
+
+      q.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 }, aspectRatio: 1 },
+        function (doc) { if (phien === camPhien) camTrung(doc); },
+        function () { /* mỗi khung không thấy mã — bỏ qua, không phải lỗi */ }
+      ).then(function () {
+        if (phien !== camPhien) { try { q.stop(); } catch (e) { } return; }   // đã bị đóng lúc đang khởi động
+        camBao('Đưa mã QR vào khung');
+      }).catch(function (e) {
+        if (phien !== camPhien) return;
+        const ten = (e && e.name) || String(e);
+        camBao(/NotAllowed|Permission/i.test(ten)
+          ? 'Bạn đã từ chối quyền camera. Bật lại trong cài đặt trình duyệt rồi thử lại.'
+          : /NotFound|Devices/i.test(ten)
+            ? 'Máy này không có camera.'
+            : /NotReadable|TrackStart/i.test(ten)
+              ? 'Camera đang bị ứng dụng khác chiếm. Đóng ứng dụng đó rồi thử lại.'
+              : /Secure|https/i.test(String(e))
+                ? 'Camera chỉ chạy trên HTTPS.'
+                : 'Không mở được camera — ' + ten + ': ' + ((e && e.message) || ''), true);
+      });
+    }
+
+    function camTrung(raw) {
+      const r = docMaMO(raw);
+      if (!r.ma) { camBao(esc(r.loi), true); return; }   // đọc được QR nhưng không phải mã MO → báo, vẫn quét tiếp
+      if (navigator.vibrate) navigator.vibrate(60);
+      camBao('<b>' + esc(r.ma) + '</b> — đã đọc');
+      dongCam();
+      xuLyQuet(raw);
+    }
+
+    function dongCam() {
+      camPhien++;                                  // mọi callback của phiên cũ tự vô hiệu
+      const q = camQ; camQ = null;
+      const box = $('#cam'); if (box) box.hidden = true;
+      if (!q) return;
+      try {
+        const p = q.stop();
+        if (p && p.then) p.then(function () { try { q.clear(); } catch (e) { } }).catch(function () { });
+      } catch (e) { }
+    }
+
+    /* ══ Quét QR → kích hoạt bước ═══════════════════════════
+       Mã QR chỉ nói MO NÀO. Bước nào được kích hoạt lấy từ TAB đang mở —
+       máy đặt ở trạm QC thì quét là QC nhận. */
+    function bcQuet(html, kind) {
+      const box = $('#qrbox'), t = $('#qrtxt');
+      if (box) box.className = 'qrbox' + (kind ? ' ' + kind : '');
+      if (t) t.innerHTML = html;
+    }
+    let qrKey = null, qrLuc = 0;
+    function xuLyQuet(raw) {
+      const r = docMaMO(raw);
+      if (!r.ma) { bcQuet(esc(r.loi), 'err'); toast(r.loi, true); return; }
+      const ma = r.ma;
+
+      /* Đầu đọc hay bắn hai lần — bỏ qua lần trùng trong 2 giây.
+         Khoá theo MÃ + TRẠM chứ không chỉ theo mã: cùng một MO quét tiếp ở trạm
+         kế bên phải ăn ngay, không bị chặn oan. */
+      const gio = Date.now(), khoa = ma + '@' + S.tab;
+      if (khoa === qrKey && gio - qrLuc < 2000) return;
+      qrKey = khoa; qrLuc = gio;
+
+      const buoc = parseInt(S.tab, 10);
+      if (isNaN(buoc)) {
+        bcQuet('<b>' + esc(ma) + '</b> — mở tab của trạm rồi quét', 'err');
+        toast('Màn hình này không nhận quét — mở tab Kho / Setup / QC / Bàn team leader / Sản xuất / Nhập kho', true);
+        return;
+      }
+
+      const mo = queue(buoc).find(m => m.code === ma);
+      if (!mo) {
+        const khac = S.mos.find(m => m.code === ma);
+        const ly = !khac ? 'không có trong hệ thống'
+          : atStep(buoc).some(m => m.code === ma) ? 'đã nhận ở trạm này rồi'
+            : 'đang ở ' + (khac.step == null ? khac.status : STEP_NM[khac.step]);
+        bcQuet('<b>' + esc(ma) + '</b> — ' + esc(ly), 'err');
+        toast(ma + ' — ' + ly + ', không nhận được ở ' + STEP_NM[buoc], true);
+        render(); return;
+      }
+
+      let ok;
+      if (buoc === 0) { khoAccept(mo); ok = true; } else { ok = accept(mo, buoc); }
+      if (ok) {
+        bcQuet('<b>' + esc(ma) + '</b> → ' + esc(STEP_NM[buoc]) + ' đã nhận', 'hit');
+        toast(ma + ' — ' + STEP_NM[buoc] + ' nhận qua QR, bước trước đóng tự động.');
+      }
+      render();
+    }
+
+    /* Đầu đọc QR gõ như bàn phím: rất nhanh rồi Enter.
+       Dựa vào tốc độ gõ để phân biệt với người gõ tay. */
+    let qrDem = '', qrPhim = 0;
+    const QR_NGUONG_MS = 50;           // scanner ~10-30ms/ký tự · người gõ tay >100ms
+    document.addEventListener('keydown', function (ev) {
+      const ae = document.activeElement;
+      if (ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return;
+      const gio = Date.now();
+      if (gio - qrPhim > QR_NGUONG_MS) qrDem = '';
+      qrPhim = gio;
+      if (ev.key === 'Enter') { const d = qrDem; qrDem = ''; if (d) xuLyQuet(d); return; }
+      if (ev.key.length === 1) qrDem += ev.key;
+    });
+
+    /* ══ Sự kiện ════════════════════════════════════════════ */
+    const val = id => { const e = document.getElementById(id); return e ? e.value : ''; };
+    const nval = id => { const v = parseInt(val(id), 10); return isNaN(v) ? 0 : v; };
+
+    document.addEventListener('click', ev => {
+      const tb = ev.target.closest('[data-tab]');
+      if (tb) { S.tab = tb.getAttribute('data-tab'); S.ui = { mode: S.ui.mode }; render(); return; }
+      const sp = ev.target.closest('[data-speed]');
+      if (sp) { S.speed = +sp.getAttribute('data-speed'); render(); return; }
+      const el = ev.target.closest('[data-act]'); if (!el) return;
+      const act = el.getAttribute('data-act');
+      const mo = el.hasAttribute('data-mo') ? byId(+el.getAttribute('data-mo')) : null;
+      const run = el.hasAttribute('data-run') ? runById(el.getAttribute('data-run')) : null;
+
+      switch (act) {
+        case 'reseed': seed(); render(); toast('Đã nạp 11 MO mẫu.'); return;
+        case 'clear': S = blank(); render();
+          toast('Đã xóa sạch. Bắt đầu ở tab Kế hoạch — tạo MO rồi Submit để lệnh chạy sang Kho.'); return;
+        case 'reset-clock': resetClock();
+          toast('Giờ xưởng về ' + hhmm(S.now) + ' — mọi mốc dịch theo nên số đo không đổi.'); break;
+        case 'mo-detail': S.ui.detail = S.ui.detail === mo.id ? null : mo.id; break;
+        case 'sx-trace': {
+          const khoa = mo.id + ':' + el.getAttribute('data-round');
+          S.ui.sxTrace = S.ui.sxTrace === khoa ? null : khoa;
+          break;
+        }
+        case 'toggle-log': S.ui.log = !S.ui.log; break;
+        case 'cam-open': moCam(); return;
+        case 'cam-close': dongCam(); return;
+        case 'mode': S.ui.mode = el.getAttribute('data-mode'); break;
+        case 'pick': { const b = document.getElementById('scan-' + S.tab); if (b) { b.value = el.getAttribute('data-code'); b.focus(); return; } break; }
+
+        case 'create': {
+          const one = el.getAttribute('data-one') === '1';
+          const prod = val('p-prod') || 'Sản phẩm', qty = Math.max(1, nval('p-qty')),
+            mins = Math.max(1, nval('p-mins')), box = Math.max(0, nval('p-box'));
+          if (one) {
+            const code = chuanHoaQuet(val('p-code'));
+            if (!MO_STRICT.test(code)) { toast('Mã MO phải có dạng M + 6 chữ số, ví dụ M067690.', true); return; }
+            if (S.mos.some(m => m.code === code)) { toast('Mã ' + code + ' đã tồn tại — MO Code unique toàn hệ thống.', true); return; }
+            const m = mkMo(code, prod, qty, mins, box); S.mos.push(m);
+            log(m, null, 'MO_CREATE', '', 'DRAFT', prod + ' · ' + nfmt(qty) + ' PCS'); toast('Đã tạo ' + code + '.');
+          } else createBatch(Math.max(1, nval('p-start')), Math.max(1, Math.min(100, nval('p-count'))), prod, qty, mins, box);
+          break;
+        }
+        case 'import': importCsv(val('csv')); break;
+        case 'submit-one': submit([mo]); break;
+        case 'submit-all': submit(S.mos.filter(m => m.status === 'DRAFT')); break;
+        case 'cancel-open': S.ui.cancel = S.ui.cancel === mo.id ? null : mo.id; break;
+        case 'cancel': cancel(mo, val('cr-' + mo.id) || 'không ghi lý do'); S.ui.cancel = null; break;
+
+        case 'kho-accept': khoAccept(mo); break;
+        case 'kho-accept-all': { const q = queue(0); q.forEach(khoAccept); toast('Đã Accept ' + q.length + ' lệnh.'); break; }
+        case 'slip': S.ui.slip = S.ui.slip === mo.id ? null : mo.id; break;
+        case 'kho-handover': khoHandover(mo); break;
+        case 'kho-handover-all': {
+          const h = S.mos.filter(m => m.kho.acceptedAt && !m.kho.handedOverAt);
+          h.forEach(khoHandover); toast('Đã bàn giao ' + h.length + ' phiếu.'); break;
+        }
+
+        case 'scan': {
+          const n = +el.getAttribute('data-step');
+          const raw = val('scan-' + n).trim();
+          if (!raw) { toast('Quét hoặc nhập MO Code trước.', true); return; }
+          const inp = document.getElementById('scan-' + n); if (inp) inp.value = '';
+          xuLyQuet(raw);            // chung bộ đọc với đầu đọc QR
+          return;
+        }
+        case 'accept': if (accept(mo, +el.getAttribute('data-step')))
+          toast(mo.code + ' — Accept xong, bước trước đóng tự động.'); break;
+
+        case 'qc-open': S.ui.qc = S.ui.qc === mo.id ? null : mo.id; break;
+        case 'qc-pass': qcDecide(mo, true); S.ui.qc = null; toast(mo.code + ' — PASS, chờ Bàn team leader Accept.'); break;
+        case 'qc-fail': qcDecide(mo, false, val('qr-' + mo.id)); S.ui.qc = null;
+          toast(mo.code + ' — FAIL, quay về Step1 (Rework).'); break;
+
+        case 'pick-line': {
+          const l = +el.getAttribute('data-line');
+          if (!S.ui.pick || S.ui.pick.mo !== mo.id) S.ui.pick = { mo: mo.id, lines: [] };
+          const i = S.ui.pick.lines.indexOf(l);
+          if (i >= 0) S.ui.pick.lines.splice(i, 1); else S.ui.pick.lines.push(l);
+          S.ui.pick.lines.sort((a, b) => a - b);
+          break;
+        }
+        case 'add-picked': {
+          const p = (S.ui.pick && S.ui.pick.mo === mo.id) ? S.ui.pick.lines.slice() : [];
+          if (!p.length) { toast('Chưa chọn line nào.', true); return; }
+          let n = 0;
+          p.forEach(l => { if (addRun(mo, l)) n++; });
+          S.ui.pick = null;
+          if (n) toast('Đã thêm ' + n + ' line (' + lineList(runsOf(mo)) + ') vào bảng — 1 MO 1 dòng');
+          break;
+        }
+        /* Nút ở bảng đang chạy — thao tác ở cấp MO vì 1 MO = 1 dòng (§7.2) */
+        case 'mo-run-start': {
+          const rs = runsOf(mo).filter(r => r.status === 'WAIT');
+          if (!rs.length) { toast('Không có line nào đang chờ', true); break; }
+          rs.forEach(r => runStart(r));
+          toast(mo.code + ' — Đang lắp ráp ' + lineList(rs) + '. TG chờ dừng, TG thực tế bắt đầu đếm.');
+          break;
+        }
+        case 'mo-pause': {
+          if (!runsOf(mo).some(r => r.status === 'RUN')) { toast('Không có line nào đang chạy', true); break; }
+          S.ui.hold = S.ui.hold === mo.id ? null : mo.id;
+          break;
+        }
+        case 'mo-hold-cancel': S.ui.hold = null; break;
+        case 'mo-hold-ok': {
+          const ly = val('hold-' + mo.id).trim();
+          if (!ly) { toast('Bắt buộc ghi lý do dừng (§17).', true); return; }
+          const rs = runsOf(mo).filter(r => r.status === 'RUN');
+          if (!rs.length) { toast('Không có line nào đang chạy', true); S.ui.hold = null; break; }
+          rs.forEach(r => runHold(r, ly));
+          S.ui.hold = null;
+          toast(mo.code + ' — dừng ' + lineList(rs) + ': ' + ly + '. TG thực tế đứng lại, TG chờ chạy tiếp.');
+          break;
+        }
+
+        case 'finish-all': S.ui.sxDone = S.ui.sxDone === mo.id ? null : mo.id; break;
+        case 'sx-done-cancel': S.ui.sxDone = null; break;
+        case 'sx-done-ok': {
+          if (finishAll(mo, nval('sxok-' + mo.id), nval('sxng-' + mo.id), nval('sxth-' + mo.id),
+            val('sxngr-' + mo.id), val('sxthr-' + mo.id)))
+            S.ui.sxDone = null;
+          break;
+        }
+        case 'pack-start': packingStart(mo); break;
+        case 'pack-finish-open': S.ui.packFinish = mo.id; break;
+        case 'pack-finish-cancel': S.ui.packFinish = null; break;
+        case 'pack-finish-ok': {
+          if (packingFinish(mo, nval('packqty-' + mo.id), val('packreason-' + mo.id))) S.ui.packFinish = null;
+          break;
+        }
+        case 'hour-add': { const mid = +val('hour-mo'); const slot = val('hour-slot'); const people = nval('hour-people'); const target = nval('hour-target'); const qty = nval('hour-qty'); const note = val('hour-note'); if (!mid) { toast('Chọn MO', true); break; } addHourly(mid, slot, people, target, qty, note); break; }
+        case 'pbox-add': { const pid = +val('pbox-mo'); if (!pid) { toast('Chọn MO', true); break; } addPackHourly(pid, val('pbox-slot'), nval('pbox-n'), val('pbox-note')); break; }
+        case 'finish-mo': if (finishMo(mo)) toast(mo.code + ' — COMPLETED.'); break;
+      }
+      render();
+    });
+    document.addEventListener('keydown', ev => {
+      if (ev.key === 'Escape' && !$('#cam').hidden) { dongCam(); return; }
+      if (ev.key !== 'Enter') return;
+      const id = ev.target.id || '';
+      if (id === 'qr-sim') { const v = ev.target.value; ev.target.value = ''; if (v) xuLyQuet(v); return; }
+      if (id.indexOf('scan-') !== 0) return;
+      const b = document.querySelector('[data-act="scan"][data-step="' + id.split('-')[1] + '"]');
+      if (b) b.click();
+    });
+
+    /* ══ Vòng chạy ══════════════════════════════════════════ */
+    let last = Date.now(), acc = 0, pDown = false;
+    /* Không vẽ lại trong lúc con trỏ đang nhấn: nếu render() thay nút giữa mousedown và
+       mouseup thì trình duyệt không phát sinh click, thao tác bị mất trắng. */
+    addEventListener('pointerdown', () => { pDown = true; }, true);
+    addEventListener('pointerup', () => { pDown = false; }, true);
+    addEventListener('pointercancel', () => { pDown = false; }, true);
+    setInterval(() => {
+      const d = Date.now() - last; last = Date.now();
+      S.now += d * S.speed; acc += d;
+      const typing = document.activeElement && /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement.tagName);
+      if (acc >= 1000 && !typing && !pDown) render(); else live();
+    }, 250);
+
+    const r = load();
+    if (r) {
+      S = r; S.ui = S.ui || { mode: 'batch' };
+      if (!S.packHourly) S.packHourly = [];
+      // MO tạo trước v2.22 chưa có quy cách → 0, nghĩa là không đếm thùng. Không đoán
+      // một quy cách vào đó: đoán sai là quy đổi sai toàn bộ tiến độ của đơn.
+      S.mos.forEach(m => { if (m.pcsPerBox === undefined) m.pcsPerBox = 0; });
+      // Hàng ghi trước khi có `people`/`target` thì để null — bảng hiện '—'.
+      // Đoán một con số vào đó là bịa ra năng suất chưa ai đo.
+      if (!S.hourly) S.hourly = [];
+      else S.hourly.forEach(h => {
+        if (h.note === undefined) h.note = '';
+        if (h.people === undefined) h.people = null;
+        if (h.target === undefined) h.target = null;
+      });
+      // migrate: bỏ step 6 cũ, thêm packing song song
+      S.mos.forEach(m => {
+        if (!m.packing) m.packing = { startedAt: null, completedAt: null, by: null, qtyPacked: null, packingReason: null };
+        if (m.packing && m.packing.qtyPacked === undefined) m.packing.qtyPacked = null;
+        if (m.packing && m.packing.packingReason === undefined) m.packing.packingReason = null;
+        if (m.steps && m.steps[6]) {
+          if (!m.packing.startedAt && m.steps[5]?.acceptedAt) { m.packing.startedAt = m.steps[5].acceptedAt; m.packing.by = m.steps[5].by; }
+          delete m.steps[6]; if (m.steps[5] && m.steps[5].acceptedAt && !m.steps[5].completedAt && m.status === 'PROCESSING' && m.packing.completedAt) m.steps[5].completedAt = m.packing.completedAt;
+        }
+        if (m.step === 6) m.step = 5;
+      });
+    } else S = blank();   // mặc định bảng trắng
+    render();
+  })();
+</script>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MES v2.3 — Mockup từng phòng ban</title>
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="assets/app.css">
+</head>
+
+<body>
+  <div class="shell">
+    <aside class="sb" id="sb"></aside>
+
+    <div class="main">
+      <div class="topbar">
+        <div class="crumb" id="crumb"></div>
+        <div class="sp"></div>
+        <div class="clock"><span class="lbl">Giờ xưởng</span><span id="clock" class="mono">--:--</span></div>
+        <button class="btn ghost sm" data-act="theme">Sáng / Tối</button>
+      </div>
+      <div class="page" id="view"></div>
+    </div>
+  </div>
+
+  <div class="ov" id="ov" hidden>
+    <div class="modal">
+      <header>
+        <h2>Đổi vai</h2>
+        <button class="btn ghost sm x" data-act="close">Đóng</button>
+      </header>
+      <div class="body" id="rolebody"></div>
+    </div>
+  </div>
+
+  <div class="ov" id="cam" hidden>
+    <div class="modal" style="width:min(430px,100%)">
+      <header>
+        <h2>Quét bằng camera</h2>
+        <button class="btn ghost sm x" data-act="cam-close">Đóng</button>
+      </header>
+      <div class="body">
+        <div class="cam-view">
+          <div class="cam-frame"><i></i><i></i><i></i><i></i></div>
+          <span class="msg">Đưa mã QR vào khung</span>
+        </div>
+        <div class="note">Mockup — không mở camera thật. Bấm một mã bên dưới để mô phỏng camera đọc được.
+          Bản chạy thật dùng <code>html5-qrcode</code> như trong <code>mes-v2-console.html</code>.</div>
+        <div class="gl" style="margin-top:14px">Đang có trong hàng đợi trạm này</div>
+        <div class="camchips" id="camchips"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" hidden></div>
+
+  <script src="assets/data.js"></script>
+  <script src="assets/screens.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+
+</html>

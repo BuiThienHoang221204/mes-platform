@@ -1,0 +1,59 @@
+# File này CÓ lên git nên KHÔNG chứa giá trị bí mật nào.
+#
+# Mọi thứ nhạy cảm đọc từ `.env` cùng thư mục — docker compose tự nạp file đó.
+# Cú pháp `${BIEN:?câu nhắc}` nghĩa là THIẾU thì compose dừng ngay kèm câu nhắc,
+# không im lặng chạy bằng chuỗi rỗng.
+
+services:
+  mes-db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?thiếu POSTGRES_USER trong .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?thiếu POSTGRES_PASSWORD trong .env}
+      POSTGRES_DB: ${POSTGRES_DB:?thiếu POSTGRES_DB trong .env}
+      TZ: Asia/Ho_Chi_Minh
+    # Chỉ mở cổng ra máy chủ khi cần nối từ ngoài vào (pgAdmin, hoặc chạy API
+    # trên máy chủ). Ở máy thật nên bỏ dòng này — api nối qua mạng nội bộ của
+    # compose, không cần cổng nào lộ ra.
+    ports: ["${POSTGRES_PORT:-5432}:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Migration chạy thành JOB RIÊNG, xong mới tới api.
+  # Bốn worker cùng migrate lúc khởi động là hỏng — xem BE-PLAN §10.
+  migrate:
+    build: .
+    command: alembic upgrade head
+    environment:
+      # Trong mạng compose thì máy chủ CSDL tên là `mes-db`, không phải localhost —
+      # khác với MES_DATABASE_URL trong .env (dành cho lúc chạy API ngoài máy chủ).
+      MES_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mes-db:5432/${POSTGRES_DB}
+      MES_JWT_SECRET: ${MES_JWT_SECRET:?thiếu MES_JWT_SECRET trong .env}
+    depends_on:
+      mes-db: { condition: service_healthy }
+
+  api:
+    build: .
+    command: >
+      gunicorn app.main:app
+      -k uvicorn.workers.UvicornWorker
+      -w 4 -b 0.0.0.0:8000
+      --access-logfile - --error-logfile -
+    environment:
+      MES_DATABASE_URL: postgresql+psycopg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@mes-db:5432/${POSTGRES_DB}
+      MES_JWT_SECRET: ${MES_JWT_SECRET:?thiếu MES_JWT_SECRET trong .env}
+      MES_ENV: ${MES_ENV:-dev}
+      MES_COOKIE_SECURE: ${MES_COOKIE_SECURE:-true}
+      MES_COOKIE_SAMESITE: ${MES_COOKIE_SAMESITE:-lax}
+      MES_CORS_ORIGINS: ${MES_CORS_ORIGINS:-["http://localhost:3000"]}
+    ports: ["${API_PORT:-8000}:8000"]
+    depends_on:
+      mes-db: { condition: service_healthy }
+      migrate: { condition: service_completed_successfully }
+
+volumes:
+  pgdata:

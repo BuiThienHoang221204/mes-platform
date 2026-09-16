@@ -1,0 +1,1420 @@
+<title>Mười Bốn Quyển Sổ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root{
+  --bg:#F2F5F6; --surface:#FFFFFF; --surface-2:#E8EDEF; --surface-3:#F7FAFA;
+  --ink:#131A1D; --ink-2:#56656B; --ink-3:#7D8B90;
+  --line:#D5DEE0; --line-strong:#B9C6C9;
+  --accent:#0C6B7A; --accent-ink:#FFFFFF; --accent-tint:#E4F1F3;
+  --ok:#1B7A45; --ok-bg:#E2F1E8;
+  --warn:#8E5A08; --warn-bg:#FAEFDC;
+  --bad:#A82C2C; --bad-bg:#F9E6E5;
+  --shadow:0 1px 2px rgba(19,26,29,.06), 0 4px 14px rgba(19,26,29,.05);
+  --sans:'IBM Plex Sans', ui-sans-serif, system-ui, 'Segoe UI', sans-serif;
+  --mono:'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1213; --surface:#151D1F; --surface-2:#1D2729; --surface-3:#111A1C;
+    --ink:#E4EDEF; --ink-2:#94A5AA; --ink-3:#6E8085;
+    --line:#29373A; --line-strong:#3A4B4F;
+    --accent:#48AFC0; --accent-ink:#06181C; --accent-tint:#12292D;
+    --ok:#55BE82; --ok-bg:#12301F;
+    --warn:#D9A548; --warn-bg:#33260F;
+    --bad:#E8736D; --bad-bg:#351A19;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.28);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1213; --surface:#151D1F; --surface-2:#1D2729; --surface-3:#111A1C;
+  --ink:#E4EDEF; --ink-2:#94A5AA; --ink-3:#6E8085;
+  --line:#29373A; --line-strong:#3A4B4F;
+  --accent:#48AFC0; --accent-ink:#06181C; --accent-tint:#12292D;
+  --ok:#55BE82; --ok-bg:#12301F;
+  --warn:#D9A548; --warn-bg:#33260F;
+  --bad:#E8736D; --bad-bg:#351A19;
+  --shadow:0 1px 2px rgba(0,0,0,.4), 0 4px 14px rgba(0,0,0,.28);
+}
+*{box-sizing:border-box}
+body{background:var(--bg); color:var(--ink); font-family:var(--sans); font-size:15px; line-height:1.62; margin:0}
+.wrap{max-width:1000px; margin:0 auto; padding-inline:16px; padding-block:0 72px}
+@media(min-width:900px){ .wrap{padding-inline:28px} }
+
+header.top{border-bottom:1px solid var(--line); background:var(--surface)}
+header.top .wrap{padding-block:34px 28px}
+.eyebrow{font-family:var(--mono); font-size:11px; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent); margin:0 0 12px}
+h1{font-size:clamp(28px,5vw,44px); font-weight:600; letter-spacing:-.028em; margin:0 0 12px; text-wrap:balance}
+.sub{color:var(--ink-2); max-width:60ch; margin:0}
+.facts{display:flex; flex-wrap:wrap; gap:8px; margin-top:20px}
+.fact{font-family:var(--mono); font-size:11.5px; border:1px solid var(--line); border-radius:20px;
+  padding:4px 11px; color:var(--ink-2); background:var(--surface-3)}
+
+h2{font-size:21px; font-weight:600; letter-spacing:-.018em; margin:52px 0 8px; text-wrap:balance}
+h3{font-size:15px; font-weight:600; margin:26px 0 8px}
+p{margin:0 0 13px; max-width:66ch}
+.lead{color:var(--ink-2); max-width:64ch}
+code{font-family:var(--mono); font-size:.88em; background:var(--surface-2); padding:1px 5px; border-radius:4px}
+b{font-weight:600}
+
+.callout{border-left:3px solid var(--accent); background:var(--surface); border-radius:0 7px 7px 0;
+  padding:16px 18px; margin:20px 0; box-shadow:var(--shadow)}
+.callout p:last-child{margin-bottom:0}
+.callout.q{border-left-color:var(--warn)}
+
+/* ── 19 → 9 ───────────────────────────────────────── */
+.merge{display:grid; gap:10px; margin:22px 0 8px}
+.mrow{display:grid; grid-template-columns:1fr auto 1fr; gap:14px; align-items:center;
+  background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:13px 16px}
+@media(max-width:640px){ .mrow{grid-template-columns:1fr; gap:8px} .mrow .arrow{justify-self:start} }
+.mfrom{font-family:var(--mono); font-size:12.5px; color:var(--ink-2); line-height:1.8}
+.mto{font-family:var(--mono); font-size:13px; font-weight:600; color:var(--accent)}
+.arrow{color:var(--ink-3); font-size:17px; line-height:1}
+.mwhy{grid-column:1/-1; font-size:13.5px; color:var(--ink-2); border-top:1px dashed var(--line);
+  padding-top:9px; margin-top:3px}
+
+/* ── ngăn + quyển sổ ──────────────────────────────── */
+.drawer{margin-top:34px}
+.dhead{display:flex; align-items:baseline; gap:12px; border-bottom:2px solid var(--accent);
+  padding-bottom:7px; margin-bottom:2px}
+.dhead h3{margin:0; font-size:16px}
+.dhead .cnt{font-family:var(--mono); font-size:11.5px; color:var(--ink-3); margin-left:auto}
+
+.book{background:var(--surface); border:1px solid var(--line); border-top:none; box-shadow:var(--shadow)}
+.book:first-of-type{border-top:1px solid var(--line)}
+.book:last-of-type{border-radius:0 0 9px 9px}
+.btop{display:flex; align-items:baseline; gap:11px; flex-wrap:wrap; padding:15px 18px 0}
+.tab{font-family:var(--mono); font-size:11px; font-weight:600; color:var(--accent-ink);
+  background:var(--accent); border-radius:3px; padding:2px 7px; line-height:1.5}
+.bname{font-size:16px; font-weight:600; letter-spacing:-.012em}
+.btech{font-family:var(--mono); font-size:12px; color:var(--ink-3)}
+.bpurpose{padding:3px 18px 0; color:var(--ink-2); font-size:14px; max-width:70ch}
+.bwhy{margin:12px 18px 0; border-left:2px solid var(--line-strong); padding:2px 0 2px 13px;
+  font-size:13.5px; color:var(--ink-2); max-width:72ch}
+.bwhy b{color:var(--ink)}
+.fields{display:flex; flex-wrap:wrap; gap:6px; padding:14px 18px 17px}
+.f{font-family:var(--mono); font-size:11.5px; border:1px solid var(--line); border-radius:4px;
+  padding:3px 8px; background:var(--surface-3); color:var(--ink-2)}
+.f.key{border-color:var(--accent); color:var(--accent); background:var(--accent-tint)}
+.f.num{border-color:var(--line-strong); color:var(--ink)}
+
+/* nhóm cột trong phiếu lượt chạy */
+.bands{display:grid; gap:1px; background:var(--line); border:1px solid var(--line);
+  border-radius:8px; overflow:hidden; margin:14px 18px 17px}
+.band{background:var(--surface-3); display:grid; grid-template-columns:150px 1fr; gap:14px;
+  padding:11px 14px; align-items:start}
+@media(max-width:620px){ .band{grid-template-columns:1fr; gap:6px} }
+.bl{font-family:var(--mono); font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+  color:var(--accent); padding-top:3px}
+.bc{display:flex; flex-wrap:wrap; gap:6px}
+
+/* ── bảng so sánh ─────────────────────────────────── */
+.tscroll{overflow-x:auto; border:1px solid var(--line); border-radius:9px; background:var(--surface);
+  box-shadow:var(--shadow); margin:18px 0}
+table{border-collapse:collapse; width:100%; font-size:13.5px; min-width:480px}
+th,td{text-align:left; padding:10px 14px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+  color:var(--ink-2); background:var(--surface-2); font-weight:500}
+tr:last-child td{border-bottom:none}
+td.n{font-variant-numeric:tabular-nums}
+
+.two{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin:20px 0}
+@media(max-width:720px){ .two{grid-template-columns:1fr} }
+.panel{background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:16px 18px;
+  box-shadow:var(--shadow)}
+.panel h4{margin:0 0 10px; font-size:13px; font-family:var(--mono); letter-spacing:.07em;
+  text-transform:uppercase}
+.panel.good h4{color:var(--ok)} .panel.cost h4{color:var(--bad)}
+.panel ul{margin:0; padding-left:18px} .panel li{margin-bottom:9px}
+.panel li:last-child{margin-bottom:0}
+
+figure{margin:22px 0}
+.erd{width:100%; height:auto; max-width:100%; display:block}
+figure.wide{margin-inline:calc(50% - 49vw); max-width:none}
+/* Sơ đồ co theo chiều cao màn hình: cả hình lọt trong một khung nhìn,
+   chữ nhỏ lại theo — muốn đọc kỹ thì bấm mở từng bảng. */
+figure.wide .erd{height:calc(100vh - 250px); min-height:460px; max-height:900px;
+  width:auto; max-width:100%; margin-inline:auto}
+@media(max-width:1100px){
+  figure.wide{margin-inline:0}
+  figure.wide .erd{height:auto; width:100%; max-height:none}
+}
+figcaption{font-size:13px; color:var(--ink-2); margin-top:10px; max-width:70ch}
+
+pre{font-family:var(--mono); font-size:12.5px; background:var(--surface); border:1px solid var(--line);
+  border-radius:8px; padding:14px 16px; overflow-x:auto; margin:14px 0; line-height:1.65}
+pre .cm{color:var(--ink-3)}
+
+.erd .ent{cursor:pointer}
+.erd .ent, .erd .edge{transition:opacity .13s ease}
+.erd.dimmed .ent{opacity:.16}
+.erd.dimmed .edge{opacity:.07}
+.erd.dimmed .ent.hot, .erd.dimmed .edge.hot{opacity:1}
+.erd .ent.hot .ebox{stroke:var(--accent); stroke-width:2}
+.erd .ent.hot .ehead{fill:var(--accent-tint)}
+.erd .extra{display:none}
+.erd .edivider{stroke:var(--line); stroke-width:.9; display:none}
+.erd .ent.open .edivider{display:block}
+.erd .ent.open .extra{display:block}
+.erd .more{font-family:var(--mono); font-size:10px; fill:var(--accent); text-anchor:end}
+.erd .ent.open .more{display:none}
+.hint{font-size:13px; color:var(--ink-2); margin:10px 0 0}
+@media(prefers-reduced-motion:reduce){ .erd .ent, .erd .edge{transition:none} }
+.conn.bus{stroke:var(--accent); stroke-opacity:.4; stroke-dasharray:3 3}
+.zone{fill:var(--surface-3); stroke:var(--line); stroke-width:1; stroke-dasharray:5 4}
+.zlab{font-family:var(--mono); font-size:10.5px; letter-spacing:.1em; fill:var(--ink-3)}
+/* ── sơ đồ ERD ─────────────────────────────────────── */
+.ebox{fill:var(--surface); stroke:var(--line-strong); stroke-width:1.2}
+.ehead{fill:var(--surface-2)}
+.erow{stroke:var(--line); stroke-width:.9}
+.egut{stroke:var(--line); stroke-width:.9}
+.etitle{font-family:var(--mono); font-size:12.5px; font-weight:600; fill:var(--ink); text-anchor:middle;
+  letter-spacing:.04em}
+.ecol{font-family:var(--mono); font-size:11.5px; fill:var(--ink-2)}
+.ecol.pk{fill:var(--ink); font-weight:600}
+.ecol.grp{font-style:italic; fill:var(--ink-3)}
+.ekey{font-family:var(--mono); font-size:9.5px; fill:var(--accent); font-weight:600}
+.conn{fill:none; stroke:var(--line-strong); stroke-width:1.3}
+.conn.acc{stroke:var(--accent)}
+.conn.dash{stroke-dasharray:5 4}
+.dia{fill:var(--accent-tint); stroke:var(--accent); stroke-width:1.2}
+.diat{font-family:var(--sans); font-size:11px; font-weight:600; fill:var(--accent); text-anchor:middle}
+.card{font-family:var(--mono); font-size:10.5px; fill:var(--ink-3)}
+.nte{font-family:var(--sans); font-size:11.5px; fill:var(--ink-3); font-style:italic}
+
+footer{border-top:1px solid var(--line); margin-top:56px; background:var(--surface)}
+footer .wrap{padding-block:24px 30px}
+footer p{font-size:13px; color:var(--ink-2); margin:0}
+a{color:var(--accent)}
+</style>
+
+<header class="top"><div class="wrap">
+  <p class="eyebrow">Thiết kế cơ sở dữ liệu · bản đang phát triển</p>
+  <h1>Mười Bốn Quyển Sổ</h1>
+  <p class="sub">Móng dữ liệu cho MES, dựng quanh một trục duy nhất là <b>lượt chạy</b>.
+     Mỗi trạm giữ sổ riêng, nên thêm trạm về sau là mở một quyển mới — không phải sửa quyển đang dùng.</p>
+  <div class="facts">
+    <span class="fact">PostgreSQL 15+</span>
+    <span class="fact">15 sổ + 2 hạ tầng</span>
+    <span class="fact">nguồn: BRD v2.20</span>
+    <span class="fact">DDL: DB-GON.md</span>
+  </div>
+</div></header>
+
+<div class="wrap">
+
+<h2>Ý tưởng gốc</h2>
+<p class="lead">Đơn hàng 10.000 cái có thể phải xuống xưởng <b>nhiều lần</b> mới xong. Mỗi lần xuống là
+<b>một tờ phiếu riêng</b> — mọi con số của lần đó ghi lên tờ đó, không đụng gì tới lần trước.</p>
+<figure>
+<svg class="erd" viewBox="0 0 880 250" role="img"
+     aria-label="Đơn hàng M076741 mười nghìn cái sinh ra hai phiếu lượt chạy: lượt 1 làm được 9.000 nên còn thiếu và quay lại, lượt 2 làm nốt 1.000 rồi đơn hoàn thành.">
+  <defs>
+    <marker id="a9" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.3" color="var(--line-strong)">
+    <rect x="20" y="92" width="170" height="66" rx="6" fill="var(--surface)"/>
+    <rect x="290" y="26" width="230" height="86" rx="6" fill="var(--surface)"/>
+    <rect x="290" y="146" width="230" height="86" rx="6" fill="var(--surface)"/>
+    <rect x="620" y="92" width="150" height="66" rx="6" fill="var(--surface)"/>
+  </g>
+  <g font-family="IBM Plex Sans, sans-serif" fill="var(--ink)">
+    <text x="105" y="118" font-size="13" font-weight="600" text-anchor="middle">ĐƠN M076741</text>
+    <text x="105" y="137" font-size="12" fill="var(--ink-2)" text-anchor="middle">10.000 cái</text>
+
+    <text x="308" y="48" font-size="12.5" font-weight="600">Phiếu lượt chạy · lần 1</text>
+    <text x="308" y="68" font-size="11.5" fill="var(--ink-2)">phải làm 10.000 · hạn 3 giờ</text>
+    <text x="308" y="88" font-size="11.5" fill="var(--ink-2)">đạt 9.000 · hỏng 500 · thiếu 500</text>
+    <text x="308" y="103" font-size="11" fill="var(--warn)">còn 1.000 → về Bàn team leader</text>
+
+    <text x="308" y="168" font-size="12.5" font-weight="600">Phiếu lượt chạy · lần 2</text>
+    <text x="308" y="188" font-size="11.5" fill="var(--ink-2)">phải làm 1.000 · hạn 18 phút</text>
+    <text x="308" y="208" font-size="11.5" fill="var(--ink-2)">đạt 1.000 · hỏng 0 · thiếu 0</text>
+    <text x="308" y="223" font-size="11" fill="var(--ok)">đủ 10.000</text>
+
+    <text x="695" y="118" font-size="13" font-weight="600" text-anchor="middle">HOÀN THÀNH</text>
+    <text x="695" y="137" font-size="11.5" fill="var(--ink-2)" text-anchor="middle">10.000 / 10.000</text>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="1.3" color="var(--accent)">
+    <path d="M190 112 L240 112 L240 69 L290 69" marker-end="url(#a9)"/>
+    <path d="M190 138 L240 138 L240 189 L290 189" marker-end="url(#a9)"/>
+    <path d="M520 189 L620 133" marker-end="url(#a9)"/>
+    <path d="M520 69 L560 69 L560 250" stroke-dasharray="4 4"/>
+    <path d="M560 250 L405 250 L405 240" marker-end="url(#a9)" stroke-dasharray="4 4"/>
+  </g>
+  <text x="583" y="182" font-size="11" font-family="IBM Plex Mono, monospace" fill="var(--warn)">thiếu → mở lượt mới</text>
+</svg>
+<figcaption>Đơn hàng giữ con số kế hoạch và không bao giờ bị sửa. Mỗi lần xuống xưởng sinh thêm một phiếu
+lượt chạy — thiếu thì mở tiếp lượt sau, đủ thì đơn đóng lại.</figcaption>
+</figure>
+
+<h2>Sơ đồ quan hệ</h2>
+<p class="lead">Ba cột dọc: bên trái là đơn hàng · nhật ký · danh mục, giữa là <b>trục</b>, bên phải là <b>năm trạm</b>. Mỗi đường nối có nhãn ghi sẵn quan hệ và tên việc.</p>
+<figure class="wide">
+<svg class="erd" id="erd" viewBox="0 0 1730 960" role="img"
+     aria-label="Sơ đồ quan hệ mười lăm bảng, thu gọn còn khoá chính và khoá ngoại: manufacturing_order sinh ra nhiều mo_round; mo_round nối một-một tới năm bảng trạm và một-nhiều tới mo_step, hourly_output, line_segment, packing_hourly; mo_event trỏ về cả đơn hàng lẫn lượt chạy; ba bảng danh mục app_user, reason_code, line được các bảng trên tra về.">
+  <defs>
+    <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="var(--line-strong)"/>
+    </marker>
+  </defs>
+  <rect class="zone" x="26" y="476" width="438" height="388" rx="10"/>
+  <text class="zlab" x="36" y="468">DANH MỤC</text>
+  <rect class="zone" x="1202" y="22" width="466" height="781" rx="10"/>
+  <text class="zlab" x="1212" y="14">NĂM TRẠM · mỗi trạm một sổ · 1-1 với lượt chạy</text>
+  <g class="ent open" data-id="mo" data-x="40" data-y="40" data-hc="105" data-hf="209">
+  <rect class="ebox" x="40" y="40" width="410" height="209" rx="3"/>
+  <path class="ehead" d="M41 41 h408 v27 h-408 z"/>
+  <line class="erow" x1="40" y1="68" x2="450" y2="68"/>
+  <text class="etitle" x="245" y="59">MANUFACTURING_ORDER</text>
+  <line class="egut" x1="80" y1="68" x2="80" y2="249"/>
+  <line class="egut" x1="279" y1="68" x2="279" y2="249"
+        />
+  <line class="edivider" x1="245" y1="68" x2="245" y2="249"/>
+  <line class="erow sep" x1="40" y1="94" x2="450" y2="94"/>
+  <line class="erow sep" x1="40" y1="120" x2="450" y2="120"/>
+  <line class="erow sep extra" x1="40" y1="146" x2="450" y2="146"/>
+  <line class="erow sep extra" x1="40" y1="172" x2="450" y2="172"/>
+  <line class="erow sep extra" x1="40" y1="198" x2="450" y2="198"/>
+  <line class="erow sep extra" x1="40" y1="224" x2="450" y2="224"/>
+  <g class="row">
+    <text class="ekey" x="58" y="86">PK</text>
+    <text class="ecol pk" x="89" y="86">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="58" y="112">FK</text>
+    <text class="ecol" x="89" y="112">created_by</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="58" y="138">FK</text>
+    <text class="ecol" x="89" y="138">cancelled_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="164">code</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="190">product_name</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="216">quantity</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="242">unit</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="86">required_production_sec</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="112">status</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="138">created_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="164">submitted_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="190">cancelled_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="216">cancel_reason_text</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="242">pcs_per_box</text>
+  </g>
+  <text class="more" x="438" y="136">+ 11 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="event" data-x="40" data-y="291" data-hc="131" data-hf="157">
+  <rect class="ebox" x="40" y="291" width="410" height="157" rx="3"/>
+  <path class="ehead" d="M41 292 h408 v27 h-408 z"/>
+  <line class="erow" x1="40" y1="319" x2="450" y2="319"/>
+  <text class="etitle" x="245" y="310">MO_EVENT</text>
+  <line class="egut" x1="80" y1="319" x2="80" y2="448"/>
+  <line class="egut" x1="279" y1="319" x2="279" y2="448"
+        />
+  <line class="edivider" x1="245" y1="319" x2="245" y2="448"/>
+  <line class="erow sep" x1="40" y1="345" x2="450" y2="345"/>
+  <line class="erow sep" x1="40" y1="371" x2="450" y2="371"/>
+  <line class="erow sep" x1="40" y1="397" x2="450" y2="397"/>
+  <line class="erow sep extra" x1="40" y1="423" x2="450" y2="423"/>
+  <g class="row">
+    <text class="ekey" x="58" y="337">PK</text>
+    <text class="ecol pk" x="89" y="337">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="58" y="363">FK</text>
+    <text class="ecol" x="89" y="363">mo_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="58" y="389">FK</text>
+    <text class="ecol" x="89" y="389">round_id · nullable</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="58" y="415">FK</text>
+    <text class="ecol" x="89" y="415">actor_id</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="441">step_no</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="337">action</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="363">from_state</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="389">to_state</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="415">reason_text</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="441">occurred_at</text>
+  </g>
+  <text class="more" x="438" y="413">+ 6 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="reason" data-x="40" data-y="490" data-hc="53" data-hf="79">
+  <rect class="ebox" x="40" y="490" width="410" height="79" rx="3"/>
+  <path class="ehead" d="M41 491 h408 v27 h-408 z"/>
+  <line class="erow" x1="40" y1="518" x2="450" y2="518"/>
+  <text class="etitle" x="245" y="509">REASON_CODE</text>
+  <line class="egut" x1="80" y1="518" x2="80" y2="569"/>
+  <line class="egut" x1="279" y1="518" x2="279" y2="569"
+        />
+  <line class="edivider" x1="245" y1="518" x2="245" y2="569"/>
+  <line class="erow sep extra" x1="40" y1="544" x2="450" y2="544"/>
+  <g class="row">
+    <text class="ekey" x="58" y="536">PK</text>
+    <text class="ecol pk" x="89" y="536">id</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="562">group_code</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="536">name</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="562">is_active</text>
+  </g>
+  <text class="more" x="438" y="534">+ 3 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="line" data-x="40" data-y="611" data-hc="53" data-hf="79">
+  <rect class="ebox" x="40" y="611" width="410" height="79" rx="3"/>
+  <path class="ehead" d="M41 612 h408 v27 h-408 z"/>
+  <line class="erow" x1="40" y1="639" x2="450" y2="639"/>
+  <text class="etitle" x="245" y="630">LINE</text>
+  <line class="egut" x1="80" y1="639" x2="80" y2="690"/>
+  <line class="egut" x1="279" y1="639" x2="279" y2="690"
+        />
+  <line class="edivider" x1="245" y1="639" x2="245" y2="690"/>
+  <line class="erow sep extra" x1="40" y1="665" x2="450" y2="665"/>
+  <g class="row">
+    <text class="ekey" x="58" y="657">PK</text>
+    <text class="ecol pk" x="89" y="657">id</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="683">code · L01</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="657">name</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="683">is_active</text>
+  </g>
+  <text class="more" x="438" y="655">+ 3 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="user" data-x="40" data-y="732" data-hc="53" data-hf="105">
+  <rect class="ebox" x="40" y="732" width="410" height="105" rx="3"/>
+  <path class="ehead" d="M41 733 h408 v27 h-408 z"/>
+  <line class="erow" x1="40" y1="760" x2="450" y2="760"/>
+  <text class="etitle" x="245" y="751">APP_USER</text>
+  <line class="egut" x1="80" y1="760" x2="80" y2="837"/>
+  <line class="egut" x1="279" y1="760" x2="279" y2="837"
+        />
+  <line class="edivider" x1="245" y1="760" x2="245" y2="837"/>
+  <line class="erow sep extra" x1="40" y1="786" x2="450" y2="786"/>
+  <line class="erow sep extra" x1="40" y1="812" x2="450" y2="812"/>
+  <g class="row">
+    <text class="ekey" x="58" y="778">PK</text>
+    <text class="ecol pk" x="89" y="778">id</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="804">full_name</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="89" y="830">emp_code</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="778">roles[]</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="804">is_active</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="288" y="830">pin_hash</text>
+  </g>
+  <text class="more" x="438" y="776">+ 5 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="round" data-x="630" data-y="40" data-hc="79" data-hf="157">
+  <rect class="ebox" x="630" y="40" width="410" height="157" rx="3"/>
+  <path class="ehead" d="M631 41 h408 v27 h-408 z"/>
+  <line class="erow" x1="630" y1="68" x2="1040" y2="68"/>
+  <text class="etitle" x="835" y="59">MO_ROUND</text>
+  <line class="egut" x1="670" y1="68" x2="670" y2="197"/>
+  <line class="egut" x1="869" y1="68" x2="869" y2="197"
+        />
+  <line class="edivider" x1="835" y1="68" x2="835" y2="197"/>
+  <line class="erow sep" x1="630" y1="94" x2="1040" y2="94"/>
+  <line class="erow sep extra" x1="630" y1="120" x2="1040" y2="120"/>
+  <line class="erow sep extra" x1="630" y1="146" x2="1040" y2="146"/>
+  <line class="erow sep extra" x1="630" y1="172" x2="1040" y2="172"/>
+  <g class="row">
+    <text class="ekey" x="648" y="86">PK</text>
+    <text class="ecol pk" x="679" y="86">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="112">FK</text>
+    <text class="ecol" x="679" y="112">mo_id</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="138">round_no</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="164">target_qty</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="190">required_sec</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="86">opened_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="112">closed_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="138">returned_to_step</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="164">return_reason_text</text>
+  </g>
+  <text class="more" x="1028" y="110">+ 7 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="step" data-x="630" data-y="239" data-hc="131" data-hf="131">
+  <rect class="ebox" x="630" y="239" width="410" height="131" rx="3"/>
+  <path class="ehead" d="M631 240 h408 v27 h-408 z"/>
+  <line class="erow" x1="630" y1="267" x2="1040" y2="267"/>
+  <text class="etitle" x="835" y="258">MO_STEP</text>
+  <line class="egut" x1="670" y1="267" x2="670" y2="370"/>
+  <line class="egut" x1="869" y1="267" x2="869" y2="370"
+        />
+  <line class="edivider" x1="835" y1="267" x2="835" y2="370"/>
+  <line class="erow sep" x1="630" y1="293" x2="1040" y2="293"/>
+  <line class="erow sep" x1="630" y1="319" x2="1040" y2="319"/>
+  <line class="erow sep" x1="630" y1="345" x2="1040" y2="345"/>
+  <g class="row">
+    <text class="ekey" x="648" y="285">PK</text>
+    <text class="ecol pk" x="679" y="285">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="311">FK</text>
+    <text class="ecol" x="679" y="311">round_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="337">FK</text>
+    <text class="ecol" x="679" y="337">accepted_by</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="363">FK</text>
+    <text class="ecol" x="679" y="363">closed_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="285">step_no</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="311">accepted_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="337">closed_at</text>
+  </g>
+  <text class="more" x="1028" y="361">+ 3 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="hourly" data-x="630" data-y="412" data-hc="105" data-hf="157">
+  <rect class="ebox" x="630" y="412" width="410" height="157" rx="3"/>
+  <path class="ehead" d="M631 413 h408 v27 h-408 z"/>
+  <line class="erow" x1="630" y1="440" x2="1040" y2="440"/>
+  <text class="etitle" x="835" y="431">HOURLY_OUTPUT</text>
+  <line class="egut" x1="670" y1="440" x2="670" y2="569"/>
+  <line class="egut" x1="869" y1="440" x2="869" y2="569"
+        />
+  <line class="edivider" x1="835" y1="440" x2="835" y2="569"/>
+  <line class="erow sep" x1="630" y1="466" x2="1040" y2="466"/>
+  <line class="erow sep" x1="630" y1="492" x2="1040" y2="492"/>
+  <line class="erow sep extra" x1="630" y1="518" x2="1040" y2="518"/>
+  <line class="erow sep extra" x1="630" y1="544" x2="1040" y2="544"/>
+  <g class="row">
+    <text class="ekey" x="648" y="458">PK</text>
+    <text class="ecol pk" x="679" y="458">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="484">FK</text>
+    <text class="ecol" x="679" y="484">round_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="510">FK</text>
+    <text class="ecol" x="679" y="510">recorded_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="536">work_date</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="562">slot_hour</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="458">headcount</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="484">target_qty</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="510">qty · thực tế</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="536">note</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="562">recorded_at</text>
+  </g>
+  <text class="more" x="1028" y="508">+ 7 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="seg" data-x="630" data-y="585" data-hc="157" data-hf="157">
+  <rect class="ebox" x="630" y="585" width="410" height="157" rx="3"/>
+  <path class="ehead" d="M631 586 h408 v27 h-408 z"/>
+  <line class="erow" x1="630" y1="613" x2="1040" y2="613"/>
+  <text class="etitle" x="835" y="604">LINE_SEGMENT</text>
+  <line class="egut" x1="670" y1="613" x2="670" y2="742"/>
+  <line class="egut" x1="869" y1="613" x2="869" y2="742"
+        />
+  <line class="edivider" x1="835" y1="613" x2="835" y2="742"/>
+  <line class="erow sep" x1="630" y1="639" x2="1040" y2="639"/>
+  <line class="erow sep" x1="630" y1="665" x2="1040" y2="665"/>
+  <line class="erow sep" x1="630" y1="691" x2="1040" y2="691"/>
+  <line class="erow sep" x1="630" y1="717" x2="1040" y2="717"/>
+  <g class="row">
+    <text class="ekey" x="648" y="631">PK</text>
+    <text class="ecol pk" x="679" y="631">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="657">FK</text>
+    <text class="ecol" x="679" y="657">round_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="683">FK</text>
+    <text class="ecol" x="679" y="683">line_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="709">FK</text>
+    <text class="ecol" x="679" y="709">hold_reason_code_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="735">FK</text>
+    <text class="ecol" x="679" y="735">started_by</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="847" y="631">FK</text>
+    <text class="ecol" x="878" y="631">ended_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="657">kind · WAIT|RUN</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="683">started_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="709">ended_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="735">hold_reason_text</text>
+  </g>
+  <text class="more" x="1028" y="733">+ 4 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="packhour" data-x="630" data-y="770" data-hc="105" data-hf="157">
+  <rect class="ebox" x="630" y="770" width="410" height="157" rx="3"/>
+  <path class="ehead" d="M631 771 h408 v27 h-408 z"/>
+  <line class="erow" x1="630" y1="798" x2="1040" y2="798"/>
+  <text class="etitle" x="835" y="789">PACKING_HOURLY</text>
+  <line class="egut" x1="670" y1="798" x2="670" y2="927"/>
+  <line class="egut" x1="869" y1="798" x2="869" y2="927"
+        />
+  <line class="edivider" x1="835" y1="798" x2="835" y2="927"/>
+  <line class="erow sep" x1="630" y1="824" x2="1040" y2="824"/>
+  <line class="erow sep" x1="630" y1="850" x2="1040" y2="850"/>
+  <line class="erow sep extra" x1="630" y1="876" x2="1040" y2="876"/>
+  <line class="erow sep extra" x1="630" y1="902" x2="1040" y2="902"/>
+  <g class="row">
+    <text class="ekey" x="648" y="816">PK</text>
+    <text class="ecol pk" x="679" y="816">id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="842">FK</text>
+    <text class="ecol" x="679" y="842">round_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="648" y="868">FK</text>
+    <text class="ecol" x="679" y="868">recorded_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="894">work_date</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="679" y="920">slot_hour</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="816">boxes · thùng đầy</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="842">pcs_per_box</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="868">note</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="878" y="894">recorded_at</text>
+  </g>
+  <text class="more" x="1028" y="866">+ 6 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="whout" data-x="1220" data-y="40" data-hc="79" data-hf="79">
+  <rect class="ebox" x="1220" y="40" width="430" height="79" rx="3"/>
+  <path class="ehead" d="M1221 41 h428 v27 h-428 z"/>
+  <line class="erow" x1="1220" y1="68" x2="1650" y2="68"/>
+  <text class="etitle" x="1435" y="59">WAREHOUSE_OUT</text>
+  <line class="egut" x1="1260" y1="68" x2="1260" y2="119"/>
+  <line class="egut" x1="1469" y1="68" x2="1469" y2="119"/>
+  <line class="edivider" x1="1435" y1="68" x2="1435" y2="119"/>
+  <line class="erow sep" x1="1220" y1="94" x2="1650" y2="94"/>
+  <g class="row">
+    <text class="ekey" x="1238" y="86">PK</text>
+    <text class="ecol pk" x="1269" y="86">round_id  FK</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="112">FK</text>
+    <text class="ecol" x="1269" y="112">handed_over_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="86">handed_over_at</text>
+  </g>
+  <text class="more" x="1638" y="110">+ 1 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="qc" data-x="1220" data-y="187" data-hc="105" data-hf="105">
+  <rect class="ebox" x="1220" y="187" width="430" height="105" rx="3"/>
+  <path class="ehead" d="M1221 188 h428 v27 h-428 z"/>
+  <line class="erow" x1="1220" y1="215" x2="1650" y2="215"/>
+  <text class="etitle" x="1435" y="206">QC_RESULT</text>
+  <line class="egut" x1="1260" y1="215" x2="1260" y2="292"/>
+  <line class="egut" x1="1469" y1="215" x2="1469" y2="292"
+        />
+  <line class="edivider" x1="1435" y1="215" x2="1435" y2="292"/>
+  <line class="erow sep" x1="1220" y1="241" x2="1650" y2="241"/>
+  <line class="erow sep" x1="1220" y1="267" x2="1650" y2="267"/>
+  <g class="row">
+    <text class="ekey" x="1238" y="233">PK</text>
+    <text class="ecol pk" x="1269" y="233">round_id  FK</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="259">FK</text>
+    <text class="ecol" x="1269" y="259">checked_by</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="285">FK</text>
+    <text class="ecol" x="1269" y="285">reason_code_id</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="233">result · PASS|FAIL</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="259">checked_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="285">reason_text</text>
+  </g>
+  <text class="more" x="1638" y="283">+ 3 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="prod" data-x="1220" data-y="334" data-hc="131" data-hf="157">
+  <rect class="ebox" x="1220" y="334" width="430" height="157" rx="3"/>
+  <path class="ehead" d="M1221 335 h428 v27 h-428 z"/>
+  <line class="erow" x1="1220" y1="362" x2="1650" y2="362"/>
+  <text class="etitle" x="1435" y="353">PRODUCTION</text>
+  <line class="egut" x1="1260" y1="362" x2="1260" y2="491"/>
+  <line class="egut" x1="1469" y1="362" x2="1469" y2="491"
+        />
+  <line class="edivider" x1="1435" y1="362" x2="1435" y2="491"/>
+  <line class="erow sep" x1="1220" y1="388" x2="1650" y2="388"/>
+  <line class="erow sep" x1="1220" y1="414" x2="1650" y2="414"/>
+  <line class="erow sep" x1="1220" y1="440" x2="1650" y2="440"/>
+  <line class="erow sep extra" x1="1220" y1="466" x2="1650" y2="466"/>
+  <g class="row">
+    <text class="ekey" x="1238" y="380">PK</text>
+    <text class="ecol pk" x="1269" y="380">round_id  FK</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="406">FK</text>
+    <text class="ecol" x="1269" y="406">ng_reason_code_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="432">FK</text>
+    <text class="ecol" x="1269" y="432">short_reason_code_id</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="458">FK</text>
+    <text class="ecol" x="1269" y="458">closed_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1269" y="484">qty_ok</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="380">qty_ng</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="406">qty_short</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="432">ng_reason_text</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="458">short_reason_text</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="484">closed_at</text>
+  </g>
+  <text class="more" x="1638" y="456">+ 6 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="pack" data-x="1220" data-y="533" data-hc="105" data-hf="131">
+  <rect class="ebox" x="1220" y="533" width="430" height="131" rx="3"/>
+  <path class="ehead" d="M1221 534 h428 v27 h-428 z"/>
+  <line class="erow" x1="1220" y1="561" x2="1650" y2="561"/>
+  <text class="etitle" x="1435" y="552">PACKING</text>
+  <line class="egut" x1="1260" y1="561" x2="1260" y2="664"/>
+  <line class="egut" x1="1469" y1="561" x2="1469" y2="664"
+        />
+  <line class="edivider" x1="1435" y1="561" x2="1435" y2="664"/>
+  <line class="erow sep" x1="1220" y1="587" x2="1650" y2="587"/>
+  <line class="erow sep" x1="1220" y1="613" x2="1650" y2="613"/>
+  <line class="erow sep extra" x1="1220" y1="639" x2="1650" y2="639"/>
+  <g class="row">
+    <text class="ekey" x="1238" y="579">PK</text>
+    <text class="ecol pk" x="1269" y="579">round_id  FK</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="605">FK</text>
+    <text class="ecol" x="1269" y="605">started_by</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="631">FK</text>
+    <text class="ecol" x="1269" y="631">completed_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1269" y="657">started_at</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="579">qty_packed</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="605">note_text</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="631">completed_at</text>
+  </g>
+  <text class="more" x="1638" y="629">+ 4 ô · bấm để mở</text>
+  </g>
+  <g class="ent open" data-id="whin" data-x="1220" data-y="706" data-hc="79" data-hf="79">
+  <rect class="ebox" x="1220" y="706" width="430" height="79" rx="3"/>
+  <path class="ehead" d="M1221 707 h428 v27 h-428 z"/>
+  <line class="erow" x1="1220" y1="734" x2="1650" y2="734"/>
+  <text class="etitle" x="1435" y="725">WAREHOUSE_IN</text>
+  <line class="egut" x1="1260" y1="734" x2="1260" y2="785"/>
+  <line class="egut" x1="1469" y1="734" x2="1469" y2="785"
+        />
+  <line class="edivider" x1="1435" y1="734" x2="1435" y2="785"/>
+  <line class="erow sep" x1="1220" y1="760" x2="1650" y2="760"/>
+  <g class="row">
+    <text class="ekey" x="1238" y="752">PK</text>
+    <text class="ecol pk" x="1269" y="752">round_id  FK</text>
+  </g>
+  <g class="row">
+    <text class="ekey" x="1238" y="778">FK</text>
+    <text class="ecol" x="1269" y="778">counted_by</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="752">qty_received</text>
+  </g>
+  <g class="row extra">
+    <text class="ecol" x="1478" y="778">counted_at</text>
+  </g>
+  <text class="more" x="1638" y="776">+ 2 ô · bấm để mở</text>
+  </g>
+  <g class="edge" data-a="mo" data-b="round">
+    <path class="conn acc" d="M450 120 L630 120" marker-end="url(#a1)"/>
+    <text class="card" x="458" y="112">1 - M · xuống xưởng</text>
+  </g>
+  <g class="edge" data-a="event" data-b="mo">
+    <path class="conn acc" d="M245 291 L245 253" marker-end="url(#a1)"/>
+    <text class="card" x="258" y="276">M - 1</text>
+  </g>
+  <g class="edge" data-a="event" data-b="round">
+    <path class="conn acc" d="M450 330 L540 330 L540 165 L630 165" marker-end="url(#a1)"/>
+    <text class="card" x="458" y="322">M - 1 · ghi sổ</text>
+  </g>
+  <g class="edge" data-a="round" data-b="step">
+    <path class="conn acc" d="M630 70 L600 70 L600 304 L630 304" marker-end="url(#a1)"/>
+    <text class="card" x="636" y="224">1 - M · đi qua bước</text>
+  </g>
+  <g class="edge" data-a="round" data-b="hourly">
+    <path class="conn acc" d="M630 95 L585 95 L585 477 L630 477" marker-end="url(#a1)"/>
+    <text class="card" x="636" y="398">1 - M · ghi giờ</text>
+  </g>
+  <g class="edge" data-a="round" data-b="seg">
+    <path class="conn acc" d="M630 120 L570 120 L570 663 L630 663" marker-end="url(#a1)"/>
+    <text class="card" x="636" y="571">1 - M · chạy trên chuyền</text>
+  </g>
+  <g class="edge" data-a="round" data-b="packhour">
+    <path class="conn acc" d="M630 145 L555 145 L555 848 L630 848" marker-end="url(#a1)"/>
+    <text class="card" x="636" y="756">1 - M · đóng thùng theo giờ</text>
+  </g>
+  <text class="card" x="1046" y="62">1 - 1 · năm trạm</text>
+  <g class="edge" data-a="round" data-b="whout">
+    <path class="conn acc" d="M1040 75 L1070 75 L1070 92 L1220 92" marker-end="url(#a1)"/>
+    <text class="card" x="1076" y="83">bàn giao</text>
+  </g>
+  <g class="edge" data-a="round" data-b="qc">
+    <path class="conn acc" d="M1040 75 L1090 75 L1090 239 L1220 239" marker-end="url(#a1)"/>
+    <text class="card" x="1096" y="230">kiểm</text>
+  </g>
+  <g class="edge" data-a="round" data-b="prod">
+    <path class="conn acc" d="M1040 75 L1110 75 L1110 412 L1220 412" marker-end="url(#a1)"/>
+    <text class="card" x="1116" y="403">chốt SX</text>
+  </g>
+  <g class="edge" data-a="round" data-b="pack">
+    <path class="conn acc" d="M1040 75 L1130 75 L1130 598 L1220 598" marker-end="url(#a1)"/>
+    <text class="card" x="1136" y="589">đóng thùng</text>
+  </g>
+  <g class="edge" data-a="round" data-b="whin">
+    <path class="conn acc" d="M1040 75 L1150 75 L1150 745 L1220 745" marker-end="url(#a1)"/>
+    <text class="card" x="1156" y="736">nhập kho</text>
+  </g>
+  <g class="edge" data-a="line" data-b="seg">
+    <path class="conn dash" d="M450 650 L512 650 L512 700 L630 700" marker-end="url(#a1)"/>
+    <text class="card" x="458" y="642">chạy trên chuyền nào</text>
+  </g>
+  <g class="edge" data-a="reason" data-b="seg">
+    <path class="conn dash" d="M450 529 L530 529 L530 620 L630 620" marker-end="url(#a1)"/>
+    <text class="card" x="458" y="521">lý do dừng máy</text>
+  </g>
+  <g class="edge" data-a="reason" data-b="qc">
+    <path class="conn dash" d="M450 545 L492 545 L492 213 L1180 213 L1180 260 L1220 260" marker-end="url(#a1)"/>
+    <text class="card" x="500" y="205">lý do QC · hỏng · thiếu</text>
+  </g>
+  <g class="edge" data-a="reason" data-b="prod">
+    <path class="conn dash" d="M450 545 L492 545 L492 213 L1180 213 L1180 440 L1220 440" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="mo">
+    <path class="conn bus" d="M450 762 L472 762 L472 200 L450 200" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="event">
+    <path class="conn bus" d="M450 762 L472 762 L472 400 L450 400" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="step">
+    <path class="conn bus" d="M450 778 L552 778 L552 330 L630 330" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="hourly">
+    <path class="conn bus" d="M450 778 L552 778 L552 500 L630 500" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="seg">
+    <path class="conn bus" d="M450 778 L552 778 L552 690 L630 690" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="whout">
+    <path class="conn bus" d="M245 837 L245 884 L1690 884 L1690 110 L1650 110" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="qc">
+    <path class="conn bus" d="M245 837 L245 884 L1690 884 L1690 265 L1650 265" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="prod">
+    <path class="conn bus" d="M245 837 L245 884 L1690 884 L1690 465 L1650 465" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="pack">
+    <path class="conn bus" d="M245 837 L245 884 L1690 884 L1690 630 L1650 630" marker-end="url(#a1)"/>
+  </g>
+  <g class="edge" data-a="user" data-b="whin">
+    <path class="conn bus" d="M245 837 L245 884 L1690 884 L1690 765 L1650 765" marker-end="url(#a1)"/>
+  </g>
+  <text class="nte" x="700" y="876">ai làm · mọi sổ đều trỏ về APP_USER</text>
+</svg>
+<p class="hint"><b>Bấm vào một bảng</b> để thu gọn còn khoá chính và khoá ngoại, bấm lần nữa để mở lại · <b>rê chuột</b> lên bảng để soi những bảng và đường nối liên quan. Mặc định mở sẵn hết, và chỗ đã chừa đủ nên không bảng nào đè bảng nào.</p>
+<figcaption><b>14 bảng · 103 cột · đủ 24 quan hệ.</b> Các ô xếp thành <b>hai cột</b> cho hộp khỏi cao; bấm vào bảng thì thu lại còn <b>khoá chính và khoá ngoại</b>. Cột giữa là trục; cột phải là năm trạm, mỗi trạm một sổ nối một-một với lượt chạy; cột trái là đơn hàng, nhật ký và danh mục. <b>Nét liền</b> là quan hệ chứa — xoá lượt thì xoá luôn dòng con. <b>Nét đứt</b> là tra cứu — xoá danh mục không xoá gì cả.</figcaption>
+</figure>
+
+<h2>Cách đọc sơ đồ</h2>
+<h3>Sơ đồ bấm được</h3>
+<p>Mặc định mỗi bảng <b>mở sẵn hết các ô</b>. <b>Bấm vào bảng</b> thì nó thu lại còn <b>khoá chính và khoá ngoại</b> — vừa đủ để thấy bộ khung nối với nhau thế nào; bấm lần nữa thì mở lại.</p>
+<p><b>Rê chuột</b> lên một bảng thì cả sơ đồ mờ đi, chỉ còn bảng đó, những bảng có quan hệ với nó, và các
+đường nối giữa chúng sáng lên. Muốn biết <i>“sổ đóng thùng dính tới những ai”</i> thì rê vào nó là thấy ngay,
+không phải dò từng đường.</p>
+
+<h3>Mũi tên nói “một cái này sinh ra mấy cái kia”</h3>
+<p><code>1 - M</code> là <b>một</b> bên gốc, <b>nhiều</b> bên ngọn: một đơn hàng sinh ra nhiều lượt chạy;
+một lượt chạy sinh ra sáu dòng bước, nhiều đoạn chuyền, nhiều dòng sản lượng giờ.</p>
+<p><code>1 - 1</code> là <b>một đổi một</b>: một lượt chạy có đúng một dòng ở mỗi bảng trạm. Không thể có
+hai lần bàn giao, hai kết quả QC, hai lần chốt sổ sản xuất cho cùng một lượt.</p>
+<p>Nhãn trên đường nối đọc thành câu: <i>đơn hàng</i> — <b>xuống xưởng</b> — <i>lượt chạy</i>; <i>lượt chạy</i> — <b>chốt SX</b> — <i>sổ chốt sản xuất</i>.</p>
+
+<h3>Đường trục: nhiều nhánh đi chung một làn</h3>
+<p>Hai quyển danh mục được tra tới từ rất nhiều nơi — <code>APP_USER</code> có <b>mười bảng</b> trỏ về
+(ai quét nhận, ai đóng bước, ai in phiếu, ai chốt sổ, ai bấm dừng…), <code>REASON_CODE</code> có ba.
+Vẽ mỗi bảng một đường riêng thì sơ đồ thành mạng nhện.</p>
+<p>Nên chúng đi thành <b>một đường trục chạy trong hành lang giữa các cột</b>, rồi rẽ nhánh ngắn vào từng
+bảng — giống đường dây điện chạy dọc tường rồi mới rẽ vào từng phòng. Trục vẽ mờ hơn để mắt đọc phần
+nghiệp vụ trước, phần tra cứu sau.</p>
+
+<h3>Nét liền = thuộc về · nét đứt = tra cứu</h3>
+<div class="tscroll"><table>
+<thead><tr><th></th><th>Nét liền</th><th>Nét đứt</th></tr></thead>
+<tbody>
+<tr><td>Quan hệ</td><td>Dòng con <b>thuộc về</b> dòng cha</td><td>Chỉ <b>trỏ tới</b> để tra tên</td></tr>
+<tr><td>Ví dụ</td><td>Sáu dòng bước thuộc về lượt chạy số 2</td><td>Đoạn chuyền trỏ tới chuyền L02</td></tr>
+<tr><td>Xoá cha thì sao</td><td>Xoá luôn dòng con — sáu bước của lượt đó không còn ý nghĩa</td>
+    <td>Không xoá gì. Bỏ L02 khỏi danh mục không làm mất lịch sử nó từng chạy</td></tr>
+</tbody></table></div>
+
+<h3>Vì sao mọi đường đều đổ về ô giữa</h3>
+<p>Đây là quyết định gốc: <b>mọi con số vận hành treo vào lượt chạy, không treo vào đơn hàng.</b></p>
+<p>Thử làm ngược lại — treo thẳng vào đơn hàng. Đơn M076741 xuống xưởng lần một làm được 9.000, ghi vào
+đơn. Lần hai làm nốt 1.000, ghi tiếp vào đâu? Cùng chỗ đó thì <b>đè mất số của lần một</b>. Muốn giữ cả
+hai thì phải thêm cột “lần thứ mấy” vào <b>mọi</b> bảng rồi <b>nhớ lọc</b> ở mọi câu hỏi — quên một chỗ
+là số sai mà không ai biết. Bản demo đầu tiên đã sai đúng kiểu này <b>năm lần</b>.</p>
+
+<h3>Vì sao “có dòng” cũng là một thông tin</h3>
+<p>Không có cột nào tên kiểu <i>“đã đóng thùng chưa”</i>. Cứ mở quyển sổ đóng thùng ra: <b>tìm thấy dòng của
+lượt này = đã bắt đầu đóng thùng</b>, không thấy = chưa. Giống cái kẹp giấy trên bàn — có tờ trong kẹp là
+có việc.</p>
+<p>Đây là thứ mô hình gộp <b>không làm được</b>: một ô <code>packing_started_at</code> lúc nào cũng tồn
+tại, chỉ khác là rỗng hay không — mà rỗng thì mơ hồ giữa <i>“chưa làm”</i> và <i>“không áp dụng”</i>.</p>
+
+<h2>Ngăn 1 — Bộ khung</h2>
+<div class="drawer">
+  <div class="dhead"><h3>Hai quyển</h3><span class="cnt">2 / 15</span></div>
+<div class="book">
+    <div class="btop"><span class="tab">1</span><span class="bname">Sổ lệnh sản xuất</span>
+      <span class="btech">manufacturing_order</span></div>
+    <p class="bpurpose">Khách đặt gì, bao nhiêu, hạn bao lâu.</p>
+    <div class="bwhy"><b>Số lượng đặt không bao giờ bị sửa.</b> Làm được 9.000 thì không gạch 10.000 đi — gạch rồi thì cuối tháng không ai trả lời được “đơn này khách đặt bao nhiêu”. Kế hoạch và thực tế phải nằm hai chỗ thì mới so được với nhau.<br><br>Nhập sai sau khi Submit thì <b>không sửa và không xoá</b> (§4A) — chuyển sang <code>status = CANCELLED</code> kèm lý do rồi tạo lệnh mới. Lệnh đã huỷ vẫn nằm nguyên.</div>
+    <div class="fields"><span class="f key">id</span><span class="f">code</span><span class="f">product_name</span><span class="f num">quantity</span><span class="f">unit</span><span class="f num">pcs_per_box · quy cách</span><span class="f num">required_production_sec</span><span class="f">status</span><span class="f">created_by</span><span class="f">created_at</span><span class="f">submitted_at</span><span class="f">cancelled_at</span><span class="f">cancelled_by</span><span class="f">cancel_reason_text</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">2</span><span class="bname">Phiếu lượt chạy</span>
+      <span class="btech">mo_round</span></div>
+    <p class="bpurpose">Một lần đơn hàng xuống xưởng. Trục mà mọi thứ khác móc vào.</p>
+    <div class="bwhy"><b>Chín ô, hết.</b> Đây là toàn bộ sự thật ở mức lượt: lần thứ mấy, phải làm bao nhiêu, được bao nhiêu giây, mở lúc nào, đóng lúc nào, trả về bước nào và vì sao. Mọi thứ khác là việc của từng trạm, nằm ở sổ của trạm đó.<br><br>Hai con số đầu được <b>đóng dấu ngay lúc giao việc</b> chứ không tính lại: tính lại thì mỗi lần mở báo cáo ra một số khác — KPI tháng trước sẽ tự đổi khi tháng này chạy thêm.<br><br><code>returned_to_step</code> chỉ nhận hai giá trị vì có đúng hai đường quay lại: <b>3 · Bàn team leader</b> khi thiếu SL hoặc line dừng quá lâu — máy setup đúng, hàng đã qua QC; <b>0 · Kho</b> khi QC FAIL — setup sai thì phải in phiếu mới, chỉnh máy, QC kiểm lại từ gốc.</div>
+    <div class="fields"><span class="f key">id</span><span class="f key">mo_id</span><span class="f num">round_no</span><span class="f num">target_qty</span><span class="f num">required_sec</span><span class="f">opened_at</span><span class="f">closed_at</span><span class="f">returned_to_step</span><span class="f">return_reason_text</span></div>
+  </div>
+</div>
+
+<h2>Ngăn 2 — Năm trạm, năm sổ</h2>
+<p class="lead">Cả năm dùng chung một khuôn: khoá chính <b>chính là</b> khoá ngoại trỏ về lượt chạy. Một
+lượt có đúng một dòng ở mỗi sổ, và <b>có dòng nghĩa là việc đó đã xảy ra</b>.</p>
+<div class="drawer">
+  <div class="dhead"><h3>Năm quyển</h3><span class="cnt">5 / 15</span></div>
+<div class="book">
+    <div class="btop"><span class="tab">3</span><span class="bname">Sổ kho vật tư</span>
+      <span class="btech">warehouse_out</span></div>
+    <p class="bpurpose">Bước 0 · Kho bàn giao hàng xuống xưởng.</p>
+    <div class="bwhy"><b>Hai ô, hết.</b> BRD v2.18 bỏ thao tác <i>In phiếu</i> — Kho quét nhận lệnh xong là bàn giao luôn, bớt một lần bấm cho mỗi MO. Lô 50 lệnh một ca là bớt 50 thao tác, mà cái bấm đó không quyết định điều gì.<br><br>Mốc <i>quét nhận</i> nằm ở sổ đồng hồ từng bước. Quyển này chỉ giữ đúng cái sổ kia không biết: <b>hàng rời kho lúc nào, ai giao</b> — và <b>có dòng nghĩa là đã bàn giao</b>, chưa có dòng thì Setup không nhận được.</div>
+    <div class="fields"><span class="f key">round_id</span><span class="f">handed_over_at</span><span class="f">handed_over_by</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">4</span><span class="bname">Sổ QC</span>
+      <span class="btech">qc_result</span></div>
+    <p class="bpurpose">Bước 2 · kết quả kiểm sau khi setup máy.</p>
+    <div class="bwhy">Đạt hay không đạt, và <b>không đạt thì bắt buộc có lý do</b> — thiếu lý do là cơ sở dữ liệu từ chối ghi, không phải nhắc nhở suông.<br><br><b>Kết quả gắn theo lượt.</b> Sang lượt mới là một dòng mới; kết quả cũ vẫn nằm nguyên ở lượt cũ, không bị xoá, không lẫn sang.</div>
+    <div class="fields"><span class="f key">round_id</span><span class="f">result · PASS|FAIL</span><span class="f">checked_at</span><span class="f">checked_by</span><span class="f key">reason_code_id</span><span class="f">reason_text</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">5</span><span class="bname">Sổ chốt sản xuất</span>
+      <span class="btech">production</span></div>
+    <p class="bpurpose">Bước 4 · nơi chuyền khai ba con số cuối lượt.</p>
+    <div class="bwhy"><b>Ba số phải cộng đúng bằng SL phải làm của lượt.</b> Mỗi cái hàng giao xuống chuyền phải rơi vào đúng một trong ba nhóm: <i>làm ra đạt</i> · <i>làm ra nhưng hỏng</i> · <i>không làm ra được</i>. Tổng lệch nghĩa là có hàng không ai khai — chặn, không cho chốt sổ.<br><br><b>Hỏng và thiếu hỏi lý do riêng</b>, vì là hai chuyện khác nhau: hỏng vì lỗi khuôn, thiếu vì chờ bù liệu. Nhét chung một ô thì mất một nửa câu chuyện.<br><br><b>Chốt một lần rồi thôi.</b> Có dòng rồi thì không sửa được nữa — chốt lại lần hai sẽ đè số cũ mà không để lại dấu vết.</div><div class="bands"><div class="band"><div class="bl">Ví dụ</div><div class="bc">
+      <span class="f num">qty_ok 9.000</span><span class="f num">qty_ng 500</span>
+      <span class="f num">qty_short 500</span><span class="f key">= target_qty 10.000</span>
+    </div></div></div>
+    <div class="fields"><span class="f key">round_id</span><span class="f num">qty_ok</span><span class="f num">qty_ng</span><span class="f num">qty_short</span><span class="f key">ng_reason_code_id</span><span class="f">ng_reason_text</span><span class="f key">short_reason_code_id</span><span class="f">short_reason_text</span><span class="f">closed_at</span><span class="f">closed_by</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">6</span><span class="bname">Sổ đóng thùng</span>
+      <span class="btech">packing</span></div>
+    <p class="bpurpose">Chạy song song với chuyền, trong lúc bước 4 còn đang chạy.</p>
+    <div class="bwhy"><b>Không có ô hàng hỏng</b> — hàng xuống tới đóng thùng là hàng đã đạt, hỏng khai ở sổ chốt sản xuất rồi. Ràng buộc duy nhất về số: không đóng nhiều hơn SL đạt có thật.<br><br><code>note_text</code> là <b>ghi chú tự do</b> (<code>Đủ</code>, <code>thiếu thùng</code>, <code>chờ tem</code>), không gọi là “lý do”: đóng thùng thường chẳng có sự cố gì, gọi vậy khiến người nhập tưởng phải có vấn đề mới được ghi.<br><br><b>Đây là quyển được lợi nhiều nhất khi tách riêng.</b> Đóng thùng chạy song song với chuyền — hai tổ, hai thời điểm. Để chung một dòng với sản xuất thì hai bên ghi đè nhau là rủi ro thật.</div>
+    <div class="fields"><span class="f key">round_id</span><span class="f">started_at</span><span class="f">started_by</span><span class="f num">qty_packed</span><span class="f">note_text</span><span class="f">completed_at</span><span class="f">completed_by</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">7</span><span class="bname">Sổ kho thành phẩm</span>
+      <span class="btech">warehouse_in</span></div>
+    <p class="bpurpose">Bước 5 · kho đếm lại hàng nhận.</p>
+    <div class="bwhy">BRD không bắt kho đếm lại, nhưng đây là <b>chỗ duy nhất phát hiện thất thoát</b> giữa đóng thùng và kho. Có dòng = kho đã đếm; không có dòng = kho nhận theo số đóng thùng.<br><br>Mốc <i>quét nhận</i> và <i>bấm Hoàn thành</i> không nằm ở đây — chúng ở sổ đồng hồ từng bước, cùng chỗ với năm bước còn lại. Lưu hai nơi thì có ngày hai nơi lệch nhau.</div>
+    <div class="fields"><span class="f key">round_id</span><span class="f num">qty_received</span><span class="f">counted_at</span><span class="f">counted_by</span></div>
+  </div>
+</div>
+
+<h2>Ngăn 3 — Nhiều dòng mỗi lượt</h2>
+<div class="drawer">
+  <div class="dhead"><h3>Bốn quyển</h3><span class="cnt">4 / 15</span></div>
+<div class="book">
+    <div class="btop"><span class="tab">8</span><span class="bname">Sổ đồng hồ từng bước</span>
+      <span class="btech">mo_step</span></div>
+    <p class="bpurpose">Mỗi bước trong sáu bước: vào lúc mấy giờ, ra lúc mấy giờ, ai nhận, ai đóng.</p>
+    <div class="bwhy">Sáu bước nhân N lượt nên bắt buộc phải là sổ, không thể là sáu cặp ô trên phiếu.<br><br>Cột đáng giá nhất là <b>ai đóng bước</b>: hệ thống bỏ nút Complete, nên bước N đóng khi <b>bước N+1 quét nhận</b>. Người đóng Setup chính là người của QC. Không ghi thì sau này Setup bảo “tôi xong lâu rồi”, QC bảo “tôi nhận ngay mà”, không ai phân xử được.<br><br><b>Một bước có thể có nhiều dòng — mỗi lượt một dòng.</b> Nhờ vậy trả lời được cả hai câu: <i>“lượt 2 nằm ở Setup bao lâu”</i> (một dòng) và <i>“cả đơn tốn bao nhiêu thời gian ở Setup”</i> (cộng mọi lượt, kèm số lượt). Thiếu cách thứ hai thì đơn qua Setup ba lần vẫn hiện <b>—</b> nếu lượt cuối không qua Setup.<br><br><b>Thêm trạm thứ 7 là thêm một dòng ở đây</b>, chỉ cần nới khoảng số bước.</div>
+    <div class="fields"><span class="f key">id</span><span class="f key">round_id</span><span class="f num">step_no</span><span class="f">accepted_at</span><span class="f">accepted_by</span><span class="f">closed_at</span><span class="f">closed_by</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">9</span><span class="bname">Sổ đoạn chuyền</span>
+      <span class="btech">line_segment</span></div>
+    <p class="bpurpose">Từng quãng một chuyền nằm chờ hoặc thật sự chạy.</p>
+    <div class="bwhy">Chuyền chạy rồi dừng rồi chạy tiếp, ngày mấy lần là chuyện thường — nên <b>mỗi quãng ghi một dòng</b>, như bấm giờ chạy bộ. Chỉ một quyển này trả lời cả ba câu: máy chạy thật sự bao lâu, có đang dừng không, và dừng vì gì.<br><br><b>Mỗi đoạn ghi luôn tên chuyền</b> — đó là cách gộp hai bảng của bản đầy đủ làm một. Nhờ vậy hai luật tự đúng: một MO chạy nhiều chuyền là nhiều dòng cùng lượt khác chuyền; một chuyền ôm nhiều MO là nhiều dòng cùng chuyền khác lượt.<br><br>Một luật ngầm: hai đoạn <code>RUN</code> của <b>cùng một chuyền</b> không được chồng giờ — một máy không thể vừa chạy MO này vừa chạy MO kia trong cùng một phút.</div><div class="tscroll" style="margin:12px 18px 0"><table>
+      <thead><tr><th>kind</th><th>từ</th><th>đến</th><th>lý do</th></tr></thead><tbody>
+      <tr><td>WAIT</td><td class="n">23:10</td><td class="n">23:14</td><td>—</td></tr>
+      <tr><td>RUN</td><td class="n">23:14</td><td class="n">23:36</td><td>—</td></tr>
+      <tr><td>WAIT</td><td class="n">23:36</td><td class="n">23:41</td><td>Hư máy — kẹt cữ đẩy</td></tr>
+      <tr><td>RUN</td><td class="n">23:41</td><td class="n">23:47</td><td>—</td></tr>
+      </tbody></table></div>
+    <div class="bwhy">TG chờ = 4 + 5 = <b>9 phút</b> · TG thực tế = 22 + 6 = <b>28 phút</b>. Bấm Dừng là
+      đồng hồ thực tế đứng ngay, không ai ăn gian được giờ.</div>
+    <div class="fields"><span class="f key">id</span><span class="f key">round_id</span><span class="f key">line_id</span><span class="f">kind · WAIT|RUN</span><span class="f">started_at</span><span class="f">ended_at</span><span class="f key">hold_reason_code_id</span><span class="f">hold_reason_text</span><span class="f">started_by</span><span class="f">ended_by</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">10</span><span class="bname">Sổ sản lượng giờ</span>
+      <span class="btech">hourly_output</span></div>
+    <p class="bpurpose">Mỗi khung giờ: bao nhiêu người đứng, định mức bao nhiêu, ra được bao nhiêu.</p>
+    <div class="bwhy">Ghi <b>theo đơn</b> chứ không theo chuyền: một chuyền chạy hai đơn thì chọn đơn để ghi. Có cột <b>ngày</b> riêng — thiếu nó thì đơn chạy qua đêm không ghi được khung <code>08:00-09:00</code> lần thứ hai.<br><br><b>Ba con số, không phải một</b> (BRD §7.2b). Riêng <code>qty</code> thì 500 cái là nhanh hay chậm không ai biết: cùng 500 cái mà 8 người khác hẳn 20 người, định mức 400 khác hẳn định mức 700. Có <code>headcount</code> và <code>target_qty</code> mới ra được năng suất và phần trăm đạt. Bản ghi cũ hơn hai cột này để <b>NULL</b> — đừng suy ngược một con số vào đó.<br><br><b>Không tác động</b> tới đồng hồ hay KPI. Nó tồn tại để cuối lượt đối chiếu với <code>qty_ok</code> mà chuyền khai — hai nguồn độc lập, lệch nhau là có chuyện.</div>
+    <div class="fields"><span class="f key">id</span><span class="f key">round_id</span><span class="f">work_date</span><span class="f num">slot_hour</span><span class="f num">headcount</span><span class="f num">target_qty</span><span class="f num">qty · thực tế</span><span class="f">note</span><span class="f">recorded_by</span><span class="f">recorded_at</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">15</span><span class="bname">Sổ đóng thùng giờ</span>
+      <span class="btech">packing_hourly</span></div>
+    <p class="bpurpose">Mỗi khung giờ đóng được bao nhiêu <b>thùng đầy</b>. </p>
+    <div class="bwhy"><b>Thùng chỉ là cách ĐẾM; pcs mới là đơn vị gốc.</b> Đơn hàng đặt bằng pcs, xưởng
+      đếm bằng thùng — <code>pcs_per_box</code> là cầu nối duy nhất, và nó được <b>đóng dấu vào từng
+      dòng</b> chứ không đọc sang đơn hàng: quy cách bị sửa một lần là mọi dòng cũ quy ra số khác.<br><br>
+      Chỉ ghi <b>thùng đầy</b>. Hàng chưa đủ thùng nằm trên bàn — <b>đó không phải hàng thiếu</b>, giờ sau
+      gom tiếp, cuối vòng vào thùng lẻ và thùng lẻ vẫn nhập kho được. Số lẻ <b>không có cột</b>: nó bằng
+      <code>đã làm ra − Σ(boxes × pcs_per_box)</code>, suy ra được nên không lưu.<br><br>
+      Tiến độ đơn vẫn đọc <code>packing.qty_packed</code>, không đọc sổ này — hai sổ độc lập để đối soát.</div>
+    <div class="fields"><span class="f key">id</span><span class="f key">round_id</span><span class="f">work_date</span><span class="f num">slot_hour</span><span class="f num">boxes</span><span class="f num">pcs_per_box</span><span class="f">note</span><span class="f">recorded_by</span><span class="f">recorded_at</span></div>
+  </div>
+</div>
+
+<h2>Ngăn 4 — Nhật ký</h2>
+<div class="drawer">
+  <div class="dhead"><h3>Một quyển</h3><span class="cnt">1 / 15</span></div>
+<div class="book">
+    <div class="btop"><span class="tab">11</span><span class="bname">Sổ nhật ký</span>
+      <span class="btech">mo_event</span></div>
+    <p class="bpurpose">Ai bấm gì, lúc nào, chuyển từ trạng thái nào sang trạng thái nào, vì sao.</p>
+    <div class="bwhy"><b>Chỉ được viết thêm — không sửa, không xoá</b>, và đây là quy định đặt ở mức cơ sở dữ liệu chứ không phải lời hứa của phần mềm. Sổ mà sửa được thì khi có tranh chấp, nó không còn giá trị làm bằng chứng.<br><br>Móc vào <b>cả đơn hàng lẫn lượt chạy</b>, và ô lượt chạy <b>được phép rỗng</b>: tạo lệnh, Submit và huỷ lệnh đều xảy ra trước khi có lượt nào — mà đó lại đúng là chỗ hay tranh chấp nhất.</div>
+    <div class="fields"><span class="f key">id</span><span class="f key">mo_id</span><span class="f key">round_id · nullable</span><span class="f num">step_no</span><span class="f">action</span><span class="f">from_state</span><span class="f">to_state</span><span class="f">reason_text</span><span class="f">actor_id</span><span class="f">occurred_at</span></div>
+  </div>
+</div>
+
+<h2>Ngăn 5 — Danh mục</h2>
+<div class="drawer">
+  <div class="dhead"><h3>Ba quyển dán trên tường</h3><span class="cnt">3 / 15</span></div>
+<div class="book">
+    <div class="btop"><span class="tab">12</span><span class="bname">Sổ người</span>
+      <span class="btech">app_user</span></div>
+    <p class="bpurpose">Ai là ai, giữ những vai gì.</p>
+    <div class="bwhy">Vai trò để dạng <b>danh sách trong một ô</b> — một người kiêm hai phòng ban là chuyện bình thường ở xưởng nhỏ.<br><br><b>Đây là nửa dữ liệu của mô hình RBAC:</b> ô <code>roles[]</code> chính là <i>gán người vào vai</i>, còn <i>gán vai vào quyền</i> nằm trong code. Sáu phòng ban, mỗi phòng hai cấp Leader và Member, cộng PLANNER là <b>13 vai</b> — chi tiết ở mục <a href="#phanquyen">Phân quyền</a>.<br><br>Quyền vẫn kiểm ở tầng ứng dụng chứ chưa <code>GRANT</code> theo bảng — nhưng vì mỗi sổ trạm đã là một bảng độc lập nên <b>siết lúc nào cũng được</b>.<br><br><code>pin_hash</code> là bcrypt của mã PIN. Rỗng = tài khoản chưa đặt PIN, không đăng nhập được.</div>
+    <div class="fields"><span class="f key">id</span><span class="f">full_name</span><span class="f">emp_code</span><span class="f">pin_hash</span><span class="f">roles[]</span><span class="f">is_active</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">13</span><span class="bname">Sổ lý do</span>
+      <span class="btech">reason_code</span></div>
+    <p class="bpurpose">Danh sách chọn sẵn: Hư máy · Hết liệu · Lỗi khuôn · Đổi ca…</p>
+    <div class="bwhy">Để gõ tay thì “hư máy”, “Hư Máy”, “hưmáy!!” thành ba lý do khác nhau — cuối tháng muốn biết <b>tháng này dừng vì hư máy mấy lần</b> là không đếm nổi. Chọn từ danh sách thì đếm được ngay, và đó mới là thứ giúp xưởng sửa được nguyên nhân.<br><br>Mỗi lý do vẫn đi kèm <b>một ô chữ tự do</b> ở bảng dùng nó, vì danh mục không bao giờ phủ hết mọi tình huống.</div>
+    <div class="fields"><span class="f key">id</span><span class="f">group_code · HOLD|NG|SHORT|QC</span><span class="f">name</span><span class="f">is_active</span></div>
+  </div>
+<div class="book">
+    <div class="btop"><span class="tab">14</span><span class="bname">Sổ chuyền</span>
+      <span class="btech">line</span></div>
+    <p class="bpurpose">L01 đến L14.</p>
+    <div class="bwhy">Đánh số cứng trong phần mềm thì thêm chuyền thứ 15 phải sửa phần mềm. Để là sổ thì thêm một dòng là xong.</div>
+    <div class="fields"><span class="f key">id</span><span class="f">code · L01</span><span class="f">name</span><span class="f">is_active</span></div>
+  </div>
+</div>
+
+<h2>Thêm một trạm về sau — đúng ba việc</h2>
+<p class="lead">Đây là lý do chính để tách năm sổ trạm ra. Giả sử khách yêu cầu <b>kiểm kích thước</b>
+trước khi nhập kho:</p>
+
+<pre><span class="cm">-- 1. Nới số bước: 0..5 thành 0..6</span>
+ALTER TABLE mo_step DROP CONSTRAINT mo_step_step_no_check;
+ALTER TABLE mo_step ADD  CONSTRAINT mo_step_step_no_check CHECK (step_no BETWEEN 0 AND 6);
+
+<span class="cm">-- 2. Sổ riêng cho trạm mới — KHÔNG đụng bảng nào đang có dữ liệu</span>
+CREATE TABLE dimension_check (
+  round_id   uuid PRIMARY KEY REFERENCES mo_round(id) ON DELETE CASCADE,
+  checked_at timestamptz NOT NULL DEFAULT now(),
+  checked_by uuid NOT NULL REFERENCES app_user(id),
+  result     qc_verdict NOT NULL,
+  sample_qty int NOT NULL CHECK (sample_qty &gt; 0),
+  defect_qty int NOT NULL CHECK (defect_qty &gt;= 0),
+  CHECK (defect_qty &lt;= sample_qty)
+);
+
+<span class="cm">-- 3. Thêm cột vào view của màn hình cần</span>
+CREATE OR REPLACE VIEW v_round_board AS SELECT … LEFT JOIN dimension_check d ON …;</pre>
+
+<div class="callout">
+  <p><b>Lượt chạy cũ không có dòng trong bảng mới</b> — và đó chính là câu trả lời đúng: <i>“lượt đó chạy
+  từ thời chưa có trạm này”</i>.</p>
+  <p>Nếu đắp thêm cột vào bảng chính thì mọi lượt cũ <b>mọc thêm ô rỗng vĩnh viễn</b>, và không ai phân
+  biệt được <i>“chưa kiểm”</i> với <i>“thời đó không có trạm này”</i>.</p>
+</div>
+
+<h2>Luật lệ nằm ở đâu</h2>
+<p class="lead">Mọi ràng buộc của BRD đều có chỗ đứng cụ thể. Phần lớn là <code>CHECK</code> — cơ sở dữ
+liệu tự từ chối ghi, không cần phần mềm nhớ.</p>
+
+<div class="tscroll"><table>
+<thead><tr><th>Luật trong BRD</th><th>Đứng ở đâu</th></tr></thead>
+<tbody>
+<tr><td>§2.2 mã <code>M</code> + 6 chữ số</td><td><code>CHECK (code ~ '^M[0-9]{6}$')</code></td></tr>
+<tr><td>§2.3 huỷ lệnh kèm lý do</td><td><code>CHECK</code> trên sổ lệnh</td></tr>
+<tr><td>§4A khoá cứng sau Submit</td><td>trigger <code>mo_lock_after_submit</code></td></tr>
+<tr><td>§3 bàn giao là bước duy nhất ở Kho</td><td>có dòng <code>warehouse_out</code> = đã bàn giao</td></tr>
+<tr><td>§5 QC FAIL cần lý do</td><td><code>CHECK</code> trong <code>qc_result</code></td></tr>
+<tr><td>§6b mỗi đơn một lượt đang mở</td><td>chỉ mục duy nhất một phần trên <code>mo_round</code></td></tr>
+<tr><td>§7.5 ba số cộng bằng mục tiêu lượt</td><td>trigger <code>production_balances</code></td></tr>
+<tr><td>§7.5 hai lý do riêng</td><td>hai <code>CHECK</code> trong <code>production</code></td></tr>
+<tr><td>§7.5 chốt sổ một lần</td><td><code>RULE</code> chặn sửa <code>production</code></td></tr>
+<tr><td>§7b đóng thùng không vượt SL đạt</td><td>trigger <code>packing_within_ok</code></td></tr>
+<tr><td>§7.2b mỗi khung giờ mỗi ngày một lần</td><td>duy nhất <code>(round_id, work_date, slot_hour)</code></td></tr>
+<tr><td>§14B một chuyền nhiều MO</td><td><b>không</b> đặt ràng buộc duy nhất trên <code>line_id</code></td></tr>
+<tr><td>§17 dừng máy bắt buộc ghi lý do</td><td><code>CHECK</code> trên sổ đoạn chuyền</td></tr>
+<tr><td>§21A KPI lấy chuyền chậm nhất</td><td>view <code>v_round_kpi</code></td></tr>
+<tr><td>§25A nhật ký không sửa không xoá</td><td>thu hồi quyền + hai <code>RULE</code></td></tr>
+<tr><td>— một chuyền không chạy hai MO cùng lúc</td><td>ràng buộc không chồng giờ trên đoạn <code>RUN</code></td></tr>
+</tbody></table></div>
+
+
+<h2 id="phanquyen">Phân quyền — mô hình RBAC</h2>
+<p class="lead">Người <b>không</b> nhận quyền trực tiếp. Người nhận <b>vai</b>, vai mới mang <b>quyền</b>.
+Hai lớp gán rời nhau: đổi việc của một người thì đổi vai, đổi luật của cả một phòng ban thì đổi quyền
+của vai — hai thao tác không đụng nhau.</p>
+
+<figure>
+<svg class="erd" viewBox="0 0 880 300" role="img"
+     aria-label="Chuỗi phân quyền: bảng app_user gán người vào vai qua cột roles, bảng luật trong code gán vai vào quyền là cặp trạm và mức, rồi router chặn ghi vào năm sổ trạm.">
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <g fill="none" stroke="currentColor" stroke-width="1.3" color="var(--line-strong)">
+    <rect x="20" y="56" width="150" height="76" rx="6" fill="var(--surface)"/>
+    <rect x="300" y="56" width="170" height="76" rx="6" fill="var(--surface)"/>
+    <rect x="600" y="56" width="260" height="76" rx="6" fill="var(--surface)"/>
+    <rect x="300" y="212" width="560" height="66" rx="6" fill="var(--surface)"/>
+  </g>
+  <g font-family="IBM Plex Sans, sans-serif" fill="var(--ink)" text-anchor="middle">
+    <text x="95" y="88" font-size="13" font-weight="600">NGƯỜI</text>
+    <text x="95" y="107" font-size="11.5" fill="var(--ink-2)">bảng app_user</text>
+    <text x="95" y="123" font-size="11" fill="var(--ink-3)">trong CSDL</text>
+
+    <text x="385" y="88" font-size="13" font-weight="600">VAI</text>
+    <text x="385" y="107" font-size="11.5" fill="var(--ink-2)">13 vai</text>
+    <text x="385" y="123" font-size="11" fill="var(--ink-3)">hằng trong code</text>
+
+    <text x="730" y="88" font-size="13" font-weight="600">QUYỀN</text>
+    <text x="730" y="107" font-size="11.5" fill="var(--ink-2)">cặp (trạm, mức)</text>
+    <text x="730" y="123" font-size="11" fill="var(--ink-3)">full = ghi · view = chỉ xem</text>
+
+    <text x="580" y="240" font-size="12.5" font-weight="600">NĂM SỔ TRẠM</text>
+    <text x="580" y="261" font-size="11.5" fill="var(--ink-2)">warehouse_out · qc_result · production · packing · warehouse_in</text>
+  </g>
+  <g fill="none" stroke="currentColor" stroke-width="1.3" color="var(--accent)">
+    <path d="M170 94 L300 94" marker-end="url(#ar)"/>
+    <path d="M470 94 L600 94" marker-end="url(#ar)"/>
+    <path d="M730 132 L730 212" marker-end="url(#ar)"/>
+  </g>
+  <g font-family="IBM Plex Mono, monospace" text-anchor="middle" fill="var(--accent)">
+    <text x="235" y="84" font-size="11">gán người vào vai</text>
+    <text x="235" y="114" font-size="11" fill="var(--ink-3)">roles[]</text>
+    <text x="535" y="84" font-size="11">gán vai vào quyền</text>
+    <text x="535" y="114" font-size="11" fill="var(--ink-3)">bảng luật · một chỗ</text>
+    <text x="730" y="176" font-size="11">chặn ở router</text>
+    <text x="730" y="194" font-size="11" fill="var(--ink-3)">require_step()</text>
+  </g>
+</svg>
+<figcaption>Chỉ mũi tên đầu nằm trong CSDL — đổi vai của một người là một câu <code>UPDATE</code>. Hai
+mũi tên sau nằm trong code: <b>toàn bộ luật ở đúng một bảng</b>, nên thêm một phòng ban là thêm một
+dòng, không phải sửa ba mươi endpoint.</figcaption>
+</figure>
+
+<h3>Ma trận quyền</h3>
+<p>Sáu phòng ban, mỗi phòng phụ trách một trạm, mỗi phòng hai cấp <b>Leader</b> và <b>Member</b> —
+<b>hiện quyền y hệt nhau</b>. Cộng <b>PLANNER</b> là 13 vai.</p>
+
+<div class="tscroll"><table>
+<thead><tr><th>Phòng ban</th><th>Trạm</th><th>Trạm của mình</th><th>Trạm 4 · Sản xuất + Đóng thùng</th><th>Trạm khác</th><th>Ghi được sổ nào</th></tr></thead>
+<tbody>
+<tr><td><b>Kho xuất</b> · kho vật tư</td><td class="n">0</td><td>Full</td><td>View</td><td>—</td><td><code>warehouse_out</code></td></tr>
+<tr><td><b>Setup</b></td><td class="n">1</td><td>Full</td><td>View</td><td>—</td><td><code>mo_step</code> trạm 1</td></tr>
+<tr><td><b>QC</b></td><td class="n">2</td><td>Full</td><td>View</td><td>—</td><td><code>qc_result</code></td></tr>
+<tr><td><b>Bàn team leader</b></td><td class="n">3</td><td>Full</td><td><b>FULL</b></td><td>—</td><td><code>mo_step</code> trạm 3 · <b>và cả sổ trạm 4</b></td></tr>
+<tr><td><b>Sản xuất</b> · gồm Đóng thùng</td><td class="n">4</td><td>Full</td><td><i>chính nó</i></td><td>—</td><td><code>production</code> · <code>packing</code> · <code>hourly_output</code> · <code>line_segment</code></td></tr>
+<tr><td><b>Kho nhập</b> · kho thành phẩm</td><td class="n">5</td><td>Full</td><td>View</td><td>—</td><td><code>warehouse_in</code></td></tr>
+<tr><td><b>PLANNER</b></td><td>—</td><td colspan="3"><b>Full mọi trạm</b></td><td><code>mo</code> · <code>mo_round</code> · và mọi sổ</td></tr>
+</tbody></table></div>
+
+<p><b>Đóng thùng không phải một trạm riêng.</b> Nó nằm <b>trong trạm 4</b> — thuộc phòng Sản xuất, chạy
+song song với chuyền. Nên cột <i>Trạm 4</i> ở trên phủ <b>cả hai sổ</b> <code>production</code> và
+<code>packing</code>: ai <b>ghi</b> được trạm 4 thì ghi được cả đóng thùng, ai chỉ <b>xem</b> được trạm 4
+thì <b>cũng xem được số đóng thùng</b>. Kho nhập cần con số đó để biết sắp nhận bao nhiêu; QC và Setup cần
+để biết lô mình làm đã ra thành phẩm chưa.</p>
+
+<p><b>Hai chỗ dễ đọc sai.</b> <i>Bảng đang chạy</i> thì phòng nào cũng xem được — nó là bảng tổng quan
+của cả xưởng; cái bị giới hạn là màn hình thao tác của từng trạm. Và <b>Bàn team leader có full quyền trạm 4</b>,
+kể cả Đóng thùng — đây là ô duy nhất trong ma trận không theo quy tắc chung.</p>
+
+<h3>Vì sao hai kho phải là hai vai</h3>
+<div class="callout">
+  <p><b>Kho xuất (trạm 0) và Kho nhập (trạm 5) là hai kho vật lý khác nhau</b> — hai toà nhà, hai tổ
+  người. Kho xuất giữ vật tư và bán thành phẩm, hàng đi <b>ra</b>; kho nhập giữ thành phẩm đã đóng thùng,
+  hàng đi <b>vào</b>.</p>
+  <p>Gộp chung một vai thì người giao vật tư <b>tự nhận luôn thành phẩm của chính lô mình giao</b> —
+  mất hẳn lớp đối soát giữa đầu vào và đầu ra của xưởng. RBAC gọi đây là <b>tách trách nhiệm</b>
+  <i>(separation of duties)</i>, và cách hiện thực đúng là hai vai rời, không vai nào bao vai nào.</p>
+  <p>Một người <b>vẫn kiêm được hai kho</b> nếu xưởng nhỏ — gán cả hai vai. Nhưng đó phải là quyết định
+  có chủ ý của người quản lý, không phải hệ quả của việc hệ thống không phân biệt nổi hai kho.</p>
+</div>
+
+<h3>Đặt bảng luật ở đâu</h3>
+<div class="two">
+  <div class="panel good">
+    <h4>Vì sao để trong code</h4>
+    <ul>
+      <li>Sáu phòng ban <b>cố định</b>, ma trận đổi hoạ hoằn một năm một lần.</li>
+      <li>Luật đi cùng phiên bản code — được lint soi, được test gọi thẳng.</li>
+      <li>Thêm phòng ban thứ bảy là <b>thêm một dòng</b>, danh sách vai tự dài ra.</li>
+    </ul>
+  </div>
+  <div class="panel cost">
+    <h4>Khi nào chuyển xuống CSDL</h4>
+    <ul>
+      <li>Nhiều xưởng, mỗi nơi một luật khác nhau.</li>
+      <li>Khách muốn <b>tự sửa quyền</b> trên màn hình quản trị.</li>
+      <li>Quyền tới từng dòng dữ liệu — <i>“chỉ xem MO của chuyền mình”</i>.</li>
+    </ul>
+  </div>
+</div>
+<p>Cả ba trường hợp đó chỉ phải đổi <b>nguồn của bảng luật</b>, vì mọi endpoint đều hỏi chung một hàm.
+Đó là lý do phải có <i>một</i> chỗ ra quyết định, thay vì rải câu lệnh kiểm tra khắp ba mươi endpoint.</p>
+<p><b>Chưa dùng thư viện RBAC.</b> Toàn bộ luật gói trong khoảng ba mươi dòng; kéo <code>casbin</code>
+hay <code>oso</code> vào thì đổi lấy một cú pháp phải học, hai file cấu hình nằm ngoài code, và thêm một
+lớp phải mò khi phân quyền chạy sai.</p>
+
+<div class="callout">
+  <p><b>Đã vào code — 2026-09-14.</b> Bảng quyền ở <code>app/common/security/permissions.py</code>, thi hành bằng
+  <code>Actor.require_step()</code> ở 8 router, migration <code>0004_roles</code> đổi
+  <code>app_user.roles</code> từ 7 vai phẳng sang 13 vai. 101 test xanh, trong đó có một ca duyệt
+  <b>mọi</b> endpoint và bắt lỗi quên gác.</p>
+  <p>Hai việc <b>phải làm tay</b> trước khi chạy thật, vì dữ liệu cũ không nói: gán
+  <code>WAREHOUSE_IN_*</code> cho người ở kho thành phẩm (migration đổi hết thành kho vật tư), và nâng
+  vài người lên <code>*_LEADER</code>. Lý do và các bước ở <code>docs/KE-HOACH-PHAN-QUYEN.md</code>.</p>
+</div>
+
+<h2>Đổi lấy cái gì</h2>
+<div class="two">
+  <div class="panel good">
+    <h4>Được</h4>
+    <ul>
+      <li><b>Thêm trạm là mở sổ mới</b>, không sửa sổ đang dùng. Đây là lý do chính.</li>
+      <li><b>“Có dòng = đã xảy ra”</b> — rõ hơn hẳn một ô lúc nào cũng tồn tại nhưng thường rỗng.</li>
+      <li><b>Phân quyền theo sổ.</b> Tổ đóng thùng chỉ được ghi sổ đóng thùng, không đụng được số của chuyền.</li>
+      <li><b>Đóng thùng và sản xuất không giẫm chân nhau</b> — hai tổ ghi hai sổ khác nhau, đúng như §7b cho
+        chúng chạy song song.</li>
+      <li><b>Mỗi sổ nhỏ và đọc được.</b> Quyển to nhất 10 ô.</li>
+    </ul>
+  </div>
+  <div class="panel cost">
+    <h4>Mất</h4>
+    <ul>
+      <li><b>Hai ràng buộc đối soát thành trigger</b> thay vì <code>CHECK</code>, vì số nằm ở hai sổ khác
+        nhau: ba số cộng bằng mục tiêu lượt, và đóng thùng không vượt SL đạt.</li>
+      <li><b>Câu truy vấn dài hơn</b> — mỗi màn hình phải nối 3-4 sổ. Đã gói sẵn vào view
+        <code>v_round_board</code> nên ứng dụng vẫn đọc một dòng như cũ.</li>
+      <li><b>14 quyển thay vì 9</b> — nhiều hơn để nhớ, dù mỗi quyển đơn giản hơn.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="callout q">
+  <p><b>Hai câu hỏi mở ở §10 BRD chạm thẳng vào thiết kế này:</b></p>
+  <p><b>#26 phân quyền</b> — <b>đã chốt</b> ở BRD v2.20: sáu phòng ban, 13 vai, mô hình RBAC.
+  Xem mục <a href="#phanquyen">Phân quyền</a>.<br>
+  <b>#38 bỏ ô nhập SL ở Đóng thùng</b> — bỏ được thì <code>qty_packed</code> thành số tính từ
+  <code>qty_ok</code>, sổ đóng thùng còn đúng bốn ô.</p>
+</div>
+
+</div>
+
+<footer><div class="wrap">
+  <p>DDL đầy đủ ở <code>DB-GON.md</code> · đối chiếu <code>BRD-v2-chot.md</code> v2.20 và
+     <code>demo/mes-v2-console.html</code> v38. Bản 19 bảng vẫn giữ nguyên ở
+     <code>demo/db-model.html</code>.</p>
+</div></footer>
+
+<script>
+(function(){
+  var svg = document.getElementById('erd');
+  if(!svg) return;
+  var ents  = Array.prototype.slice.call(svg.querySelectorAll('.ent'));
+  var edges = Array.prototype.slice.call(svg.querySelectorAll('.edge'));
+
+  /* bấm để mở/đóng — mở thì vẽ đè lên trên cho khỏi bị hộp dưới che */
+  ents.forEach(function(g){
+    g.addEventListener('click', function(){
+      var open = g.classList.toggle('open');
+      var h = +g.dataset[open ? 'hf' : 'hc'];
+      g.querySelector('.ebox').setAttribute('height', h);
+      var yy = (+g.dataset.y) + h;
+      Array.prototype.forEach.call(g.querySelectorAll('.egut, .edivider'), function(l){
+        l.setAttribute('y2', yy);
+      });
+      if(open) svg.appendChild(g);
+    });
+  });
+
+  /* rê chuột để soi bảng liên quan */
+  function clear(){
+    svg.classList.remove('dimmed');
+    Array.prototype.forEach.call(svg.querySelectorAll('.hot'), function(x){
+      x.classList.remove('hot');
+    });
+  }
+  function focusOn(g){
+    clear();
+    svg.classList.add('dimmed');
+    g.classList.add('hot');
+    var id = g.dataset.id;
+    edges.forEach(function(e){
+      if(e.dataset.a !== id && e.dataset.b !== id) return;
+      e.classList.add('hot');
+      var other = e.dataset.a === id ? e.dataset.b : e.dataset.a;
+      var o = svg.querySelector('.ent[data-id="' + other + '"]');
+      if(o) o.classList.add('hot');
+    });
+  }
+  ents.forEach(function(g){
+    g.addEventListener('mouseenter', function(){ focusOn(g); });
+    g.addEventListener('mouseleave', clear);
+  });
+})();
+</script>
