@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
+import { Table } from "@/components/common/PhosphorIcons";
 import { RunningTable } from "@/components/board/RunningTable";
 import { ProductionWorkspace } from "@/components/production/ProductionWorkspace";
 import { QueueList } from "@/components/scan/QueueList";
@@ -89,7 +90,13 @@ function ProductionBody() {
                 title="Chọn lệnh để làm"
                 action={(r) =>
                   !canWrite ? null : (
-                    <AppButton size="md" variant="primary" onClick={() => open(r.code)}>
+                    <AppButton
+                      size="md"
+                      variant="primary"
+                      compact
+                      icon={<Table size={22} />}
+                      onClick={() => open(r.code)}
+                    >
                       Mở bảng
                     </AppButton>
                   )

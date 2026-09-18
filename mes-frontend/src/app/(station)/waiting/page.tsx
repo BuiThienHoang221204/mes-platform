@@ -29,7 +29,13 @@ function WaitingBody() {
               station={STATION}
               title="Đang giữ — chờ chia chuyền"
               action={() => (
-                <AppButton size="md" variant="primary" icon={<Factory size={24} />}>
+                <AppButton
+                  size="md"
+                  variant="primary"
+                  compact
+                  aria-label="Sang Sản xuất"
+                  icon={<Factory size={24} />}
+                >
                   <a href="/production">Sang Sản xuất</a>
                 </AppButton>
               )}

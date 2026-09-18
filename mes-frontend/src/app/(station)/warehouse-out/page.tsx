@@ -36,6 +36,7 @@ function WarehouseOutBody() {
       <AppButton
         size="md"
         variant="primary"
+        compact
         disabled={handover.isPending}
         onClick={() => handover.mutate(r.code)}
         icon={<Truck size={24} />}

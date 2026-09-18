@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { Pause, Play, SealCheck } from "@/components/common/PhosphorIcons";
+import { Factory, Pause, Play, SealCheck } from "@/components/common/PhosphorIcons";
 import { HoldLineModal } from "@/components/production/HoldLineModal";
 import { AppButton } from "@/components/ui/AppButton";
 import { FULL } from "@/constants/roles";
@@ -35,7 +35,13 @@ export function RunningActions({ row }: { row: RunningRow }) {
 
   if (!lines.length) {
     return (
-      <AppButton size="sm" variant="primary" onClick={openWork}>
+      <AppButton
+        size="sm"
+        variant="primary"
+        compact
+        onClick={openWork}
+        icon={<Factory size={18} />}
+      >
         Chia chuyền
       </AppButton>
     );
@@ -46,6 +52,7 @@ export function RunningActions({ row }: { row: RunningRow }) {
       <AppButton
         size="sm"
         variant="primary"
+        compact
         disabled={busy}
         onClick={() => held.forEach((l) => a.start.mutate(l.line_code))}
         icon={<Play size={18} weight="fill" />}
@@ -60,6 +67,7 @@ export function RunningActions({ row }: { row: RunningRow }) {
       <AppButton
         size="sm"
         variant="primary"
+        compact
         disabled={busy}
         onClick={() => idle.forEach((l) => a.start.mutate(l.line_code))}
         icon={<Play size={18} weight="fill" />}
@@ -75,7 +83,8 @@ export function RunningActions({ row }: { row: RunningRow }) {
         {idle.length ? (
           <AppButton
             size="sm"
-            className="min-w-32"
+            compact
+            className="sm:min-w-32"
             disabled={busy}
             onClick={() => idle.forEach((l) => a.start.mutate(l.line_code))}
             icon={<Play size={18} weight="fill" />}
@@ -86,7 +95,8 @@ export function RunningActions({ row }: { row: RunningRow }) {
         <AppButton
           size="sm"
           variant="danger"
-          className="min-w-32"
+          compact
+          className="sm:min-w-32"
           disabled={busy}
           onClick={() => setHoldOpen(true)}
           icon={<Pause size={18} weight="fill" />}
@@ -96,7 +106,8 @@ export function RunningActions({ row }: { row: RunningRow }) {
         <AppButton
           size="sm"
           variant="primary"
-          className="min-w-32"
+          compact
+          className="sm:min-w-32"
           disabled={idle.length > 0}
           title={idle.length ? "Còn chuyền chưa vào Đang lắp ráp" : undefined}
           onClick={openWork}

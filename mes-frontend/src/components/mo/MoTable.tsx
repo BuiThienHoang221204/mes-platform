@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { AppButton } from "@/components/ui/AppButton";
 import { AppCard } from "@/components/ui/AppCard";
-import { CheckSquare } from "@/components/common/PhosphorIcons";
+import { CheckSquare, SealCheck, XCircle } from "@/components/common/PhosphorIcons";
 import { AppDropdown, type DropdownOption } from "@/components/ui/AppDropdown";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
@@ -124,6 +124,8 @@ export function MoTable({ status, onStatus }: Props) {
             <AppButton
               size="sm"
               variant="primary"
+              compact
+              icon={<SealCheck size={18} />}
               disabled={submit.isPending}
               onClick={() => submit.mutate(m.code)}
             >
@@ -134,6 +136,8 @@ export function MoTable({ status, onStatus }: Props) {
             <AppButton
               size="sm"
               variant="danger"
+              compact
+              icon={<XCircle size={18} />}
               disabled={cancel.isPending}
               onClick={() => {
                 const reason = window.prompt("Lý do huỷ lệnh?");

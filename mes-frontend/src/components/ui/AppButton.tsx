@@ -23,6 +23,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   size?: Size;
   block?: boolean;
   icon?: ReactNode;
+  compact?: boolean;
 };
 
 export function AppButton({
@@ -30,26 +31,35 @@ export function AppButton({
   size = "lg",
   block,
   icon,
+  compact,
   className = "",
   children,
   disabled,
+  title,
+  "aria-label": ariaLabel,
   ...rest
 }: Props) {
+  const iconOnly = Boolean(compact && icon);
+  const asText = typeof children === "string" ? children : undefined;
+
   return (
     <button
       {...rest}
       disabled={disabled}
+      title={title ?? (iconOnly ? asText : undefined)}
+      aria-label={ariaLabel ?? (iconOnly ? asText : undefined)}
       className={[
         "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-field border font-medium transition-colors",
         VARIANT[variant],
         SIZE[size],
+        iconOnly ? "max-sm:gap-0 max-sm:px-2.5" : "",
         block ? "w-full" : "",
         disabled ? "cursor-not-allowed opacity-45" : "",
         className,
       ].join(" ")}
     >
       {icon ? <span className="flex shrink-0 items-center">{icon}</span> : null}
-      {children}
+      {iconOnly ? <span className="max-sm:hidden">{children}</span> : children}
     </button>
   );
 }
