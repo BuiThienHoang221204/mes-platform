@@ -44,13 +44,16 @@ export function BarRow({
   const scale = max > 0 ? 100 / max : 0;
 
   return (
-    <div className="grid grid-cols-[minmax(7rem,11rem)_1fr_auto] items-center gap-3" title={title}>
-      <div className="min-w-0">
+    <div
+      className="grid grid-cols-[1fr_auto] items-center gap-x-3 gap-y-1.5 sm:grid-cols-[minmax(7rem,11rem)_1fr_auto] sm:gap-y-0"
+      title={title}
+    >
+      <div className="order-1 min-w-0">
         <div className="truncate text-body-sm font-semibold text-fg">{label}</div>
         {sub ? <div className="truncate text-caption text-fg-subtle">{sub}</div> : null}
       </div>
 
-      <div className="relative h-5 rounded-r-xs bg-surface-3">
+      <div className="relative order-3 col-span-2 h-5 rounded-r-xs bg-surface-3 sm:order-2 sm:col-span-1">
         <div
           className="rise-x flex h-full overflow-hidden rounded-r-xs"
           style={{
@@ -80,7 +83,7 @@ export function BarRow({
         ))}
       </div>
 
-      <div className="whitespace-nowrap text-right text-body-sm tnum text-fg">{value}</div>
+      <div className="order-2 whitespace-nowrap text-right text-body-sm tnum text-fg sm:order-3">{value}</div>
     </div>
   );
 }

@@ -43,7 +43,7 @@ export function DateRangePicker({ label = "Khung thời gian", value, onChange }
     <div
       ref={menu}
       style={{ top: spot.top, left: spot.left, width: spot.width }}
-      className="fixed z-50 overflow-hidden rounded-card border border-line bg-surface shadow-lg"
+      className="fixed z-[70] overflow-hidden rounded-card border border-line bg-surface shadow-lg"
     >
       <ul className="py-1">
         {PRESETS.map((p) => (

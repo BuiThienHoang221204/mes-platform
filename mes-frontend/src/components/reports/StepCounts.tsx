@@ -38,7 +38,7 @@ export function StepCounts() {
       title="MO theo giai đoạn"
       meta="giữ đúng thứ tự quy trình 0 → 5"
       controls={
-        <div className="w-56 shrink-0">
+        <div className="w-full shrink-0 sm:w-56">
           <DateRangePicker label="Ngày tạo lệnh" value={range} onChange={setRange} />
         </div>
       }

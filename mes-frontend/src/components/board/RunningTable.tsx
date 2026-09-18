@@ -114,7 +114,7 @@ export function RunningTable({
   });
 
   return (
-    <div className={fill ? "flex min-h-0 flex-1 flex-col" : ""}>
+    <div className={fill ? "flex flex-col lg:min-h-0 lg:flex-1" : ""}>
       <DataTable columns={columns} rows={body} pad="lg" nowrap fill={fill} />
       <Pager
         offset={offset}

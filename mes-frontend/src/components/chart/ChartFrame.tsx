@@ -56,9 +56,9 @@ export function ChartFrame({
     <AppCard
       title={title}
       meta={meta}
-      className={fill ? "flex min-h-0 flex-1 flex-col" : ""}
+      className={fill ? "flex flex-col lg:min-h-0 lg:flex-1" : ""}
       bodyClassName={
-        fill ? `flex min-h-0 flex-1 flex-col ${scroll ? "overflow-y-auto" : ""}` : ""
+        fill ? `flex flex-col lg:min-h-0 lg:flex-1 ${scroll ? "lg:overflow-y-auto" : ""}` : ""
       }
       actions={
         <>
@@ -77,7 +77,7 @@ export function ChartFrame({
     >
 
       {legend?.length ? (
-        <ul className="mb-4 flex shrink-0 flex-wrap gap-4 text-body-sm text-fg-muted">
+        <ul className="mb-4 flex shrink-0 flex-wrap gap-x-4 gap-y-2 text-body-sm text-fg-muted">
           {legend.map((k) => (
             <li key={k.label} className="flex items-center gap-2">
               <span className="h-3 w-3 rounded-xs" style={{ background: k.color }} aria-hidden />
@@ -87,7 +87,7 @@ export function ChartFrame({
         </ul>
       ) : null}
 
-      <div className={fill ? `flex flex-col ${scroll ? "shrink-0" : "min-h-0 flex-1"}` : ""}>
+      <div className={fill ? `flex flex-col ${scroll ? "lg:shrink-0" : "lg:min-h-0 lg:flex-1"}` : ""}>
         {error ? (
           <ErrorState error={error} onRetry={onRetry} />
         ) : isLoading ? (

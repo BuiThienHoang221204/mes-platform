@@ -38,7 +38,10 @@ export function ScanFeedback({ station }: { station: number }) {
   return (
     <div className="flex items-start gap-3 rounded-field bg-surface-2 px-4 py-3 text-body-sm text-fg-muted">
       <QrCode size={22} className="shrink-0" />
-      <span>Đưa mã QR vào đầu đọc, hoặc bấm một dòng trong hàng đợi để nạp mã.</span>
+      <span>
+        Đưa mã QR vào đầu đọc là nhận lệnh luôn. Bấm một dòng trong hàng đợi thì chỉ nạp mã vào
+        ô — bấm Nhận mới ghi sổ.
+      </span>
     </div>
   );
 }

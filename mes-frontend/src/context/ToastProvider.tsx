@@ -21,7 +21,7 @@ export function ToastHost() {
   if (!toasts.length) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-50 flex flex-col items-center gap-2 px-4">
+    <div className="pointer-events-none fixed inset-x-0 top-[calc(1rem+env(safe-area-inset-top))] z-[80] flex flex-col items-center gap-2 px-4">
       {toasts.map((t) => (
         <button
           key={t.id}

@@ -2,7 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation";
 
-import { CaretRight } from "@/components/common/PhosphorIcons";
+import { CaretRight, List } from "@/components/common/PhosphorIcons";
 import { FactoryClock } from "@/components/common/FactoryClock";
 import { ThemeToggle } from "@/components/common/ThemeToggle";
 import { PLANNER_STEPS } from "@/constants/plannerSteps";
@@ -32,22 +32,44 @@ function useCrumb(): string[] {
   return [];
 }
 
-export function AppTopbar() {
+type Props = {
+  onMenu?: () => void;
+};
+
+const ICON_BTN =
+  "flex h-11 w-11 shrink-0 items-center justify-center rounded-field text-fg-muted hover:bg-surface-2 hover:text-fg";
+
+export function AppTopbar({ onMenu }: Props) {
   const crumb = useCrumb();
 
   return (
-    <header className="flex shrink-0 items-center gap-3 border-b border-line bg-surface px-6 py-2.5">
-      <nav className="flex min-w-0 items-center gap-2 text-body-sm">
+    <header className="sticky top-0 z-30 flex shrink-0 items-center gap-2 border-b border-line bg-surface px-2 pb-3 pt-[calc(0.75rem+env(safe-area-inset-top))] sm:px-4 lg:static lg:z-auto lg:gap-3 lg:px-6 lg:py-2.5">
+      <button
+        type="button"
+        onClick={onMenu}
+        aria-label="Mở điều hướng"
+        className={`${ICON_BTN} lg:hidden`}
+      >
+        <List size={26} />
+      </button>
+
+      <nav className="flex min-w-0 flex-1 items-center gap-2 text-body-sm">
         {crumb.map((c, i) => (
-          <span key={c} className="flex min-w-0 items-center gap-2">
-            {i > 0 ? <CaretRight size={16} className="shrink-0 text-fg-subtle" /> : null}
+          <span
+            key={c}
+            className={`min-w-0 items-center gap-2 ${
+              i === crumb.length - 1 ? "flex" : "hidden sm:flex"
+            }`}
+          >
+            {i > 0 ? <CaretRight size={16} className="hidden shrink-0 text-fg-subtle sm:block" /> : null}
             <span className={i === crumb.length - 1 ? "truncate text-fg" : "truncate text-fg-subtle"}>
               {c}
             </span>
           </span>
         ))}
       </nav>
-      <div className="ml-auto flex shrink-0 items-center gap-2">
+
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
         <FactoryClock />
         <ThemeToggle />
       </div>

@@ -59,9 +59,11 @@ export function QcDecideModal({ code, onClose }: Props) {
 
         <div className="space-y-4 rounded-card border border-line p-4">
           <p className="flex items-start gap-2 text-body-sm text-warn">
-            <Warning size={20} weight="fill" className="shrink-0" />
-            Không đạt thì lệnh <strong>về Kho xuất</strong> và mở vòng mới — không về Bàn team
-            leader, vì setup sai mà bỏ qua Setup và QC là hàng lỗi đi thẳng vào chuyền.
+            <Warning size={20} weight="fill" className="mt-0.5 shrink-0" />
+            <span className="min-w-0">
+              Không đạt thì lệnh <strong>về Kho xuất</strong> và mở vòng mới — không về Bàn team
+              leader, vì setup sai mà bỏ qua Setup và QC là hàng lỗi đi thẳng vào chuyền.
+            </span>
           </p>
 
           <AppSelect

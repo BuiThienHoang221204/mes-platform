@@ -32,9 +32,9 @@ type Props = {
 };
 
 const PAD = {
-  sm: "px-3 py-2.5",
-  md: "px-4 py-3",
-  lg: "px-5 py-3",
+  sm: "px-2.5 py-2 sm:px-3 sm:py-2.5",
+  md: "px-3 py-2.5 sm:px-4 sm:py-3",
+  lg: "px-3 py-2.5 sm:px-5 sm:py-3",
 } as const;
 
 const HEAD =
@@ -71,10 +71,11 @@ export function DataTable({
   selection,
 }: Props) {
   const box = fill
-    ? "min-h-0 flex-1 overflow-auto"
+    ? "overflow-auto lg:min-h-0 lg:flex-1"
     : maxHeight
       ? "overflow-auto"
       : "overflow-x-auto";
+  const wrap = nowrap ? "whitespace-nowrap" : "whitespace-nowrap md:whitespace-normal";
   const p = PAD[pad];
 
   const pickable = rows.filter((r) => r.selectable !== false).map((r) => r.key);
@@ -99,7 +100,7 @@ export function DataTable({
 
   return (
     <div className={box} style={fill || !maxHeight ? undefined : { maxHeight }}>
-      <table className={`w-full border-collapse ${nowrap ? "whitespace-nowrap" : ""}`}>
+      <table className={`w-full border-collapse ${wrap}`}>
         <thead>
           <tr className="text-left text-caption uppercase tracking-wider text-fg-subtle">
             {selection ? (

@@ -9,7 +9,7 @@ import { ToastHost } from "@/context/ToastProvider";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "MES — Điều hành sản xuất",
+  title: "MES | Amphenol RF",
   description: "Hệ điều hành sản xuất — quét QR, theo dõi chuyền, chốt sổ từng vòng.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MES" },

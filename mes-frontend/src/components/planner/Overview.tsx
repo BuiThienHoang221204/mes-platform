@@ -68,8 +68,8 @@ export function Overview() {
   ];
 
   return (
-    <div className="flex min-h-0 flex-1 flex-col gap-4">
-      <div className="grid shrink-0 gap-3 sm:grid-cols-2 lg:grid-cols-5">
+    <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1">
+      <div className="grid shrink-0 grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
         <QtyStat
           label="MO đang chạy"
           value={runningTotal}
@@ -99,20 +99,20 @@ export function Overview() {
         <QtyStat label="Đã hoàn thành" value={doneTotal} hint="đã chốt đơn" tone="ok" />
       </div>
 
-      <div className="grid min-h-0 flex-1 gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 lg:min-h-0 lg:flex-1 lg:gap-5 lg:grid-cols-2">
         <AppCard
           title="Việc theo trạm"
           meta="chờ nhận · đang làm — bấm để mở trạm"
           flush
-          className="flex min-h-0 flex-col"
-          bodyClassName="flex min-h-0 flex-1 flex-col"
+          className="flex flex-col lg:min-h-0"
+          bodyClassName="flex flex-col lg:min-h-0 lg:flex-1"
         >
-          <ul className="no-scrollbar min-h-0 flex-1 overflow-y-auto">
+          <ul className="no-scrollbar lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
             {STATIONS.map((s) => (
               <li key={s.no} className="border-b border-line last:border-b-0">
                 <Link
                   href={s.route}
-                  className="flex min-h-touch items-center gap-3 px-5 py-3 hover:bg-surface-2"
+                  className="flex min-h-touch items-center gap-2 px-4 py-3 hover:bg-surface-2 sm:gap-3 sm:px-5"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-pill bg-surface-2 text-body-sm tnum text-fg-muted">
                     {s.no}
@@ -144,14 +144,14 @@ export function Overview() {
           title="Cần chú ý"
           meta={alerts.length ? `${alerts.length} việc` : undefined}
           flush
-          className="flex min-h-0 flex-col"
-          bodyClassName="flex min-h-0 flex-1 flex-col"
+          className="flex flex-col lg:min-h-0"
+          bodyClassName="flex flex-col lg:min-h-0 lg:flex-1"
         >
           {!alerts.length ? (
             <EmptyState title="Không có gì bất thường" hint="Chưa lệnh nào quá giờ hay phải làm bù." />
           ) : (
-            <div className="flex min-h-0 flex-1 flex-col">
-              <div className="no-scrollbar min-h-0 flex-1 space-y-3 overflow-y-auto p-5">
+            <div className="flex flex-col lg:min-h-0 lg:flex-1">
+              <div className="no-scrollbar space-y-3 p-4 sm:p-5 lg:min-h-0 lg:flex-1 lg:overflow-y-auto">
                 {alerts.slice(alertOffset, alertOffset + ALERT_PAGE).map((a, i) => (
                   <Note key={`${a.code}-${alertOffset + i}`} tone={a.tone}>
                     <strong className="font-mono">{a.code}</strong> — {a.text}

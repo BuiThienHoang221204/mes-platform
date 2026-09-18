@@ -128,7 +128,7 @@ function MoreBar({
 }) {
   if (remaining <= 0) return null;
   return (
-    <div className="flex items-center gap-3 border-t border-line px-5 py-3">
+    <div className="flex items-center gap-3 border-t border-line px-4 py-3 sm:px-5">
       <AppButton size="md" disabled={isLoading} onClick={onMore}>
         {isLoading ? "Đang tải…" : "Xem thêm"}
       </AppButton>
@@ -198,7 +198,7 @@ export function RoundDetail({
           />
         )}
         <MoreBar remaining={hourly.remaining} isLoading={hourly.isLoading} onMore={hourly.loadMore} />
-        <p className="border-t border-line px-5 py-3 text-body-sm">
+        <p className="border-t border-line px-4 py-3 text-body-sm sm:px-5">
           <Reconcile round={round} />
         </p>
       </AppCard>
@@ -226,7 +226,7 @@ export function RoundDetail({
           />
         )}
         <MoreBar remaining={boxes.remaining} isLoading={boxes.isLoading} onMore={boxes.loadMore} />
-        <div className="space-y-1 border-t border-line px-5 py-3 text-body-sm">
+        <div className="space-y-1 border-t border-line px-4 py-3 text-body-sm sm:px-5">
           <p>
             <BoxReconcile round={round} pcsPerBox={pcsPerBox} />
           </p>

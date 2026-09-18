@@ -14,7 +14,9 @@ export type Toast = { id: number; text: string; kind: "ok" | "warn" | "danger" }
 type UiState = {
   theme: ThemeMode;
   fontStep: number;
+  navCollapsed: boolean;
   toasts: Toast[];
+  setNavCollapsed: (v: boolean) => void;
   setTheme: (t: ThemeMode) => void;
   setFontStep: (n: number) => void;
   increaseFont: () => void;
@@ -32,7 +34,9 @@ export const useUiStore = create<UiState>()(
       // mà máy tính bảng mới bóc hộp thì đang để chế độ sáng.
       theme: "dark",
       fontStep: FS_DEFAULT,
+      navCollapsed: false,
       toasts: [],
+      setNavCollapsed: (navCollapsed) => set({ navCollapsed }),
       setTheme: (theme) => set({ theme }),
       setFontStep: (n) =>
         set({ fontStep: Math.min(FONT_SCALE_STEPS.length - 1, Math.max(0, n)) }),
@@ -49,6 +53,9 @@ export const useUiStore = create<UiState>()(
       },
       dismiss: (id) => set({ toasts: get().toasts.filter((t) => t.id !== id) }),
     }),
-    { name: "mes-ui", partialize: (s) => ({ theme: s.theme, fontStep: s.fontStep }) },
+    {
+      name: "mes-ui",
+      partialize: (s) => ({ theme: s.theme, fontStep: s.fontStep, navCollapsed: s.navCollapsed }),
+    },
   ),
 );

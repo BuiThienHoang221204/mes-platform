@@ -53,7 +53,7 @@ function Task({
         ? "bg-accent text-accent-on"
         : "bg-surface-2 text-fg-subtle";
   return (
-    <div className="flex gap-4 border-b border-line py-5 last:border-b-0">
+    <div className="flex flex-wrap gap-3 border-b border-line py-4 last:border-b-0 sm:flex-nowrap sm:gap-4 sm:py-5">
       <span
         className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-pill text-body-sm tnum ${dot}`}
       >
@@ -64,7 +64,7 @@ function Task({
         <p className="mt-0.5 text-body-sm text-fg-muted">{desc}</p>
         {children ? <div className="mt-4">{children}</div> : null}
       </div>
-      {right ? <div className="shrink-0">{right}</div> : null}
+      {right ? <div className="shrink-0 pl-11 sm:pl-0">{right}</div> : null}
     </div>
   );
 }
@@ -94,22 +94,23 @@ export function ProductionWorkspace({ code }: { code: string }) {
   const canClose = everRan && !held.length;
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       <div
-        className={`flex flex-wrap items-center gap-4 rounded-card border-2 px-5 py-4 ${TONE_RING[next.tone]}`}
+        className={`flex flex-wrap items-center gap-3 rounded-card border-2 px-4 py-4 sm:gap-4 sm:px-5 ${TONE_RING[next.tone]}`}
       >
-        <div className="min-w-[240px] flex-1">
+        <div className="w-full sm:w-auto sm:min-w-[240px] sm:flex-1">
           <div
             className={`text-label uppercase tracking-wider ${TONE_TEXT[next.tone]}`}
           >
             {next.label}
           </div>
-          <div className="text-h3 text-fg">{next.title}</div>
+          <div className="text-title text-fg sm:text-h3">{next.title}</div>
           <p className="text-body-sm text-fg-muted">{next.hint}</p>
         </div>
         {next.goto ? (
           <AppButton
             variant="primary"
+            className="w-full sm:w-auto"
             onClick={() =>
               document.getElementById(`sec-${next.goto}`)?.scrollIntoView({
                 behavior: "smooth",
@@ -127,7 +128,7 @@ export function ProductionWorkspace({ code }: { code: string }) {
         meta={trace.pcs_per_box ? `quy cách ${trace.pcs_per_box} pcs/thùng` : "không đóng thùng"}
         actions={<StatusPill tone="accent">Vòng {round.round_no}</StatusPill>}
       >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
           <QtyStat label="Mục tiêu vòng" value={round.target_qty} unit="pcs" tone="accent" />
           <QtyStat label="Σ sản lượng giờ" value={sum} unit="pcs" />
           <QtyStat
@@ -181,7 +182,7 @@ export function ProductionWorkspace({ code }: { code: string }) {
           meta="làm đúng thứ tự — hai việc này không hoàn tác được"
           flush
         >
-          <div className="px-5">
+          <div className="px-4 sm:px-5">
             <Task
               no={1}
               title="Chốt sổ sản xuất"

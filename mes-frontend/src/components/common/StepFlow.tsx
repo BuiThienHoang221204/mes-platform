@@ -23,7 +23,7 @@ function StepButton({
     <button
       type="button"
       onClick={() => onPick(step.id)}
-      className={`flex min-h-touch min-w-0 flex-1 items-center gap-3 rounded-field px-3 text-left ${
+      className={`flex min-h-touch min-w-0 grow basis-[46%] items-center gap-2 rounded-field px-2.5 text-left sm:basis-0 sm:gap-3 sm:px-3 ${
         active ? "bg-accent-soft text-accent" : "text-fg-muted hover:bg-surface-2"
       }`}
     >
@@ -36,7 +36,7 @@ function StepButton({
       </span>
       <span className="min-w-0">
         <span className="block truncate text-body font-medium">{step.name}</span>
-        <span className="block truncate text-caption text-fg-subtle">{step.sub}</span>
+        <span className="hidden truncate text-caption text-fg-subtle sm:block">{step.sub}</span>
       </span>
     </button>
   );

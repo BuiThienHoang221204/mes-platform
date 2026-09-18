@@ -35,8 +35,8 @@ function PlannerBody() {
 
   if (!roles.includes(PLANNER)) {
     return (
-      <div className="mx-auto max-w-lg py-16 text-center">
-        <h1 className="text-h2">Chỉ điều độ mở được màn này</h1>
+      <div className="mx-auto max-w-lg px-4 py-16 text-center">
+        <h1 className="text-h3 sm:text-h2">Chỉ điều độ mở được màn này</h1>
         <p className="mt-2 text-body text-fg-muted">Tạo và chốt lệnh là việc của phòng kế hoạch.</p>
       </div>
     );
@@ -51,7 +51,7 @@ function PlannerBody() {
   const fitsOneScreen = step === "dash";
 
   return (
-    <div className={fitsOneScreen ? "flex h-full min-h-0 flex-col" : ""}>
+    <div className={fitsOneScreen ? "flex flex-col lg:h-full lg:min-h-0" : ""}>
       <PageHeader
         kicker="Planner · Điều độ"
         title={PLANNER_STEPS.find((s) => s.id === step)?.name ?? ""}
@@ -60,7 +60,7 @@ function PlannerBody() {
 
       <div
         className={
-          fitsOneScreen ? "flex min-h-0 flex-1 flex-col gap-5" : "space-y-5"
+          fitsOneScreen ? "flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-5" : "space-y-5"
         }
       >
         <StepStrip steps={PLANNER_STEPS} active={step} onPick={go} />

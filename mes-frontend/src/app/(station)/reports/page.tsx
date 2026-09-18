@@ -20,10 +20,10 @@ function ReportsBody() {
     router.replace(id === REPORT_STEPS[0].id ? REPORT_ROUTE : `${REPORT_ROUTE}?step=${id}`);
 
   return (
-    <div className="flex h-full min-h-0 flex-col">
+    <div className="flex flex-col lg:h-full lg:min-h-0">
       <PageHeader kicker="Xem chung" title={here?.name ?? ""} subtitle={here?.sub} />
 
-      <div className="flex min-h-0 flex-1 flex-col gap-5">
+      <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-5">
         <div className="shrink-0">
           <StepStrip steps={REPORT_STEPS} active={step} onPick={go} />
         </div>

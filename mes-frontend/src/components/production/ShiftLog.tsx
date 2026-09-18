@@ -97,7 +97,7 @@ export function ShiftLog({ round, pcsPerBox, box, packStarted, busy, onLog }: Pr
       meta={logged ? `ghi lại mỗi giờ · đã ghi ${logged} giờ` : "ghi lại mỗi giờ"}
     >
       <form onSubmit={submit} className="space-y-5">
-        <div className="max-w-xs">
+        <div className="sm:max-w-xs">
           <AppSelect
             label="Khung giờ"
             options={SLOTS}
@@ -106,7 +106,7 @@ export function ShiftLog({ round, pcsPerBox, box, packStarted, busy, onLog }: Pr
           />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid gap-5 lg:grid-cols-2 lg:gap-6">
           <div>
             <div className="mb-3 border-b border-line pb-2 text-label uppercase tracking-wider text-fg-subtle">
               Chuyền

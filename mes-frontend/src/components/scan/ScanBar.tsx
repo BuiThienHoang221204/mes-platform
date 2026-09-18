@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Camera, QrCode } from "@/components/common/PhosphorIcons";
+import { QrCode, Scan } from "@/components/common/PhosphorIcons";
 import { CameraScanModal } from "@/components/scan/CameraScanModal";
 import { ScanFeedback } from "@/components/scan/ScanFeedback";
 import { AppButton } from "@/components/ui/AppButton";
@@ -39,8 +39,8 @@ export function ScanBar({ station, hint }: { station: number; hint: string }) {
   const closeCam = useCallback(() => setCamOpen(false), []);
 
   return (
-    <div className="space-y-3 rounded-card border border-dashed border-accent bg-surface p-4">
-      <div className="flex flex-wrap items-center gap-3">
+    <div className="space-y-3 rounded-card border border-dashed border-accent bg-surface p-3 sm:p-4">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-3">
         <input
           ref={ref}
           onKeyDown={onKeyDown}
@@ -48,17 +48,19 @@ export function ScanBar({ station, hint }: { station: number; hint: string }) {
           placeholder="Quét / nhập mã lệnh…"
           autoComplete="off"
           spellCheck={false}
-          className="min-h-touch min-w-0 flex-1 rounded-field border border-accent bg-surface-2 px-4 font-mono text-body-lg tracking-wide text-fg placeholder:font-sans placeholder:text-fg-subtle"
+          className="min-h-touch w-full min-w-0 basis-full rounded-field border border-accent bg-surface-2 px-4 font-mono text-body-lg tracking-wide text-fg placeholder:font-sans placeholder:text-fg-subtle sm:w-auto sm:flex-1 sm:basis-auto"
         />
         <AppButton
+          className="flex-1 sm:flex-none"
           onClick={() => setCamOpen(true)}
           disabled={scan.isPending}
-          icon={<Camera size={24} />}
+          icon={<Scan size={24} />}
         >
-          Camera
+          Scan MO
         </AppButton>
         <AppButton
           variant="primary"
+          className="flex-1 sm:flex-none"
           onClick={submit}
           disabled={scan.isPending}
           icon={<QrCode size={28} weight="bold" />}

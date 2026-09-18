@@ -153,7 +153,7 @@ export function MoTable({ status, onStatus }: Props) {
       title="Sổ lệnh"
       meta={total ? `${offset + 1}–${offset + rows.length} trên ${total} lệnh` : undefined}
       actions={
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-3">
           <AppButton
             size="md"
             variant={picking ? "primary" : "outline"}
@@ -171,10 +171,10 @@ export function MoTable({ status, onStatus }: Props) {
                 onStatus(v === ALL ? null : (v as MoStatus));
                 goPage(0);
               }}
-              className="w-48 shrink-0"
+              className="min-w-0 flex-1 sm:w-48 sm:flex-none"
             />
           ) : null}
-          <div className="w-64 shrink-0">
+          <div className="w-full shrink-0 sm:w-64">
             <DateRangePicker label="Ngày tạo lệnh" value={range} onChange={changeRange} />
           </div>
         </div>
@@ -191,7 +191,7 @@ export function MoTable({ status, onStatus }: Props) {
       ) : (
         <>
           {picking && pickedHere.length ? (
-            <div className="flex flex-wrap items-center gap-3 border-b border-line bg-accent-soft px-5 py-3">
+            <div className="flex flex-wrap items-center gap-2 border-b border-line bg-accent-soft px-4 py-3 sm:gap-3 sm:px-5">
               <span className="text-body text-accent">
                 Đã chọn {pickedHere.length} lệnh
               </span>

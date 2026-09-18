@@ -33,7 +33,7 @@ export function TraceDetail({ code }: { code: string }) {
       />
 
       <div className="space-y-5">
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 sm:gap-3 lg:grid-cols-5">
           <QtyStat label={data.code} value={p.quantity} unit="pcs" hint="số lượng kế hoạch" />
           <QtyStat label="Đã xong" value={p.qty_done} unit="pcs" tone="ok" hint="đã đóng thùng" />
           <QtyStat

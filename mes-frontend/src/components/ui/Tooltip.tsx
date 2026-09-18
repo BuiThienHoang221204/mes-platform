@@ -85,7 +85,7 @@ export function Tooltip({ content, children, side = "top", className = "" }: Pro
         maxWidth: MAX_W,
         transform: `translate(-50%, ${spot.side === "top" ? "-100%" : "0"})`,
       }}
-      className="pointer-events-none fixed z-50 rounded-field bg-fg px-3 py-2 text-caption leading-snug text-bg shadow-lg"
+      className="pointer-events-none fixed z-[70] rounded-field bg-fg px-3 py-2 text-caption leading-snug text-bg shadow-lg"
     >
       {content}
     </div>

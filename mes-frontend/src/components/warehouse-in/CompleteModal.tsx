@@ -57,9 +57,9 @@ export function CompleteModal({ row, onClose }: Props) {
       }
     >
       <div className="space-y-5">
-        <div className="rounded-card border border-accent-line bg-accent-soft px-5 py-4">
+        <div className="rounded-card border border-accent-line bg-accent-soft px-4 py-4 sm:px-5">
           <p className="text-caption text-accent">Nhận về kho</p>
-          <p className="mt-1 text-display tnum text-accent">{boxLabel(packed, perBox)}</p>
+          <p className="mt-1 text-h1 tnum text-accent sm:text-display">{boxLabel(packed, perBox)}</p>
           <p className="mt-1 text-body-sm text-fg-muted">
             {nfmt(packed)} pcs
             {boxes ? ` · quy cách ${nfmt(perBox)} pcs/thùng` : " · mặt hàng không đóng thùng"}

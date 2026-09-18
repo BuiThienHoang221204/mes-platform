@@ -21,9 +21,9 @@ type Props = {
 export function QtyStat({ label, value, unit, hint, tone = "plain" }: Props) {
   const shown = typeof value === "number" ? value.toLocaleString("vi-VN") : value;
   return (
-    <div className="rounded-card border border-line bg-surface px-5 py-4">
+    <div className="rounded-card border border-line bg-surface px-4 py-3 sm:px-5 sm:py-4">
       <div className="text-caption text-fg-subtle">{label}</div>
-      <div className={`mt-1 text-h2 tnum ${TONE[tone]}`}>
+      <div className={`mt-1 text-h3 tnum sm:text-h2 ${TONE[tone]}`}>
         {shown}
         {unit ? <span className="ml-1 text-body text-fg-subtle">{unit}</span> : null}
       </div>

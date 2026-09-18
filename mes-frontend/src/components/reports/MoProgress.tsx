@@ -39,7 +39,7 @@ export function MoProgress() {
       title="Tiến độ theo MO"
       meta="pcs đã nhập kho trên tổng số phải làm"
       controls={
-        <div className="w-56 shrink-0">
+        <div className="w-full shrink-0 sm:w-56">
           <DateRangePicker label="Ngày tạo lệnh" value={range} onChange={changeRange} />
         </div>
       }
@@ -69,7 +69,7 @@ export function MoProgress() {
         />
       }
     >
-      <div className="no-scrollbar min-h-0 flex-1 space-y-3 overflow-y-auto pr-1">
+      <div className="no-scrollbar space-y-3 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
         {rows.map((m, i) => {
           const pct = m.quantity > 0 ? (m.qty_done / m.quantity) * 100 : 0;
           return (

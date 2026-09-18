@@ -33,9 +33,9 @@ export function StationPage({ station, title, fill = true, children }: Props) {
   };
 
   return (
-    <div className={fill ? "flex h-full min-h-0 flex-col" : ""}>
+    <div className={fill ? "flex flex-col lg:h-full lg:min-h-0" : ""}>
       <StationHeader station={station} title={title} />
-      <div className={fill ? "flex min-h-0 flex-1 flex-col gap-5" : "space-y-5"}>
+      <div className={fill ? "flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-5" : "space-y-5"}>
         <div className="shrink-0">
           <StepFlow station={station} active={step} onPick={pick} />
         </div>

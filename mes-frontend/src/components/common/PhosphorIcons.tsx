@@ -10,9 +10,9 @@ export {
   Check, CheckCircle, CheckSquare, XCircle, Warning, WarningCircle, Info, SealCheck,
   Play, Pause, StopCircle, ArrowsClockwise,
   Clock, Timer, CalendarBlank, ChartBar, ListNumbers, Table,
-  ArrowLeft, ArrowRight, CaretDown, CaretRight, CaretUp, List, X,
+  ArrowLeft, ArrowRight, CaretDown, CaretLeft, CaretRight, CaretUp, List, SidebarSimple, X,
   User, UserSwitch, SignOut, SignIn, Lock, DeviceTablet,
-  Plus, Minus, Trash, Printer, DownloadSimple, UploadSimple,
+  Plus, Minus, Trash, Printer, DownloadSimple, UploadSimple, Copy, ImageSquare,
   TextAa, Sun, Moon, Desktop,
 } from "@phosphor-icons/react";
 

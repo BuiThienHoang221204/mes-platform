@@ -28,7 +28,7 @@ export function ThemePicker() {
             role="radio"
             aria-checked={on}
             onClick={() => setTheme(id)}
-            className={`flex items-center gap-2 rounded-pill px-4 py-2 text-body-sm ${
+            className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-pill px-2.5 py-2 text-body-sm sm:flex-none sm:px-4 ${
               on ? "bg-surface font-semibold text-fg shadow-sm" : "text-fg-muted hover:text-fg"
             }`}
           >

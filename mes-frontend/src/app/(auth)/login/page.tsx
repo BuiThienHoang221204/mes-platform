@@ -45,14 +45,14 @@ export default function LoginPage() {
   );
 
   return (
-    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-8 px-6 py-10">
-      <header className="space-y-3 text-center">
-        <BrandMark className="mx-auto h-7 w-auto text-fg" />
-        <h1 className="text-h1">Đăng nhập</h1>
-        <p className="text-body text-fg-muted">Mã nhân viên và mã PIN của riêng bạn</p>
+    <main className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center gap-6 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-[calc(2rem+env(safe-area-inset-top))] sm:gap-8 sm:px-6 sm:py-10">
+      <header className="text-center">
+        <BrandMark className="mx-auto h-8 w-auto text-fg" />
+        <h1 className="mt-8 text-h2 sm:text-h1">Đăng nhập</h1>
+        <p className="mt-1.5 text-body text-fg-muted">Mã nhân viên và mã PIN của riêng bạn</p>
       </header>
 
-      <form onSubmit={submit} className="space-y-6">
+      <form onSubmit={submit} className="space-y-5 sm:space-y-6">
         <AppInput
           {...register("emp_code")}
           label="Mã nhân viên"

@@ -18,8 +18,8 @@ export type StationFlowInfo = {
 
 export const STATION_FLOW: Record<number, StationFlowInfo> = {
   0: {
-    from: "Kế hoạch chốt lệnh",
-    here: "Quét nhận lệnh rồi bàn giao xuống xưởng",
+    from: "Kế hoạch chốt MO",
+    here: "Quét nhận MO rồi bàn giao xuống xưởng",
     next: "Setup máy",
   },
   1: {

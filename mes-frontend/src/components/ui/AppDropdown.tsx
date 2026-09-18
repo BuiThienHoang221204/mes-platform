@@ -49,7 +49,7 @@ export function AppDropdown({
     <div
       ref={menu}
       style={{ top: spot.top, left: spot.left, width: spot.width }}
-      className="fixed z-50 overflow-hidden rounded-card border border-line bg-surface py-1 shadow-lg"
+      className="fixed z-[70] overflow-hidden rounded-card border border-line bg-surface py-1 shadow-lg"
     >
       {options.map((o) => {
         const isPicked = o.value === value;

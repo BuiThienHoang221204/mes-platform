@@ -10,7 +10,7 @@ type Props = {
 
 export function StationHeader({ station, title, children }: Props) {
   return (
-    <div className="mb-6">
+    <div className="mb-4 lg:mb-6">
       <PageHeader kicker={`Trạm ${station} · ${stationName(station)}`} title={title}>
         {children}
       </PageHeader>

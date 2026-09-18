@@ -42,8 +42,8 @@ export function Tabs({ tabs, initial, actions, className = "" }: Props) {
 
   return (
     <section className={`overflow-hidden rounded-card border border-line bg-surface ${className}`}>
-      <div className="flex items-end gap-2 border-b border-line bg-surface-2 pl-2 pr-3 pt-2">
-        <div ref={bar} role="tablist" onKeyDown={onKey} className="flex min-w-0 flex-1 gap-1">
+      <div className="flex flex-wrap items-end gap-2 border-b border-line bg-surface-2 pl-2 pr-2 pt-2 sm:pr-3">
+        <div ref={bar} role="tablist" onKeyDown={onKey} className="no-scrollbar flex min-w-0 flex-1 gap-1 overflow-x-auto">
           {tabs.map((t) => {
             const on = t.id === here?.id;
             return (
@@ -56,7 +56,7 @@ export function Tabs({ tabs, initial, actions, className = "" }: Props) {
                 aria-controls={`${base}-panel-${t.id}`}
                 tabIndex={on ? 0 : -1}
                 onClick={() => setActive(t.id)}
-                className={`flex min-w-0 items-center gap-2 rounded-t-card px-4 py-2.5 text-body ${
+                className={`flex min-w-0 shrink-0 items-center gap-2 rounded-t-card px-3 py-2.5 text-body sm:px-4 ${
                   on
                     ? "-mb-px border border-b-0 border-line bg-surface font-semibold text-fg"
                     : "text-fg-muted hover:bg-surface-3 hover:text-fg"
@@ -84,7 +84,7 @@ export function Tabs({ tabs, initial, actions, className = "" }: Props) {
           role="tabpanel"
           aria-labelledby={`${base}-tab-${t.id}`}
           hidden={t.id !== here?.id}
-          className="p-5"
+          className="p-4 sm:p-5"
         >
           {t.panel}
         </div>

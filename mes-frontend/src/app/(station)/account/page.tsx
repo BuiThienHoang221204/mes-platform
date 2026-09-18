@@ -23,7 +23,7 @@ function Panel({
   children: ReactNode;
 }) {
   return (
-    <section className="rounded-card border border-line bg-surface px-6 py-5">
+    <section className="rounded-card border border-line bg-surface px-4 py-4 sm:px-6 sm:py-5">
       <header className="mb-2">
         <h2 className="flex items-center gap-2 text-title text-fg">
           <span className="text-accent">{icon}</span>
@@ -38,7 +38,7 @@ function Panel({
 
 function Field({ label, value }: { label: string; value: string }) {
   return (
-    <div className="min-w-48 flex-1">
+    <div className="min-w-0 flex-1 sm:min-w-48">
       <div className="text-body-sm text-fg-subtle">{label}</div>
       <div className="mt-1 text-body-lg text-fg">{value}</div>
     </div>
@@ -51,9 +51,9 @@ export default function AccountPage() {
   const logout = useLogout();
 
   return (
-    <div className="mx-auto max-w-5xl space-y-5">
+    <div className="mx-auto max-w-5xl space-y-4 sm:space-y-5">
       <header className="space-y-1">
-        <h1 className="text-h2">Tài khoản</h1>
+        <h1 className="text-h3 sm:text-h2">Tài khoản</h1>
         <p className="text-body text-fg-muted">Giao diện, cỡ chữ và phiên đăng nhập</p>
       </header>
 
@@ -82,7 +82,7 @@ export default function AccountPage() {
         title="Thông tin đăng nhập"
         hint="Lấy từ phiên hiện tại trên máy chủ"
       >
-        <div className="flex flex-wrap gap-6 pb-5">
+        <div className="flex flex-wrap gap-4 pb-5 sm:gap-6">
           <Field label="Họ và tên" value={fullName ?? "—"} />
           <Field label="Vai trò" value={roleLabel(roles)} />
         </div>
@@ -91,7 +91,7 @@ export default function AccountPage() {
         </p>
       </Panel>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 px-2">
+      <div className="flex flex-wrap items-center justify-between gap-4 sm:px-2">
         <AppButton
           size="md"
           variant="danger"

@@ -47,7 +47,7 @@ export function ColumnChart({ columns, max, height = 180, barWidth = 56 }: Props
   const scale = max > 0 ? height / max : 0;
 
   return (
-    <div className="flex items-end justify-around gap-3 overflow-x-auto pb-1">
+    <div className="flex items-end justify-around gap-2 overflow-x-auto pb-1 sm:gap-3">
       {columns.map((c, ci) => (
         <div key={c.key} title={c.title} className="flex flex-1 flex-col items-center">
           <div className="flex w-full items-end justify-center gap-0.5" style={{ height }}>
@@ -65,7 +65,7 @@ export function ColumnChart({ columns, max, height = 180, barWidth = 56 }: Props
                     title={`${s.label}: ${s.value.toLocaleString("vi-VN")}`}
                     className="rise-y rounded-t-xs"
                     style={{
-                      width: barWidth,
+                      width: `min(${barWidth}px, 8vw)`,
                       height: Math.max(2, s.value * scale),
                       background: s.value > 0 ? s.color : "var(--color-surface-3)",
                       animationDelay: `${delay}ms`,

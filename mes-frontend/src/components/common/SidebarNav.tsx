@@ -95,7 +95,34 @@ function NavBranch({ item, match }: { item: NavItem; match: Match }) {
   );
 }
 
-export function NavGroup({ title, items }: { title: string; items: NavItem[] }) {
+const RAIL = "relative flex h-11 w-11 items-center justify-center rounded-field";
+
+function RailLink({ item, active }: { item: NavItem; active: boolean }) {
+  return (
+    <Link
+      href={item.href}
+      title={item.label}
+      aria-label={item.label}
+      className={`${RAIL} ${active ? ON : OFF}`}
+    >
+      {item.icon ?? <span className="text-body-sm tnum">{item.index}</span>}
+      {item.count != null ? (
+        <span className="absolute -right-1 -top-1 min-w-5 rounded-pill bg-accent px-1 text-center text-caption leading-5 tnum text-accent-on">
+          {item.count}
+        </span>
+      ) : null}
+    </Link>
+  );
+}
+
+type GroupProps = {
+  title: string;
+  items: NavItem[];
+  /** Dải biểu tượng của thanh bên đã thu gọn — chỉ biểu tượng, không nhãn, không tiêu đề nhóm. */
+  rail?: boolean;
+};
+
+export function NavGroup({ title, items, rail }: GroupProps) {
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -106,6 +133,20 @@ export function NavGroup({ title, items }: { title: string; items: NavItem[] }) 
   };
 
   if (!items.length) return null;
+
+  if (rail) {
+    return (
+      <div className="flex flex-col items-center gap-1">
+        {items.map((it) => (
+          <RailLink
+            key={it.href}
+            item={it}
+            active={match(it.href) || (it.children?.some((k) => match(k.href)) ?? false)}
+          />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1">

@@ -19,7 +19,7 @@ export function StationPicker({ compact }: { compact?: boolean }) {
             key={s.no}
             type="button"
             onClick={() => setPicked(s.no)}
-            className={`flex min-h-touch items-center gap-3 rounded-field border px-4 text-left ${
+            className={`flex min-h-touch items-center gap-3 rounded-field border px-3 text-left sm:px-4 ${
               active ? "border-accent bg-accent-soft" : "border-line-strong bg-surface"
             }`}
           >

@@ -16,8 +16,8 @@ export function FactoryClock() {
   }, []);
 
   return (
-    <span className="flex items-center gap-2 rounded-field border border-line bg-surface-2 px-3 py-1.5">
-      <span className="text-caption text-fg-subtle">Giờ xưởng</span>
+    <span className="flex items-center gap-2 rounded-field border border-line bg-surface-2 px-2 py-1.5 sm:px-3">
+      <span className="hidden text-caption text-fg-subtle sm:inline">Giờ xưởng</span>
       <span className="text-body tnum text-fg">{now}</span>
     </span>
   );

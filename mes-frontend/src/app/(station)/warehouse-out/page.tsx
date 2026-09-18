@@ -47,8 +47,8 @@ function WarehouseOutBody() {
   return (
     <StationPage station={STATION} title="Bàn giao vật tư xuống xưởng" fill>
       {(step) => (
-        <div className="flex min-h-0 flex-1 flex-col gap-5">
-          <div className="grid shrink-0 gap-3 sm:grid-cols-4">
+        <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-5">
+          <div className="grid shrink-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
             <QtyStat label="Chờ nhận" value={queueTotal} hint="lệnh mới + trả về" tone="accent" />
             <QtyStat label="Đã nhận, chưa giao" value={pending.length} hint="còn nằm ở kho" tone="warn" />
             <QtyStat label="Đã giao" value={handed} hint="xuống Setup" tone="ok" />
@@ -56,7 +56,7 @@ function WarehouseOutBody() {
           </div>
 
           {step === "scan" ? (
-            <div className="flex min-h-0 flex-1 flex-col gap-5">
+            <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-5">
               <div className="shrink-0">
                 <StationScanArea
                   station={STATION}
@@ -68,7 +68,7 @@ function WarehouseOutBody() {
           ) : null}
 
           {step === "handover" ? (
-            <div className="flex min-h-0 flex-1 flex-col gap-5">
+            <div className="flex flex-col gap-4 lg:min-h-0 lg:flex-1 lg:gap-5">
               <AtStationTable
                 station={STATION}
                 title="Đã nhận — chờ bàn giao xuống Setup"
@@ -76,13 +76,14 @@ function WarehouseOutBody() {
                 fill
               />
               {canWrite && pending.length > 1 ? (
-                <div className="flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface px-5 py-4">
-                  <p className="min-w-0 flex-1 text-body-sm text-fg-muted">
+                <div className="flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface px-4 py-4 sm:px-5">
+                  <p className="w-full text-body-sm text-fg-muted sm:w-auto sm:min-w-0 sm:flex-1">
                     Phát lệnh đầu ca thì bàn giao cả lô — Kho phải xử được 10–100 lệnh một lúc.
                     Một mã hỏng thì cả lô không lệnh nào được bàn giao.
                   </p>
                   <AppButton
                     variant="primary"
+                    className="w-full sm:w-auto"
                     disabled={batch.isPending}
                     onClick={() => batch.mutate(pending.map((r) => r.code))}
                     icon={<Truck size={28} weight="bold" />}
@@ -98,8 +99,8 @@ function WarehouseOutBody() {
             <AppCard
               title="Xem phiếu"
               meta={at.length ? `${at.length} lệnh · tra cứu, hệ thống không ghi sổ` : "tra cứu — hệ thống không ghi sổ"}
-              className="flex min-h-0 flex-1 flex-col"
-              bodyClassName="flex min-h-0 flex-1 flex-col gap-4"
+              className="flex flex-col lg:min-h-0 lg:flex-1"
+              bodyClassName="flex flex-col gap-4 lg:min-h-0 lg:flex-1"
             >
               <p className="shrink-0 text-body text-fg-muted">
                 Bước In phiếu đã bỏ khỏi quy trình: in hay không thì hàng vẫn xuống xưởng, và hệ
@@ -107,17 +108,22 @@ function WarehouseOutBody() {
                 không có đồng hồ nào chạy.
               </p>
               {at.length ? (
-                <div className="min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+                <div className="space-y-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
                   {at.map((r) => (
                     <div
                       key={r.code}
-                      className="flex flex-wrap items-center gap-3 rounded-field border border-line px-4 py-3"
+                      className="flex flex-wrap items-center gap-2 rounded-field border border-line px-3 py-3 sm:gap-3 sm:px-4"
                     >
                       <span className="font-mono text-body-lg">{r.code}</span>
                       <span className="min-w-0 flex-1 truncate text-body text-fg-muted">
                         {r.product_name}
                       </span>
-                      <AppButton size="sm" onClick={() => window.print()} icon={<Printer size={20} />}>
+                      <AppButton
+                        size="sm"
+                        className="w-full sm:w-auto"
+                        onClick={() => window.print()}
+                        icon={<Printer size={20} />}
+                      >
                         In bằng trình duyệt
                       </AppButton>
                     </div>

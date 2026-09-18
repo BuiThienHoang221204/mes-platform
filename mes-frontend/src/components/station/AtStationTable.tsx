@@ -65,8 +65,8 @@ export function AtStationTable({ station, title, fill = true, action }: Props) {
       title={title ?? `Đang ở bước ${station}`}
       meta={total ? `${total} lệnh` : undefined}
       flush
-      className={fill ? "flex min-h-0 flex-1 flex-col" : ""}
-      bodyClassName={fill ? "flex min-h-0 flex-1 flex-col" : ""}
+      className={fill ? "flex flex-col lg:min-h-0 lg:flex-1" : ""}
+      bodyClassName={fill ? "flex flex-col lg:min-h-0 lg:flex-1" : ""}
     >
       {isError ? (
         <ErrorState error={error} onRetry={() => refetch()} />
@@ -82,7 +82,7 @@ export function AtStationTable({ station, title, fill = true, action }: Props) {
         <DataTable columns={columns} rows={body} fill={fill} maxHeight="30rem" pad="lg" />
       )}
       {hidden > 0 ? (
-        <p className="border-t border-line px-5 py-3 text-body-sm text-fg-subtle">
+        <p className="border-t border-line px-4 py-3 text-body-sm text-fg-subtle sm:px-5">
           Còn {hidden} lệnh nữa chưa hiện — xử bớt việc ở trên rồi danh sách tự đẩy lên.
         </p>
       ) : null}

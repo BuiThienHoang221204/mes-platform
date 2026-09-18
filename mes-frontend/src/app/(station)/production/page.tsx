@@ -30,12 +30,12 @@ function PickedBar({ code, onChange }: { code: string; onChange: () => void }) {
   const others = total - 1;
 
   return (
-    <div className="flex flex-wrap items-center gap-4 rounded-card border border-line bg-surface px-5 py-3">
+    <div className="flex flex-wrap items-center gap-3 rounded-card border border-line bg-surface px-4 py-3 sm:gap-4 sm:px-5">
       <span className="font-mono text-body-lg text-fg">{code}</span>
       <span className="min-w-0 flex-1 truncate text-body text-fg-muted">
         {row?.product_name ?? "—"}
       </span>
-      <AppButton size="sm" onClick={onChange}>
+      <AppButton size="sm" className="w-full sm:w-auto" onClick={onChange}>
         Đổi lệnh{others > 0 ? ` (còn ${others})` : ""}
       </AppButton>
     </div>
@@ -70,8 +70,8 @@ function ProductionBody() {
               title="Bảng đang chạy"
               meta="một lệnh một dòng · tự làm mới 10 giây"
               flush
-              className="flex min-h-0 flex-1 flex-col"
-              bodyClassName="flex min-h-0 flex-1 flex-col"
+              className="flex flex-col lg:min-h-0 lg:flex-1"
+              bodyClassName="flex flex-col lg:min-h-0 lg:flex-1"
             >
               <RunningTable withActions onlyAssigned fill />
             </AppCard>

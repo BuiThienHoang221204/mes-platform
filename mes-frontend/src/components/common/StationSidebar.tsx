@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { BrandMark } from "@/components/common/BrandMark";
 import {
@@ -8,8 +9,10 @@ import {
   ClipboardText,
   ListNumbers,
   MagnifyingGlass,
+  SidebarSimple,
   User,
   UserSwitch,
+  X,
 } from "@/components/common/PhosphorIcons";
 import { NavGroup, type NavItem } from "@/components/common/SidebarNav";
 import { RoleSwitchModal } from "@/components/dev/RoleSwitchModal";
@@ -38,12 +41,44 @@ const stepHref = (route: string, id: string, first: boolean) =>
 const initials = (name: string) =>
   name.split(" ").slice(-2).map((w) => w[0]).join("").toUpperCase();
 
-export function StationSidebar() {
+type Props = {
+  open?: boolean;
+  collapsed?: boolean;
+  onClose?: () => void;
+  onCollapse?: () => void;
+  onExpand?: () => void;
+};
+
+const ICON_BTN =
+  "flex h-11 w-11 items-center justify-center rounded-field text-fg-muted hover:bg-surface-2 hover:text-fg";
+
+export function StationSidebar({
+  open = false,
+  collapsed = false,
+  onClose,
+  onCollapse,
+  onExpand,
+}: Props) {
   const fullName = useSessionStore((s) => s.fullName);
   const roles = useSessionStore((s) => s.roles);
   const logout = useLogout();
   const [swapOpen, setSwapOpen] = useState(false);
   const { data: counts } = useCounts();
+  const pathname = usePathname();
+  const params = useSearchParams();
+
+  useEffect(() => {
+    onClose?.();
+  }, [pathname, params, onClose]);
+
+  useEffect(() => {
+    if (!open) return;
+    const before = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = before;
+    };
+  }, [open]);
 
   const isPlanner = roles.includes(PLANNER);
   const { station: mine } = useMyStation();
@@ -100,52 +135,132 @@ export function StationSidebar() {
   ];
 
   return (
-    <aside className="flex h-full w-72 shrink-0 flex-col overflow-hidden border-r border-line bg-surface">
-      <div className="space-y-2 flex justify-center border-b border-line px-4 py-8">
-        <BrandMark className="h-7 w-auto text-fg text-center" />
-        {/* <span className="block truncate text-caption text-fg-subtle">
-          MES v2.3 · Điều hành sản xuất
-        </span> */}
-      </div>
+    <>
+      <div
+        aria-hidden
+        onClick={onClose}
+        className={`fixed inset-0 z-40 bg-overlay lg:hidden ${open ? "" : "hidden"}`}
+      />
 
-      <nav className="no-scrollbar flex-1 space-y-5 overflow-y-auto px-4 py-4">
-        <NavGroup title={mainTitle} items={main} />
-        <NavGroup title="Xem chung" items={shared} />
-        <NavGroup title="Tra cứu" items={lookup} />
-        <NavGroup title="Cá nhân" items={personal} />
-      </nav>
+      <aside
+        className={`fixed left-0 top-0 z-50 flex h-dvh w-72 max-w-[86vw] shrink-0 flex-col overflow-hidden border-r border-line bg-surface transition-[transform,width] duration-200 ease-out motion-reduce:transition-none lg:static lg:z-auto lg:h-full lg:max-w-none lg:translate-x-0 ${
+          open ? "translate-x-0" : "-translate-x-full"
+        } ${collapsed ? "lg:w-16" : ""}`}
+      >
+        {collapsed ? (
+          <div className="fade-in hidden min-h-0 flex-1 flex-col lg:flex lg:w-16">
+            <div className="flex shrink-0 justify-center border-b border-line py-5">
+              <button
+                type="button"
+                onClick={onExpand}
+                aria-label="Mở rộng thanh điều hướng"
+                title="Mở rộng thanh điều hướng"
+                className={ICON_BTN}
+              >
+                <SidebarSimple size={24} />
+              </button>
+            </div>
 
-      <div className="shrink-0 space-y-2.5 border-t border-line px-4 py-4">
-        <div className="flex items-center gap-3 rounded-card border border-line bg-surface-2 px-3 py-2.5">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-accent-soft text-body-sm font-semibold text-accent">
-            {fullName ? initials(fullName) : "—"}
-          </span>
-          <span className="min-w-0">
-            <span className="block truncate text-body font-semibold text-fg">{fullName ?? "—"}</span>
-            <span className="block truncate text-caption text-fg-muted">{roleLabel(roles)}</span>
-          </span>
-        </div>
-        <AppButton
-          size="md"
-          block
-          onClick={() => (IS_DEV ? setSwapOpen(true) : logout.mutate())}
-          disabled={logout.isPending}
-          icon={<UserSwitch size={22} />}
-        >
-          Đổi người
-        </AppButton>
+            <nav className="no-scrollbar min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain py-4">
+              <NavGroup rail title={mainTitle} items={main} />
+              <NavGroup rail title="Xem chung" items={shared} />
+              <NavGroup rail title="Tra cứu" items={lookup} />
+              <NavGroup rail title="Cá nhân" items={personal} />
+            </nav>
 
-        {IS_DEV ? (
-          <RoleSwitchModal
-            open={swapOpen}
-            onClose={() => setSwapOpen(false)}
-            onLogout={() => {
-              setSwapOpen(false);
-              logout.mutate();
-            }}
-          />
+            <div className="mt-auto flex shrink-0 flex-col items-center gap-2 border-t border-line px-2 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4">
+              <span
+                title={`${fullName ?? "—"} · ${roleLabel(roles)}`}
+                className="flex h-10 w-10 items-center justify-center rounded-card bg-accent-soft text-body-sm font-semibold text-accent"
+              >
+                {fullName ? initials(fullName) : "—"}
+              </span>
+              <button
+                type="button"
+                onClick={() => (IS_DEV ? setSwapOpen(true) : logout.mutate())}
+                disabled={logout.isPending}
+                aria-label="Đổi người"
+                title="Đổi người"
+                className={`${ICON_BTN} disabled:opacity-45`}
+              >
+                <UserSwitch size={22} />
+              </button>
+            </div>
+          </div>
         ) : null}
-      </div>
-    </aside>
+
+        <div
+          className={`relative flex shrink-0 items-center justify-center border-b border-line pb-5 pl-4 pr-14 pt-[calc(1.25rem+env(safe-area-inset-top))] lg:w-72 lg:pb-8 lg:pl-4 lg:pr-14 lg:pt-8 ${
+            collapsed ? "lg:hidden" : ""
+          }`}
+        >
+          <BrandMark className="h-7 w-auto text-center text-fg" />
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Đóng điều hướng"
+            className={`absolute right-2 ${ICON_BTN} lg:hidden`}
+          >
+            <X size={24} />
+          </button>
+          <button
+            type="button"
+            onClick={onCollapse}
+            aria-label="Thu gọn thanh điều hướng"
+            title="Thu gọn thanh điều hướng"
+            className={`absolute right-2 hidden ${ICON_BTN} lg:flex`}
+          >
+            <SidebarSimple size={24} />
+          </button>
+        </div>
+
+        <nav
+          className={`no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain px-4 py-4 lg:w-72 ${
+            collapsed ? "lg:hidden" : ""
+          }`}
+        >
+          <NavGroup title={mainTitle} items={main} />
+          <NavGroup title="Xem chung" items={shared} />
+          <NavGroup title="Tra cứu" items={lookup} />
+          <NavGroup title="Cá nhân" items={personal} />
+        </nav>
+
+        <div
+          className={`mt-auto shrink-0 space-y-2.5 border-t border-line bg-surface px-4 pb-[calc(1rem+env(safe-area-inset-bottom))] pt-4 lg:w-72 ${
+            collapsed ? "lg:hidden" : ""
+          }`}
+        >
+          <div className="flex items-center gap-3 rounded-card border border-line bg-surface-2 px-3 py-2.5">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-card bg-accent-soft text-body-sm font-semibold text-accent">
+              {fullName ? initials(fullName) : "—"}
+            </span>
+            <span className="min-w-0">
+              <span className="block truncate text-body font-semibold text-fg">{fullName ?? "—"}</span>
+              <span className="block truncate text-caption text-fg-muted">{roleLabel(roles)}</span>
+            </span>
+          </div>
+          <AppButton
+            size="md"
+            block
+            onClick={() => (IS_DEV ? setSwapOpen(true) : logout.mutate())}
+            disabled={logout.isPending}
+            icon={<UserSwitch size={22} />}
+          >
+            Đổi người
+          </AppButton>
+
+          {IS_DEV ? (
+            <RoleSwitchModal
+              open={swapOpen}
+              onClose={() => setSwapOpen(false)}
+              onLogout={() => {
+                setSwapOpen(false);
+                logout.mutate();
+              }}
+            />
+          ) : null}
+        </div>
+      </aside>
+    </>
   );
 }

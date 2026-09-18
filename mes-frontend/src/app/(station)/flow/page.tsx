@@ -33,21 +33,21 @@ function StationRow({ no, name, route }: { no: number; name: string; route: stri
   // dùng chỉ biết bằng cách thử.
   const body = (
     <>
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-accent-soft text-body tnum text-accent">
+      <span className="order-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-pill bg-accent-soft text-body tnum text-accent">
         {no}
       </span>
-      <span className="min-w-0 flex-1">
-        <span className="block text-body-lg text-fg">{name}</span>
+      <span className="order-2 min-w-0 flex-1">
+        <span className="block text-body text-fg sm:text-body-lg">{name}</span>
         <span className="block text-body-sm text-fg-muted">{f?.here}</span>
         {f?.back ? (
-          <span className="mt-1 flex items-center gap-1.5 text-body-sm text-warn">
-            <Warning size={16} weight="fill" />
+          <span className="mt-1 flex items-start gap-1.5 text-body-sm text-warn">
+            <Warning size={16} weight="fill" className="mt-1 shrink-0" />
             {f.back}
           </span>
         ) : null}
       </span>
-      <span className="shrink-0 text-right">
-        <span className="block text-body-lg tnum text-fg-muted">
+      <span className="order-4 flex w-full shrink-0 items-baseline gap-4 pl-12 sm:order-3 sm:block sm:w-auto sm:pl-0 sm:text-right">
+        <span className="block text-body tnum text-fg-muted sm:text-body-lg">
           {counts?.counts?.[String(no)] ?? 0} chờ
         </span>
         <span
@@ -58,7 +58,7 @@ function StationRow({ no, name, route }: { no: number; name: string; route: stri
           {counts?.holding?.[String(no)] ?? 0} đang làm
         </span>
       </span>
-      <span className="flex w-6 shrink-0 items-center justify-center">
+      <span className="order-3 flex w-6 shrink-0 items-center justify-center sm:order-4">
         {canOpen ? (
           <CaretRight size={20} className="text-fg-subtle" />
         ) : (
@@ -71,7 +71,7 @@ function StationRow({ no, name, route }: { no: number; name: string; route: stri
   if (!canOpen) {
     return (
       <div
-        className="flex cursor-not-allowed gap-4 px-5 py-4 opacity-60"
+        className="flex cursor-not-allowed flex-wrap gap-x-3 gap-y-1 px-4 py-3 opacity-60 sm:flex-nowrap sm:gap-4 sm:px-5 sm:py-4"
         title={`Bạn không thuộc phòng ban của ${name} — chỉ xem được con số`}
       >
         {body}
@@ -80,7 +80,7 @@ function StationRow({ no, name, route }: { no: number; name: string; route: stri
   }
 
   return (
-    <Link href={route} className="flex gap-4 px-5 py-4 hover:bg-surface-2">
+    <Link href={route} className="flex flex-wrap gap-x-3 gap-y-1 px-4 py-3 hover:bg-surface-2 sm:flex-nowrap sm:gap-4 sm:px-5 sm:py-4">
       {body}
     </Link>
   );
@@ -100,7 +100,7 @@ export default function FlowPage() {
         subtitle="Lệnh đi qua sáu trạm theo thứ tự. Hai chỗ có ngã rẽ quay lui — đó cũng là hai chỗ người vận hành hay hoang mang nhất."
       />
 
-      <div className="grid gap-5 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 lg:gap-5">
         <AppCard
           title="Đường đi chính"
           meta={

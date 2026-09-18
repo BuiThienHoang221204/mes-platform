@@ -61,7 +61,7 @@ export function LineSection({ code, lines, locked, busy, onAssign, onStart, onHo
           : "chưa chia chuyền"
       }
     >
-      <div className="grid grid-cols-3 gap-3 sm:grid-cols-5 lg:grid-cols-7">
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3 lg:grid-cols-7">
         {(catalog ?? [])
           .filter((l) => l.is_active)
           .map((l) => {
@@ -97,7 +97,7 @@ export function LineSection({ code, lines, locked, busy, onAssign, onStart, onHo
         </p>
       ) : (
         <>
-          <div className="mt-4 flex flex-wrap gap-3">
+          <div className="mt-4 flex flex-wrap gap-2 sm:gap-3">
             {picked.length ? (
               <AppButton
                 variant="primary"

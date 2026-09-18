@@ -91,10 +91,10 @@ export function SlotRanking() {
       }
       legend={tierLegend(targetPct)}
       controls={
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <AppDate
             label="Ngày xem"
-            className="w-36 shrink-0"
+            className="min-w-0 flex-1 sm:w-36 sm:flex-none"
             value={day}
             max={today()}
             onChange={(v) => {
@@ -104,7 +104,7 @@ export function SlotRanking() {
           />
           <AppDropdown
             label="Khung gộp"
-            className="w-32 shrink-0"
+            className="min-w-0 flex-1 sm:w-32 sm:flex-none"
             value={String(bucket)}
             onChange={(v) => {
               setBucket(Number(v));
@@ -118,7 +118,7 @@ export function SlotRanking() {
           />
           <AppDropdown
             label="Khung giờ"
-            className="w-40 shrink-0"
+            className="min-w-0 basis-full sm:w-40 sm:basis-auto"
             value={chosen}
             onChange={setSlot}
             options={inDay.map((k) => ({ value: k, label: slotRange(k, ends.get(k)) }))}
@@ -147,9 +147,9 @@ export function SlotRanking() {
         />
       }
     >
-      <div className="mb-4 flex shrink-0 flex-wrap items-baseline gap-4">
+      <div className="mb-4 flex shrink-0 flex-wrap items-baseline gap-x-4 gap-y-1">
         <span
-          className={`text-display tnum ${heroRate < targetPct ? "text-tier-low" : "text-fg"}`}
+          className={`text-h1 tnum sm:text-display ${heroRate < targetPct ? "text-tier-low" : "text-fg"}`}
         >
           {target > 0 ? pct(heroRate) : "—"}
         </span>
@@ -160,7 +160,7 @@ export function SlotRanking() {
         </span>
       </div>
 
-      <div className="no-scrollbar min-h-0 flex-1 space-y-2 overflow-y-auto pr-1">
+      <div className="no-scrollbar space-y-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
         {shown.map((r, i) => {
           const d = delta(r);
           return (
