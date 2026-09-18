@@ -6,6 +6,8 @@ import { createPortal } from "react-dom";
 import { BrandMark } from "@/components/common/BrandMark";
 import { CaretLeft, Copy, ImageSquare, Minus, Plus } from "@/components/common/PhosphorIcons";
 
+const VIEWFINDER_WIDTH = 1280;
+
 const BOX_ID = "mes-camera-scan";
 const FILE_BOX_ID = "mes-camera-file";
 
@@ -49,6 +51,8 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
   const [hint, setHint] = useState<string | null>(null);
   const [zoom, setZoom] = useState<Zoom | null>(null);
   const [host, setHost] = useState<HTMLElement | null>(null);
+  const [scale, setScale] = useState(0);
+  const [view, setView] = useState<{ w: number; h: number } | null>(null);
 
   const trackRef = useRef<MediaStreamTrack | null>(null);
   const onReadRef = useRef(onRead);
@@ -132,7 +136,12 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
         for (const camera of CAMERA_TRIES) {
           if (!alive) break;
           try {
-            await scanner.start(camera, config, onDecoded, onFrameMiss);
+            await scanner.start(
+              camera,
+              { ...config, videoConstraints: { ...camera, width: { ideal: 1920 }, height: { ideal: 1080 } } },
+              onDecoded,
+              onFrameMiss,
+            );
             opened = true;
             break;
           } catch (e) {
@@ -172,6 +181,85 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
     };
   }, [open]);
 
+  /* Vòng giải mã THỨ HAI, chạy song song với `html5-qrcode`.
+   *
+   *  Đo trên ba ảnh nhãn thật người vận hành chụp (QR dày, giấy cong, chụp nghiêng):
+   *  bộ giải của `html5-qrcode` đọc được 0/3, `zxing-wasm` 0/3, còn `jsQR` 2/3.
+   *  Nên không thay bộ nào cả — chạy thêm một bộ nữa, ai đọc ra trước thì thắng.
+   *
+   *  Đọc thẳng từ `videoWidth × videoHeight`, tức độ phân giải GỐC của cảm biến,
+   *  không qua canvas hiển thị. Và KHÔNG phóng to: đo được là phóng to làm jsQR
+   *  hỏng hẳn — bộ nhị phân hoá của nó chia ô theo kích thước cố định, ảnh to lên
+   *  thì mỗi ô không còn trùm đủ một ô mã nữa. */
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    let busy = false;
+    let done = false;
+    const canvas = document.createElement("canvas");
+    const ctx2d = canvas.getContext("2d", { willReadFrequently: true });
+
+    const tick = async () => {
+      if (!alive || busy || done || !ctx2d) return;
+      const v = document.querySelector<HTMLVideoElement>(`#${BOX_ID} video`);
+      if (!v?.videoWidth) return;
+      busy = true;
+      try {
+        canvas.width = v.videoWidth;
+        canvas.height = v.videoHeight;
+        ctx2d.drawImage(v, 0, 0);
+        const frame = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
+        const { default: jsQR } = await import("jsqr");
+        const hit = jsQR(frame.data, frame.width, frame.height, { inversionAttempts: "dontInvert" });
+        if (hit?.data && alive && !done) {
+          done = true;
+          onReadRef.current(hit.data);
+          onCloseRef.current();
+        }
+      } catch {
+        /* khung hình lỗi thì bỏ qua, khung sau thử lại */
+      } finally {
+        busy = false;
+      }
+    };
+
+    const timer = setInterval(tick, 350);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, [open]);
+
+  /* Thu khung ngắm cho vừa màn. Đo SAU khi camera lên hình vì chiều cao thẻ video
+     chỉ biết được khi đã có tỷ lệ của luồng. */
+  useEffect(() => {
+    if (!open) return;
+    let alive = true;
+    const fit = () => {
+      const v = document.querySelector<HTMLVideoElement>(`#${BOX_ID} video`);
+      if (!v || !v.clientWidth || !v.clientHeight) return false;
+      const k = Math.min(window.innerWidth / v.clientWidth, window.innerHeight / v.clientHeight);
+      if (alive) {
+        setScale(k);
+        setView({ w: v.clientWidth * k, h: v.clientHeight * k });
+      }
+      return true;
+    };
+    const timer = setInterval(() => {
+      if (fit()) clearInterval(timer);
+    }, 120);
+    window.addEventListener("resize", fit);
+    window.addEventListener("orientationchange", fit);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+      window.removeEventListener("resize", fit);
+      window.removeEventListener("orientationchange", fit);
+      setScale(0);
+      setView(null);
+    };
+  }, [open]);
+
   const applyZoom = useCallback((value: number) => {
     setZoom((z) => (z ? { ...z, value } : z));
     const track = trackRef.current;
@@ -198,6 +286,29 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
 
   const readFile = useCallback(async (file: File) => {
     setHint(null);
+
+    // jsQR TRƯỚC: trên ảnh nhãn chụp thật nó đọc được 2/3, bộ của html5-qrcode 0/3.
+    try {
+      const bitmap = await createImageBitmap(file);
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx2d = canvas.getContext("2d", { willReadFrequently: true });
+      if (ctx2d) {
+        ctx2d.drawImage(bitmap, 0, 0);
+        const frame = ctx2d.getImageData(0, 0, canvas.width, canvas.height);
+        const { default: jsQR } = await import("jsqr");
+        const hit = jsQR(frame.data, frame.width, frame.height, { inversionAttempts: "attemptBoth" });
+        if (hit?.data) {
+          onReadRef.current(hit.data);
+          onCloseRef.current();
+          return;
+        }
+      }
+    } catch {
+      /* rơi xuống bộ dưới */
+    }
+
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
       const reader = new Html5Qrcode(FILE_BOX_ID);
@@ -222,28 +333,40 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
       aria-label="Quét bằng camera"
       className="fixed inset-0 z-[60] bg-black"
     >
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative w-full max-w-[860px]">
+      <div className="absolute inset-0 overflow-hidden">
+        <div
+          className="absolute left-1/2 top-1/2 origin-center transition-opacity duration-200"
+          style={{
+            width: VIEWFINDER_WIDTH,
+            transform: `translate(-50%, -50%) scale(${scale || 0.3})`,
+            opacity: scale ? 1 : 0,
+          }}
+        >
           <div id={BOX_ID} className="w-full" />
-
-          {problem ? null : (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="relative h-[min(62%,62vw,320px)] w-[min(62%,62vw,320px)]">
-                <span className={`${CORNER} -left-1 -top-1 rounded-tl-lg border-l-4 border-t-4`} />
-                <span className={`${CORNER} -right-1 -top-1 rounded-tr-lg border-r-4 border-t-4`} />
-                <span className={`${CORNER} -bottom-1 -left-1 rounded-bl-lg border-b-4 border-l-4`} />
-                <span className={`${CORNER} -bottom-1 -right-1 rounded-br-lg border-b-4 border-r-4`} />
-                <span className="absolute inset-0 overflow-hidden rounded-md">
-                  <span className="scan-sweep absolute inset-x-0 -translate-y-full">
-                    <span className="block h-24 w-full bg-gradient-to-t from-white/25 via-white/10 to-transparent blur-[2px]" />
-                    <span className="block h-[2px] w-full bg-white shadow-[0_0_20px_6px_rgba(255,255,255,0.6)]" />
-                  </span>
-                </span>
-              </div>
-            </div>
-          )}
         </div>
       </div>
+
+      {/* Khung ngắm nằm NGOÀI lớp bị thu nhỏ, và lấy kích thước video đang hiển thị
+          thật. Để nó bên trong thì nó co theo `scale` và chỉ còn bằng đầu ngón tay. */}
+      {problem || !view ? null : (
+        <div
+          className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+          style={{ width: view.w, height: view.h }}
+        >
+          <div className="relative aspect-square h-[72%] max-h-[320px]">
+            <span className={`${CORNER} -left-1 -top-1 rounded-tl-lg border-l-4 border-t-4`} />
+            <span className={`${CORNER} -right-1 -top-1 rounded-tr-lg border-r-4 border-t-4`} />
+            <span className={`${CORNER} -bottom-1 -left-1 rounded-bl-lg border-b-4 border-l-4`} />
+            <span className={`${CORNER} -bottom-1 -right-1 rounded-br-lg border-b-4 border-r-4`} />
+            <span className="absolute inset-0 overflow-hidden rounded-md">
+              <span className="scan-sweep absolute inset-x-0 -translate-y-full">
+                <span className="block h-24 w-full bg-gradient-to-t from-white/25 via-white/10 to-transparent blur-[2px]" />
+                <span className="block h-[2px] w-full bg-white shadow-[0_0_20px_6px_rgba(255,255,255,0.6)]" />
+              </span>
+            </span>
+          </div>
+        </div>
+      )}
       <div id={FILE_BOX_ID} className="hidden" />
 
       <div className="absolute inset-x-0 top-0 px-3 pt-[calc(1.25rem+env(safe-area-inset-top))]">

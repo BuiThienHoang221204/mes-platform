@@ -36,7 +36,7 @@ const COLUMNS: Column[] = [
   { label: "Trạng thái" },
   { label: "Vòng", right: true },
   { label: "Ghi chú" },
-  { label: "", right: true },
+  { label: "", right: true, stickyRight: true },
 ];
 
 type Props = {

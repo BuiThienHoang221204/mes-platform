@@ -83,7 +83,9 @@ export function RunningTable({
     );
   }
 
-  const columns = withActions ? [...HEAD, { label: "", right: true } as Column] : HEAD;
+  const columns = withActions
+    ? [...HEAD, { label: "", right: true, stickyRight: true } as Column]
+    : HEAD;
 
   const body = rows.map((r) => {
     const wait = r.lines?.reduce((n, l) => Math.max(n, l.wait_sec), 0) ?? null;

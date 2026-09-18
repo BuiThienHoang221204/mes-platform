@@ -1,27 +1,24 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useRef } from "react";
 
 /**
- * §1 — ô quét phải auto-focus và LUÔN GIÀNH LẠI focus.
- * Đầu đọc QR là bàn phím: nó gõ rất nhanh rồi Enter. Mất focus một nhịp là
- * ký tự rơi vào chỗ khác và lần quét đó mất trắng.
+ * Ô quét: Enter là gửi đi. KHÔNG tự giành tiêu điểm.
+ *
+ * Bản trước bám theo FE-PLAN §1 — tự lấy tiêu điểm lúc mở màn, rồi cứ 1,2 giây và
+ * sau MỌI cú bấm chuột lại giành về. Lý do khi đó là đầu đọc QR gõ như bàn phím:
+ * mất tiêu điểm một nhịp là ký tự rơi ra ngoài và lần quét mất trắng.
+ *
+ * Cái giá quá đắt: không ai bấm được vào chỗ khác trên màn quá 1,2 giây — chọn
+ * một dòng hàng đợi, kéo thanh cuộn, bấm nút nào cũng bị con trỏ giật về ô quét.
+ * Và trên điện thoại, giành tiêu điểm là bàn phím ảo bật lên che nửa màn hình.
+ *
+ * FE-REBUILD §9 chốt người vận hành cầm điện thoại và quét bằng camera, nên đầu
+ * đọc gắn ngoài không còn là đường chính. Ai dùng đầu đọc thì bấm vào ô một lần
+ * rồi quét — mất một chạm, đổi lại cả màn hình dùng được bình thường.
  */
-export function useScanInput(onSubmit: (raw: string) => void, enabled = true) {
+export function useScanInput(onSubmit: (raw: string) => void) {
   const ref = useRef<HTMLInputElement>(null);
-
-  const keepFocus = useCallback(() => {
-    if (!enabled) return;
-    const el = ref.current;
-    if (el && document.activeElement !== el) el.focus();
-  }, [enabled]);
-
-  useEffect(() => {
-    keepFocus();
-    const t = setInterval(keepFocus, 1200);
-    window.addEventListener("click", keepFocus);
-    return () => { clearInterval(t); window.removeEventListener("click", keepFocus); };
-  }, [keepFocus]);
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key !== "Enter") return;

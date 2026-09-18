@@ -32,7 +32,7 @@ export function AtStationTable({ station, title, fill = true, action }: Props) {
     { label: "Vòng" },
     { label: "Nhận lúc", cellClassName: "text-body-sm text-fg-muted" },
     { label: "Đang giữ", cellClassName: "text-body-sm tnum text-fg-muted" },
-    ...(action ? [{ label: "", right: true } as Column] : []),
+    ...(action ? [{ label: "", right: true, stickyRight: true } as Column] : []),
   ];
 
   const body = rows.map((r) => ({

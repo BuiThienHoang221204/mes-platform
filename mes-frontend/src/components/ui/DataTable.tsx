@@ -7,6 +7,12 @@ export type Column = {
   right?: boolean;
   className?: string;
   cellClassName?: string;
+  /** Neo cột này vào mép PHẢI, không trôi đi khi cuộn ngang.
+   *
+   *  Dành cho cột nút bấm: bảng đang chạy có 12 cột nên cột nút nằm tít ngoài cùng,
+   *  muốn bấm Dừng hay Hoàn thành là phải cuộn hết bảng rồi mới thấy. Neo lại thì
+   *  thao tác luôn trong tầm tay, còn phần số liệu vẫn cuộn bình thường. */
+  stickyRight?: boolean;
 };
 
 export type Row = {
@@ -39,6 +45,10 @@ const PAD = {
 
 const HEAD =
   "sticky top-0 z-10 bg-surface-2 font-medium shadow-[inset_0_-1px_0_var(--color-line)]";
+
+/* Bóng đổ về bên TRÁI để thấy rõ phần số liệu đang chui xuống dưới cột neo. Thiếu
+   nó thì hai vùng dính liền nhau và mắt không biết chỗ nào đang cuộn. */
+const STICKY = "sticky right-0 shadow-[-10px_0_10px_-10px_rgba(0,0,0,0.35)]";
 
 const BOX = "h-5 w-5 shrink-0 cursor-pointer accent-[var(--color-accent)]";
 
@@ -116,7 +126,13 @@ export function DataTable({
               <th
                 key={i}
                 scope="col"
-                className={[HEAD, p, c.right ? "text-right" : "", c.className ?? ""].join(" ")}
+                className={[
+                  HEAD,
+                  p,
+                  c.right ? "text-right" : "",
+                  c.stickyRight ? `${STICKY} z-20` : "",
+                  c.className ?? "",
+                ].join(" ")}
               >
                 {c.label}
               </th>
@@ -153,6 +169,11 @@ export function DataTable({
                       p,
                       "text-body text-fg",
                       columns[i]?.right ? "text-right tnum" : "",
+                      // Ô neo phải TỰ tô nền: nó nổi lên trên các ô khác, nền trong
+                      // suốt thì chữ của cột bên dưới lòi qua.
+                      columns[i]?.stickyRight
+                        ? `${STICKY} ${on ? "bg-accent-soft" : "bg-surface"}`
+                        : "",
                       columns[i]?.className ?? "",
                       columns[i]?.cellClassName ?? "",
                     ].join(" ")}

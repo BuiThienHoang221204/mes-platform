@@ -264,6 +264,76 @@ Một cái bẫy nữa ở cùng chỗ: `Html5Qrcode.start()` **chỉ nhận `fa
 vào đó là cả ba nấc camera đều hỏng, người dùng thấy "không mở được camera". Muốn xin
 độ phân giải thì phải đi qua `config.videoConstraints`, không phải tham số đầu.
 
+## 6c-bis. Vì sao mã hơi nghiêng là quét không ra
+
+Camera của hệ điều hành đọc được mã ở mọi góc, app thì phải ngắm gần thẳng. Hai lý
+do, và cả hai đều là chuyện **số điểm ảnh tới tay bộ giải mã**.
+
+**1. Canvas giải mã bằng đúng bề ngang thẻ video trên màn.** Thư viện vẽ khung hình
+vào canvas rồi mới giải canvas đó. Thẻ video rộng bằng màn điện thoại thì canvas chỉ
+390px — một luồng 640×480 bị ép xuống 390×293 trước khi giải. Mã nghiêng mất thông
+tin rất nhanh ở cỡ đó.
+
+Cách chữa: giữ khung ngắm ở **1280px** rồi thu nhỏ bằng `transform: scale()` cho vừa
+màn. `transform` không đổi `clientWidth`, nên canvas vẫn 1280px và phép quy đổi toạ
+độ của thư viện vẫn đúng (§6c).
+
+Khung ngắm (bốn góc, tia quét) phải nằm **ngoài** lớp bị thu nhỏ và lấy kích thước
+video đang hiển thị thật — để bên trong thì nó co theo `scale` và chỉ còn bằng đầu
+ngón tay.
+
+**2. Luồng camera mặc định quá thấp.** Không xin gì thì được 640×480. Xin qua
+`config.videoConstraints` (đường DUY NHẤT — tham số đầu của `start()` chỉ nhận
+`facingMode`/`deviceId`) thì được 1920×1080.
+
+Đo trước và sau, cùng một máy:
+
+| | trước | sau |
+| --- | --- | --- |
+| luồng camera | 640×480 | **1920×1080** |
+| canvas giải mã | 390×293 | **1280×720** |
+| lệch tỷ lệ | 0,2% | 0% |
+
+Khoảng **11 lần** số điểm ảnh tới bộ giải mã.
+
+**Về bộ giải mã gốc:** `useBarCodeDetectorIfSupported` **vốn đã bật mặc định** —
+`getUseBarCodeDetectorIfSupported` trả `true` khi không khai gì. Ghi ra trong code
+là để nói rõ ý, không phải để đổi hành vi. Android/Chrome có `BarcodeDetector` nên
+dùng bộ giải của hệ điều hành; Safari trên iOS chưa có nên rơi về bản JavaScript —
+ở đó độ phân giải càng quan trọng.
+
+## 6c-ter. Hai bộ giải mã chạy song song
+
+Sau khi nâng độ phân giải, mã hơi nghiêng VẪN không đọc được. Đo trên ba ảnh nhãn
+thật người vận hành chụp — QR dày, in trên giấy cong, chụp chếch:
+
+| ảnh | bộ của `html5-qrcode` | `zxing-wasm` | `jsQR` |
+| --- | --- | --- | --- |
+| nhãn 1 | ✗ | ✗ | **✓** `*WM084720` |
+| nhãn 2 | ✗ | ✗ | **✓** `*WM084680` |
+| nhãn 3 (giấy cong mạnh) | ✗ | ✗ | ✗ |
+| QR sạch (đối chứng) | ✓ | ✓ | ✓ |
+
+Hàng đối chứng là bắt buộc: không có nó thì không phân biệt được "bộ giải yếu" với
+"cài đặt sai". `zxing-wasm` đọc QR sạch ngon lành nhưng thua cả ba ảnh thật — kết quả
+đó là thật, không phải lỗi cài.
+
+Nên **không thay bộ nào cả, chạy thêm một bộ nữa**: `html5-qrcode` giữ nguyên (nó lo
+camera, và trên Android nó gọi `BarcodeDetector` của hệ điều hành), `jsQR` chạy song
+song mỗi 350ms đọc thẳng từ `videoWidth × videoHeight` — độ phân giải GỐC của cảm
+biến, không qua canvas hiển thị. Ai đọc ra trước thì thắng.
+
+**Không phóng to ảnh trước khi giải.** Đo được: phóng 2× làm jsQR hỏng hẳn cả hai
+ảnh nó vốn đọc được. Bộ nhị phân hoá của nó chia ô theo kích thước cố định; ảnh to
+lên thì mỗi ô không còn trùm đủ một ô mã nữa.
+
+Nút *Chọn QR từ ảnh* cũng thử `jsQR` trước rồi mới tới `html5-qrcode`, cùng lý do.
+
+Kết quả sau khi ghép: app đi từ **0/3 lên 2/3** trên chính ba ảnh đó.
+
+Ảnh thứ ba thì mọi bộ giải JavaScript đều chịu. Trên Android nó còn cửa qua
+`BarcodeDetector`; trên iOS thì không — ở đó phải chụp lại cho phẳng hơn.
+
 ## 6d. Báo đúng LÝ DO camera không mở được
 
 `getUserMedia` hỏng vì bốn lý do, mỗi lý do cần một hành động khác nhau của người

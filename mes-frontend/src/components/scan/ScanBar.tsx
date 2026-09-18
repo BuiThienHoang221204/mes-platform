@@ -14,8 +14,11 @@ export function ScanBar({ station, hint }: { station: number; hint: string }) {
   const scan = useScan(station);
   const draft = useScanStore((s) => s.draft);
   const [camOpen, setCamOpen] = useState(false);
-  const { ref, onKeyDown } = useScanInput((raw) => scan.mutate(raw), !scan.isPending && !camOpen);
+  const { ref, onKeyDown } = useScanInput((raw) => scan.mutate(raw));
 
+  // Lấy tiêu điểm ở ĐÂY thì được: người dùng vừa bấm một dòng trong hàng đợi, nên
+  // con trỏ nhảy vào ô là thứ họ đang đợi. Khác hẳn việc tự giành tiêu điểm lúc mở
+  // màn — xem `useScanInput`.
   useEffect(() => {
     if (!draft || !ref.current) return;
     ref.current.value = draft;
