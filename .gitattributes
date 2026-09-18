@@ -1,0 +1,10 @@
+# Script chạy trong container Linux PHẢI giữ xuống dòng kiểu LF.
+#
+# Kho này được sửa trên Windows. Máy nào bật `core.autocrlf=true` thì lúc clone git
+# đổi LF thành CRLF, và `sh` trong container đọc ký tự `\r` thừa như một phần của
+# lệnh — báo `\r: not found`, hoặc tệ hơn là chạy sai mà không nói gì.
+#
+# Đây không phải chuyện thẩm mỹ: `docker-entrypoint.sh` là thứ chạy migration và
+# khởi động API trên Render.
+*.sh text eol=lf
+Dockerfile text eol=lf

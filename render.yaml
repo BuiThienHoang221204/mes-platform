@@ -1,0 +1,90 @@
+# Bản thiết kế triển khai cho Render — MỘT kho, HAI service, MỘT Postgres.
+#
+# Đọc kèm: docs/TRIEN-KHAI-RENDER.md (các bước và những chỗ phải điền tay).
+#
+# `sync: false` nghĩa là Render KHÔNG lấy giá trị từ file này — bạn điền trong bảng
+# điều khiển. Dùng cho thứ chỉ biết sau khi service đã tồn tại (URL của nhau) hoặc
+# thứ không được để lộ trong kho.
+
+databases:
+  - name: mes-db
+    databaseName: mes
+    user: mes
+    plan: free
+    # Xưởng ở Việt Nam — đặt cùng vùng với hai service để mỗi truy vấn không phải
+    # vòng qua nửa vòng trái đất.
+    region: singapore
+
+services:
+  # ══ Backend ══════════════════════════════════════════════════════════════
+  - type: web
+    name: mes-backend
+    runtime: docker
+    rootDir: mes-backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    # Render gọi đường này để biết service sống hay chết. `/healthz` chỉ trả {ok},
+    # KHÔNG chạm CSDL — đúng loại kiểm tra cho việc này. `/readyz` có chạm CSDL,
+    # để nó ở đây thì CSDL chớp một nhịp là Render giết cả service.
+    healthCheckPath: /healthz
+    envVars:
+      # Render phát chuỗi `postgres://…`; `DatabaseSettings._ep_dung_driver`
+      # trong app/common/config.py tự ghi driver `+psycopg` vào.
+      - key: MES_DATABASE_URL
+        fromDatabase:
+          name: mes-db
+          property: connectionString
+
+      # Render sinh giá trị ngẫu nhiên một lần rồi giữ nguyên. Không bao giờ để
+      # khoá ký token trong kho.
+      - key: MES_JWT_SECRET
+        generateValue: true
+
+      - key: MES_ENV
+        value: prod
+      - key: MES_TZ
+        value: Asia/Ho_Chi_Minh
+
+      # Render phục vụ HTTPS nên bật secure được. `lax` giữ nguyên lá chắn CSRF
+      # của trình duyệt — đi được vì FE proxy `/v1/*` sang đây, trình duyệt chỉ
+      # thấy MỘT origin. Đừng đổi sang `none` nếu chưa làm CSRF token (BE-PLAN §6).
+      - key: MES_COOKIE_SECURE
+        value: "true"
+      - key: MES_COOKIE_SAMESITE
+        value: lax
+
+      # 1 worker × (3 + 2) = tối đa 5 kết nối. Gói free của Postgres có trần kết
+      # nối thấp, và mỗi worker giữ pool RIÊNG nên con số này nhân lên rất nhanh.
+      - key: MES_DATABASE_POOL_SIZE
+        value: "3"
+      - key: MES_DATABASE_MAX_OVERFLOW
+        value: "2"
+
+      # Chỉ cần khi có trình duyệt gọi THẲNG vào BE (không qua proxy của FE).
+      # Đi đúng đường proxy thì để trống — CORS không áp cho gọi máy-sang-máy.
+      - key: MES_CORS_ORIGINS
+        sync: false
+
+  # ══ Frontend ═════════════════════════════════════════════════════════════
+  - type: web
+    name: mes-frontend
+    runtime: node
+    rootDir: mes-frontend
+    plan: free
+    region: singapore
+    # PHẢI gọi qua script của package.json, không phải `next build` / `next start`
+    # trần: next.config.ts chọn thư mục dựng theo biến `npm_lifecycle_event`.
+    # Gọi trần thì build ghi một chỗ, start tìm một chỗ khác, và lỗi báo ra là
+    # "Cannot find module for page: /login" — không nói gì về nguyên nhân thật.
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    envVars:
+      - key: NODE_VERSION
+        value: "20.18.1"
+
+      # URL của mes-backend, dạng https://mes-backend-xxxx.onrender.com — Render
+      # gắn thêm hậu tố ngẫu nhiên nên không đoán trước được, phải chép tay sau
+      # khi service backend đã dựng xong.
+      - key: BACKEND_ORIGIN
+        sync: false

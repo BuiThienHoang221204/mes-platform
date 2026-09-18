@@ -23,7 +23,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Neo vào GỐC DỰ ÁN, không phải thư mục đang đứng: alembic, pytest và uvicorn hay
@@ -56,6 +56,27 @@ class DatabaseSettings(BaseSettings):
     echo: bool = Field(default=False, description="In mọi câu SQL — chỉ bật khi soi lỗi")
     connect_timeout: int = Field(default=5, gt=0,
                                  description="Giây chờ mở kết nối trước khi báo lỗi")
+
+    @field_validator("url", mode="before")
+    @classmethod
+    def _ep_dung_driver(cls, v: object) -> object:
+        """Chuẩn hoá lược đồ về `postgresql+psycopg://` — driver DUY NHẤT app này cài.
+
+        Nhà cung cấp CSDL có quản (Render, Heroku, Fly…) phát chuỗi `postgres://…`.
+        SQLAlchemy 2.0 đã BỎ HẲN lược đồ đó nên nối thẳng là gãy lúc khởi động, còn
+        `postgresql://` trần thì SQLAlchemy đi tìm psycopg2 — thứ không nằm trong
+        `pyproject.toml`. Cả hai đều hỏng vì một lý do: thiếu tên driver.
+
+        Nên ghi tên driver vào thay vì bắt người triển khai sửa tay: chuỗi dán từ
+        bảng điều khiển của nhà cung cấp là dùng được ngay. Chuỗi đã ghi rõ driver
+        (`+psycopg`, `+asyncpg`…) thì giữ nguyên — người viết đang cố ý.
+        """
+        if not isinstance(v, str):
+            return v
+        for scheme in ("postgres://", "postgresql://"):
+            if v.startswith(scheme):
+                return "postgresql+psycopg://" + v[len(scheme):]
+        return v
 
 
 # ══ Nhóm jwt ════════════════════════════════════════════════════════════════
