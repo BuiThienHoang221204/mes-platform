@@ -47,7 +47,14 @@ Nên: đừng trỏ frontend thẳng vào backend bằng URL tuyệt đối, và
 ## 3. Dựng lần đầu
 
 **Bước 1 — tạo Blueprint.** Trong Render: *New → Blueprint*, chọn kho này. Render đọc
-`render.yaml` và dựng cả ba. Nó sẽ hỏi hai biến để trống, cứ bỏ qua, điền ở bước 3.
+`render.yaml` và dựng cả ba.
+
+Nó sẽ hỏi giá trị cho `BACKEND_ORIGIN`. Lúc này `mes-backend` **chưa tồn tại** nên
+chưa thể biết URL của nó. Gõ tạm `http://127.0.0.1:8000` — đúng bằng mặc định trong
+`next.config.ts`, đủ để bản dựng đi qua. Thay bằng URL thật ở bước 3.
+
+**Đừng để trống ô đó.** Render không bỏ qua ô trống, nó đặt biến bằng chuỗi rỗng —
+xem §4.
 
 **Bước 2 — chờ `mes-backend` xanh.** Mở log của nó, phải thấy đúng ba dòng này:
 
@@ -60,11 +67,22 @@ Nên: đừng trỏ frontend thẳng vào backend bằng URL tuyệt đối, và
 Migration chạy ngay trong lúc khởi động, bạn không phải làm gì thêm. Chép URL của
 service, dạng `https://mes-backend-xxxx.onrender.com`.
 
-**Bước 3 — điền `BACKEND_ORIGIN` cho `mes-frontend`.** Vào *mes-frontend → Environment*,
-đặt `BACKEND_ORIGIN` bằng URL vừa chép. Lưu, service tự dựng lại.
+**Bước 3 — điền `BACKEND_ORIGIN` thật cho `mes-frontend`.** Vào *mes-frontend →
+Environment*, thay giá trị tạm bằng URL vừa chép. Lưu.
 
 Hậu tố `xxxx` do Render sinh ngẫu nhiên nên không thể ghi sẵn trong `render.yaml` —
 đây là lý do duy nhất phải điền tay.
+
+**Phải DỰNG LẠI, khởi động lại không đủ.** Next nướng đích proxy thẳng vào bản dựng:
+
+```
+.next-build/routes-manifest.json  ->  "https://mes-backend-xxxx.onrender.com/v1/:path*"
+```
+
+Đổi biến môi trường trên Render vốn kích hoạt một lượt triển khai mới, và lượt đó
+chạy lại `pnpm build` nên giá trị mới được nướng vào. Nhưng nếu frontend vẫn gọi
+nhầm chỗ sau khi đổi, thì kiểm đúng chỗ này trước: vào *Manual Deploy → Clear build
+cache & deploy*. Khởi động lại suông thì bản dựng cũ vẫn giữ URL cũ.
 
 **Bước 4 — thử.** Mở URL của `mes-frontend`, đăng nhập bằng `NV001` / PIN `1234`.
 

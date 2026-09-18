@@ -76,11 +76,17 @@ services:
     rootDir: mes-frontend
     plan: free
     region: singapore
-    # PHẢI gọi qua script của package.json, không phải `next build` / `next start`
-    # trần: next.config.ts chọn thư mục dựng theo biến `npm_lifecycle_event`.
-    # Gọi trần thì build ghi một chỗ, start tìm một chỗ khác, và lỗi báo ra là
-    # "Cannot find module for page: /login" — không nói gì về nguyên nhân thật.
-    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm build
+    # Cài pnpm bằng npm, KHÔNG dùng `corepack enable`. Corepack đi kèm Node 20 mang
+    # khoá ký đã cũ; khi phải hỏi registry phiên bản mới nhất nó không xác minh nổi
+    # chữ ký và gãy với `Cannot find matching keyid` — lỗi chẳng liên quan gì tới dự
+    # án này. Ghim thẳng phiên bản thì không có lượt hỏi nào, không có chữ ký nào
+    # phải xác minh. Số này phải khớp `packageManager` trong package.json.
+    #
+    # `pnpm build` / `pnpm start` PHẢI gọi qua script của package.json, không phải
+    # `next build` / `next start` trần: next.config.ts chọn thư mục dựng theo biến
+    # `npm_lifecycle_event`. Gọi trần thì build ghi một chỗ, start tìm một chỗ khác,
+    # và lỗi báo ra là "Cannot find module for page: /login".
+    buildCommand: npm install -g pnpm@10.14.0 && pnpm install --frozen-lockfile && pnpm build
     startCommand: pnpm start
     envVars:
       - key: NODE_VERSION
