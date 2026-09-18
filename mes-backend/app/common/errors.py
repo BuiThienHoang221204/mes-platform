@@ -36,8 +36,25 @@ class Invalid(DomainError):
 
 
 class Forbidden(DomainError):
+    """KHÔNG ĐỦ QUYỀN — danh tính hợp lệ nhưng không được làm việc này.
+
+    Lấy token mới cũng vô ích, nên client phải KHÔNG refresh khi gặp lỗi này.
+    """
+
     def __init__(self, message: str, *, code: str = Err.FORBIDDEN) -> None:
         super().__init__(message, code=code, status=403)
+
+
+class Unauthenticated(DomainError):
+    """CHƯA XÁC THỰC — thiếu token, token hỏng, hoặc token hết hạn.
+
+    Phải là 401 chứ không phải 403. Trình duyệt chỉ đổi refresh lấy access mới khi
+    thấy 401; trả 403 thì sau 15 phút mọi lời gọi đều hỏng trong khi refresh token
+    còn sống bảy ngày mà không ai dùng tới.
+    """
+
+    def __init__(self, message: str, *, code: str = Err.UNAUTHENTICATED) -> None:
+        super().__init__(message, code=code, status=401)
 
 
 # ── Tên ràng buộc trong DB → (mã, HTTP, câu thông báo) ──────────────────────
@@ -63,11 +80,6 @@ CONSTRAINT_MESSAGES: dict[str, tuple[str, int, str]] = {
     "seg_ends_after_start": (Err.SEG_TIME, 422, "Mốc kết thúc đoạn phải sau mốc bắt đầu"),
     "seg_reason_only_on_wait": (Err.SEG_REASON, 422, "Lý do dừng chỉ gắn với đoạn chờ"),
     "seg_one_open": (Err.SEG_OPEN, 409, "Chuyền này đang có một đoạn chưa đóng ở vòng hiện tại"),
-    "line_run_no_overlap": (
-        Err.LINE_BUSY,
-        409,
-        "Chuyền này đang chạy một MO khác trong cùng khung giờ",
-    ),
     "hourly_output_round_id_work_date_slot_hour_key": (
         Err.HOURLY_DUP,
         409,

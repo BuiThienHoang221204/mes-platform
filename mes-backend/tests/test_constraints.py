@@ -171,8 +171,12 @@ def test_dong_goi_khi_chua_chot_so_sx_bi_chan(db, actor):
 
 
 # ══ Đoạn chuyền — §14B, §17 ═════════════════════════════════════════════════
-def test_mot_chuyen_khong_chay_hai_mo_cung_luc(db, actor):
-    """EXCLUDE USING gist — một máy không thể vừa chạy MO này vừa chạy MO kia."""
+def test_mot_chuyen_chay_hai_mo_cung_luc_thi_DUOC(db, actor):
+    """§14B — chuyền là dây chuyền có N chỗ ngồi, không phải một cái máy.
+
+    Lệnh ít linh kiện chỉ dùng 5 trong 10 chỗ; 5 người còn lại ngồi làm lệnh khác
+    ngay trên chuyền đó. Bản 0001 chặn bằng `line_run_no_overlap`, migration 0008 gỡ.
+    """
     a = _round(db, _mo(db, actor, code="M222222"))
     b = _round(db, _mo(db, actor, code="M333333"))
     ins = text(
@@ -182,9 +186,12 @@ def test_mot_chuyen_khong_chay_hai_mo_cung_luc(db, actor):
         """
     )
     db.execute(ins, {"r": a.id, "u": actor})
-    with pytest.raises(DBAPIError) as e:
-        db.execute(ins, {"r": b.id, "u": actor})
-    assert translate_db_error(e.value).code == "LINE_BUSY"
+    db.execute(ins, {"r": b.id, "u": actor})
+
+    n = db.execute(
+        text("SELECT count(*) FROM line_segment WHERE line_id = 1 AND ended_at IS NULL")
+    ).scalar_one()
+    assert n == 2, "hai lệnh cùng chạy trên một chuyền"
 
 
 def test_mot_chuyen_chay_nhieu_mo_KHAC_gio_thi_duoc(db, actor):

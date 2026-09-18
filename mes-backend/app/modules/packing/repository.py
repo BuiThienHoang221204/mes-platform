@@ -68,6 +68,23 @@ def packing_hourly_of(db: Session, round_id: uuid.UUID) -> list[PackingHourly]:
     ))
 
 
+def packing_hourly_page(db: Session, round_id: uuid.UUID, *,
+                        limit: int, offset: int = 0) -> list[PackingHourly]:
+    """MỘT TRANG sổ thùng theo giờ của vòng."""
+    return list(db.scalars(
+        select(PackingHourly).where(PackingHourly.round_id == round_id)
+        .order_by(PackingHourly.work_date, PackingHourly.slot_hour)
+        .limit(limit).offset(offset)
+    ))
+
+
+def count_packing_hourly(db: Session, round_id: uuid.UUID) -> int:
+    return db.scalar(
+        select(func.count()).select_from(PackingHourly)
+        .where(PackingHourly.round_id == round_id)
+    ) or 0
+
+
 def packed_boxes_pcs(db: Session, round_id: uuid.UUID) -> int:
     """Σ(thùng × quy cách) của vòng, quy ra PCS. Chưa ghi dòng nào thì 0.
 

@@ -14,13 +14,16 @@ from sqlalchemy.orm import Session
 from app.modules.warehouse_in.models import WarehouseIn
 
 
-def save_warehouse_in(db: Session, round_id: uuid.UUID, *, qty_received: int | None,
+def save_warehouse_in(db: Session, round_id: uuid.UUID, *, qty_received: int,
                  counted_at, by: uuid.UUID) -> WarehouseIn:
-    """Ghi dòng nhập kho. Kho không đếm lại thì `qty_received` rỗng và không có mốc đếm."""
+    """Ghi dòng nhập kho. `qty_received` LUÔN có, và luôn bằng SL đã đóng thùng.
+
+    Cột này từng nhận `None` cho trường hợp "kho không đếm lại". Bỏ đường đó đi thì
+    sổ nhập kho đọc được một mình — không phải nối sang `packing` mới biết nhận bao nhiêu.
+    """
     row = WarehouseIn(
         round_id=round_id, qty_received=qty_received,
-        counted_at=counted_at if qty_received is not None else None,
-        counted_by=by if qty_received is not None else None,
+        counted_at=counted_at, counted_by=by,
     )
     db.add(row)
     return row

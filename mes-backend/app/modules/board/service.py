@@ -15,8 +15,12 @@ SQL; nay còn 10 câu bất kể bao nhiêu vòng.
 
 from __future__ import annotations
 
+from datetime import date
+
 from sqlalchemy.orm import Session
 
+from app.common.deps import PAGE_SIZE
+from app.common.errors import NotFound
 from app.common.event_log import repository as event_repo
 from app.common.vocab.enums import STEP_NAMES
 from app.modules.board import repository as board_repo
@@ -26,33 +30,80 @@ from app.modules.production import repository as production_repo
 from app.modules.round import repository as round_repo
 
 
-def running_board(db: Session) -> list[dict]:
-    """Bảng lệnh đang chạy — mỗi vòng đang mở một dòng, kèm KPI thời gian."""
-    return board_repo.running_rows(db)
+def running_board(db: Session, *, limit: int, offset: int = 0) -> dict:
+    """MỘT TRANG bảng lệnh đang chạy — mỗi vòng đang mở một dòng, kèm KPI thời gian."""
+    return {"items": board_repo.running_rows(db, limit=limit, offset=offset),
+            "total": board_repo.count_running(db)}
 
+def queue(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
+    """MỘT TRANG hàng đợi: vòng đang mở, đã qua bước trước, chưa nhận bước này."""
+    return {"items": board_repo.queue_rows(db, station, limit=limit, offset=offset),
+            "total": board_repo.count_queue(db, station)}
 
-def queue(db: Session, station: int) -> list[dict]:
-    """Hàng đợi của một trạm: vòng đang mở, đã qua bước trước, chưa nhận bước này."""
-    return board_repo.queue_rows(db, station)
+def at_station(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
+    """MỘT TRANG lệnh đang nằm trong tay trạm — đã nhận, chưa trạm sau lấy đi."""
+    return {"items": board_repo.at_station_rows(db, station, limit=limit, offset=offset),
+            "total": board_repo.count_at_station(db, station)}
 
+def station_counts(db: Session, *, date_from: date | None = None,
+                   date_to: date | None = None) -> tuple[dict[int, int], dict[int, int]]:
+    """Hai con số mỗi trạm: chờ nhận và đang giữ.
 
-def at_station(db: Session, station: int) -> list[dict]:
-    """Lệnh đang nằm trong tay một trạm — đã nhận, chưa trạm sau lấy đi."""
-    return board_repo.at_station_rows(db, station)
-
-
-def station_counts(db: Session) -> dict[int, int]:
-    """Con số trên thanh trạm — MỘT câu SQL cho cả sáu trạm.
-
-    Riêng Kho đếm CẢ HAI nhóm: lệnh chưa ai nhận, và lệnh đã nhận nhưng chưa bàn
-    giao — hàng vẫn còn ở kho, vẫn cần người làm tiếp. Chỉ đếm nhóm đầu thì badge
-    hiện 0 trong khi kho còn hàng nằm đó.
-
-    Con số ở đây và danh sách của `queue` dựng từ cùng một nguồn SQL nên không thể
-    lệch nhau — xem `repository.QUEUE_SQL`.
+    Con số chờ nhận và danh sách của `queue` dựng từ cùng một nguồn SQL nên không
+    thể lệch nhau — xem `repository.QUEUE_SQL`.
     """
-    return board_repo.queue_counts(db)
+    return board_repo.queue_counts(db, date_from=date_from, date_to=date_to)
 
+def _hourly_out(h) -> dict:
+    """BA số mỗi khung giờ (§7.2b). `headcount`/`target_qty` NULL được — dòng ghi
+    trước migration 0006 không có chúng."""
+    return {
+        "work_date": h.work_date, "slot_hour": h.slot_hour,
+        "headcount": h.headcount, "target_qty": h.target_qty,
+        "qty": h.qty, "note": h.note, "recorded_at": h.recorded_at,
+    }
+
+def _box_out(b) -> dict:
+    """Sổ thùng theo giờ (§7b.2). `pcs_per_box` ĐÓNG DẤU vào từng dòng, không đọc
+    sang `manufacturing_order` — quy cách sửa một lần là mọi dòng cũ quy ra khác."""
+    return {
+        "work_date": b.work_date, "slot_hour": b.slot_hour,
+        "boxes": b.boxes, "pcs_per_box": b.pcs_per_box,
+        "note": b.note, "recorded_at": b.recorded_at,
+    }
+
+def _round_of(db: Session, mo_code: str, round_no: int):
+    """Vòng thứ `round_no` của một MO, hoặc ném lỗi."""
+    mo = mo_repo.get_mo(db, mo_code)
+    rnd = next((r for r in round_repo.rounds_of(db, mo.id) if r.round_no == round_no), None)
+    if rnd is None:
+        raise NotFound(f"{mo_code} không có vòng {round_no}")
+    return rnd
+
+def round_hourly(db: Session, mo_code: str, round_no: int, *,
+                 limit: int, offset: int) -> dict:
+    """MỘT TRANG sản lượng giờ của một vòng — nút Xem thêm của màn truy cứu gọi vào đây.
+
+    Tách khỏi `trace` cùng lý lẽ với nhật ký: `steps` tối đa 6, `lines` tối đa 14,
+    số vòng hiếm khi quá 5 — ba thứ đó có trần tự nhiên. Chỉ sổ giờ và sổ thùng là
+    KHÔNG có trần, nên chúng mới là phần làm cây truy cứu phình theo thời gian.
+    """
+    rnd = _round_of(db, mo_code, round_no)
+    return {
+        "items": [_hourly_out(h) for h in
+                  production_repo.hourly_page(db, rnd.id, limit=limit, offset=offset)],
+        "total": production_repo.count_hourly(db, rnd.id),
+    }
+
+def round_boxes(db: Session, mo_code: str, round_no: int, *,
+                limit: int, offset: int) -> dict:
+    """MỘT TRANG sổ thùng theo giờ của một vòng."""
+    rnd = _round_of(db, mo_code, round_no)
+    return {
+        "items": [_box_out(b) for b in
+                  packing_repo.packing_hourly_page(db, rnd.id, limit=limit, offset=offset)],
+        "total": packing_repo.count_packing_hourly(db, rnd.id),
+    }
 
 def trace(db: Session, mo_code: str) -> dict:
     """Truy cứu một MO: mọi vòng, mọi bước, năng suất từng chuyền, sản lượng giờ."""
@@ -60,7 +111,6 @@ def trace(db: Session, mo_code: str) -> dict:
     rounds = round_repo.rounds_of(db, mo.id)
     ids = [r.id for r in rounds]
 
-    # Năm câu cho MỌI vòng, thay vì năm câu MỖI vòng.
     steps = round_repo.steps_of_rounds(db, ids)
     lines = board_repo.line_rows_of_rounds(db, ids)
     hourly = production_repo.hourly_of_rounds(db, ids)
@@ -68,16 +118,24 @@ def trace(db: Session, mo_code: str) -> dict:
     packing = packing_repo.packing_of_rounds(db, ids)
     box_hourly = packing_repo.packing_hourly_of_rounds(db, ids)
 
+    user_names = round_repo.names_of_users(
+        db,
+        [
+            x
+            for st in steps.values()
+            for s in st
+            for x in (s.accepted_by, s.closed_by)
+            if x is not None
+        ],
+    )
+
     return {
         "code": mo.code,
         "product_name": mo.product_name,
         "quantity": mo.quantity,
-        # Màn Sản xuất cần quy cách để chia thùng lúc kết thúc đóng thùng, và nó
-        # phải có TRƯỚC khi ghi thùng đầu tiên — không suy được từ `packing_hourly`.
         "pcs_per_box": mo.pcs_per_box,
         "status": mo.status,
         "progress": board_repo.mo_progress(db, mo.id),
-        # Cộng dồn qua MỌI vòng — không chỉ vòng cuối
         "step_totals": board_repo.step_totals(db, mo.id),
         "rounds": [
             {
@@ -93,34 +151,19 @@ def trace(db: Session, mo_code: str) -> dict:
                         "step_no": s.step_no,
                         "name": STEP_NAMES[s.step_no],
                         "accepted_at": s.accepted_at,
-                        "accepted_by": s.accepted_by,
+                        "accepted_by": user_names.get(s.accepted_by),
                         "closed_at": s.closed_at,
-                        "closed_by": s.closed_by,
+                        "closed_by": user_names.get(s.closed_by) if s.closed_by else None,
                     }
                     for s in steps.get(rnd.id, [])
                 ],
                 "lines": lines.get(rnd.id, []),
-                # BA số mỗi khung giờ (§7.2b). `headcount`/`target_qty` NULL được —
-                # dòng ghi trước migration 0006 không có chúng.
-                "hourly": [
-                    {
-                        "work_date": h.work_date, "slot_hour": h.slot_hour,
-                        "headcount": h.headcount, "target_qty": h.target_qty,
-                        "qty": h.qty, "note": h.note, "recorded_at": h.recorded_at,
-                    }
-                    for h in hourly.get(rnd.id, [])
-                ],
-                # Sổ thùng theo giờ + HÀNG LẺ (§7b.2). `le_pcs` suy ra, không lưu —
-                # và nó KHÔNG phải `qty_short`: thiếu là chưa làm ra được, lẻ là làm
-                # rồi chưa đủ một thùng.
-                "packing_hourly": [
-                    {
-                        "work_date": b.work_date, "slot_hour": b.slot_hour,
-                        "boxes": b.boxes, "pcs_per_box": b.pcs_per_box,
-                        "note": b.note, "recorded_at": b.recorded_at,
-                    }
-                    for b in box_hourly.get(rnd.id, [])
-                ],
+                "hourly": [_hourly_out(h) for h in hourly.get(rnd.id, [])[:PAGE_SIZE]],
+                "hourly_total": len(hourly.get(rnd.id, [])),
+                "hourly_qty_total": sum(h.qty for h in hourly.get(rnd.id, [])),
+                "hourly_target_total": sum(h.target_qty or 0 for h in hourly.get(rnd.id, [])),
+                "packing_hourly": [_box_out(b) for b in box_hourly.get(rnd.id, [])[:PAGE_SIZE]],
+                "packing_hourly_total": len(box_hourly.get(rnd.id, [])),
                 "box_summary": _box_summary(
                     box_hourly.get(rnd.id, []),
                     production.get(rnd.id),
@@ -135,15 +178,30 @@ def trace(db: Session, mo_code: str) -> dict:
             }
             for rnd in rounds
         ],
-        "events": [
-            {
-                "at": e.occurred_at, "action": e.action, "step_no": e.step_no,
-                "from": e.from_state, "to": e.to_state, "reason": e.reason_text,
-            }
-            for e in event_repo.events_of(db, mo.id)
-        ],
+        "events": events_page(db, mo.id, limit=EVENT_PAGE, offset=0),
+        "events_total": event_repo.count_events(db, mo.id),
     }
 
+EVENT_PAGE = PAGE_SIZE
+"""Số dòng nhật ký mỗi trang. FE và BE phải nói cùng một con số, nên nó ở đây."""
+
+def events_page(db: Session, mo_id, *, limit: int, offset: int) -> list[dict]:
+    """Một trang nhật ký đã dịch sang hình dạng màn hình cần."""
+    return [
+        {
+            "at": e.occurred_at, "action": e.action, "step_no": e.step_no,
+            "from": e.from_state, "to": e.to_state, "reason": e.reason_text,
+        }
+        for e in event_repo.events_of(db, mo_id, limit=limit, offset=offset)
+    ]
+
+def events(db: Session, mo_code: str, *, limit: int, offset: int) -> dict:
+    """Một trang nhật ký của MO, kèm tổng số dòng để biết còn trang sau không."""
+    mo = mo_repo.get_mo(db, mo_code)
+    return {
+        "items": events_page(db, mo.id, limit=limit, offset=offset),
+        "total": event_repo.count_events(db, mo.id),
+    }
 
 def _box_summary(boxes, prod, hours) -> dict:
     """Ba con số của đóng thùng trong một vòng.
@@ -160,7 +218,6 @@ def _box_summary(boxes, prod, hours) -> dict:
         "made_pcs": made,
         "le_pcs": max(0, made - packed),
     }
-
 
 def _row_or_none(row, fields: tuple[str, ...]) -> dict | None:
     if row is None:

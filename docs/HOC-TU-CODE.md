@@ -77,7 +77,7 @@ biết cặp đó gồm những gì.
 | [`warehouse_out/router.py:23-29`](../mes-backend/app/modules/warehouse_out/router.py#L23-L29)<!--at: def handover--> | Router `handover` — **3 dòng**: kiểm quyền → gọi service → dựng câu trả lời. Không transaction, không SQL |
 | [`warehouse_out/service.py:27-41`](../mes-backend/app/modules/warehouse_out/service.py#L27-L41)<!--at: def handover--> | Service `handover` — `@transactional`, khoá, kiểm, ghi |
 | [`warehouse_out/service.py:44-54`](../mes-backend/app/modules/warehouse_out/service.py#L44-L54)<!--at: def handover_batch--> | `handover_batch` — gọi `handover` 100 lần trong **một** transaction |
-| [`common/uow.py:32-75`](../mes-backend/app/common/uow.py#L32-L75)<!--at: @contextmanager -> return wrapper--> | `transaction()` + `transactional` — cơ chế bên dưới |
+| [`common/uow.py:34-80`](../mes-backend/app/common/uow.py#L34-L80)<!--at: @contextmanager -> return wrapper--> | `transaction()` + `transactional` — cơ chế bên dưới |
 
 ### Vì sao — ba lý do, xếp theo sức nặng
 
@@ -110,7 +110,7 @@ nghiệp vụ**, không phải "hàm nào chạm CSDL".
 | Nhóm | Ví dụ | Vì sao |
 |---|---|---|
 | Chỉ đọc | `board/running_board` · `queue` · `trace` | đọc thì không có gì để commit |
-| Không chạm CSDL | `mo/parse_csv` | hàm thuần, không nhận `db` — gắn vào là hỏng |
+| Không chạm CSDL | `reports/shift.bins_of` | hàm thuần, không nhận `db` — gắn vào là hỏng |
 | Nội bộ | `round/open_next_round` · `step_service/accept` | luôn gọi từ trong một điểm vào đã mở |
 | Ngoại lệ | `auth/refresh` | xem [GIAO-DICH.md §5.2](GIAO-DICH.md) |
 
@@ -135,8 +135,8 @@ chính hàm đó tạo ra nó.
 
 | Mở ra | Là gì |
 |---|---|
-| [`mo/service.py:102-113`](../mes-backend/app/modules/mo/service.py#L102-L113)<!--at: def submit--> | `submit` — `get_mo` là SELECT thường, và vòng 1 **sinh ra** ở dòng `open_first_round` |
-| [`round/repository.py:42-55`](../mes-backend/app/modules/round/repository.py#L42-L55)<!--at: def lock_open_round--> | `lock_open_round` — `.with_for_update()`, thứ `qc_decide` gọi qua `lock_round` |
+| [`mo/service.py:80-91`](../mes-backend/app/modules/mo/service.py#L80-L91)<!--at: def submit--> | `submit` — `get_mo` là SELECT thường, và vòng 1 **sinh ra** ở dòng `open_first_round` |
+| [`round/repository.py:43-56`](../mes-backend/app/modules/round/repository.py#L43-L56)<!--at: def lock_open_round--> | `lock_open_round` — `.with_for_update()`, thứ `qc_decide` gọi qua `lock_round` |
 | [`0001_init.py:95-96`](../mes-backend/app/db/migrations/versions/0001_init.py#L95-L96)<!--at: -- Mỗi đơn chỉ MỘT lượt đang mở +1--> | Chỉ mục `mo_round_one_open` — thứ gánh việc chống đua thay cho khoá |
 
 ### Đo thật
@@ -182,7 +182,7 @@ sáu trạm bấm song song.
 
 | Mở ra | Dùng gì | Đóng cái gì |
 |---|---|---|
-| [`round/repository.py:93-101`](../mes-backend/app/modules/round/repository.py#L93-L101)<!--at: def close_step--> | `now()` | bước (`mo_step`) |
+| [`round/repository.py:94-102`](../mes-backend/app/modules/round/repository.py#L94-L102)<!--at: def close_step--> | `now()` | bước (`mo_step`) |
 | [`round/service.py:130-135`](../mes-backend/app/modules/round/service.py#L130-L135)<!--at: def _close_open_segments--> | `clock_timestamp()` | đoạn chuyền (`line_segment`) |
 | [`0001_init.py:194`](../mes-backend/app/db/migrations/versions/0001_init.py#L194)<!--at: CONSTRAINT seg_ends_after_start--> | — | ràng buộc `seg_ends_after_start`, lý do phải khác |
 
@@ -246,7 +246,7 @@ Nó **không** commit.
 |---|---|---|
 | [`qc/service.py:47-49`](../mes-backend/app/modules/qc/service.py#L47-L49)<!--at: qc_repo.save_qc -> db.flush()  # CHECK--> | **Bắt buộc** | không flush thì `CHECK` nổ sau khi vòng mới đã mở, thông báo trỏ nhầm chỗ |
 | [`0001_init.py:114-115`](../mes-backend/app/db/migrations/versions/0001_init.py#L114-L115)<!--at: CONSTRAINT qc_fail_needs_reason +1--> | — | ràng buộc `qc_fail_needs_reason` mà dòng flush kia đang đợi |
-| [`mo/service.py:108-111`](../mes-backend/app/modules/mo/service.py#L108-L111)<!--at: mo.status = MoStatus.PROCESSING -> round_service.open_first_round--> | **Không bắt buộc** | `open_round` bên dưới cũng flush; ở đây chỉ để lỗi nổ đúng dòng |
+| [`mo/service.py:86-89`](../mes-backend/app/modules/mo/service.py#L86-L89)<!--at: mo.status = MoStatus.PROCESSING -> round_service.open_first_round--> | **Không bắt buộc** | `open_round` bên dưới cũng flush; ở đây chỉ để lỗi nổ đúng dòng |
 
 ### Vì sao
 
@@ -267,7 +267,7 @@ do TypeORM sinh ra. Thứ tương đương trong SQLAlchemy là chính `Session`
 |---|---|
 | [`qc/repository.py:1-30`](../mes-backend/app/modules/qc/repository.py#L1-L30)<!--at: FILE--> | Repository **mỏng nhất** — cả file 20 dòng cho một hàm một dòng. Nhìn thì đúng là thừa |
 | [`board/repository.py:1-30`](../mes-backend/app/modules/board/repository.py#L1-L30)<!--at: """Truy vấn cho các màn hình điều hành +29--> | `board/` — module cuối cùng có repository, và lý do vì sao phải có |
-| [`round/repository.py:42-55`](../mes-backend/app/modules/round/repository.py#L42-L55)<!--at: def lock_open_round--> | `.with_for_update()` — một dòng, quên là không có gì báo |
+| [`round/repository.py:43-56`](../mes-backend/app/modules/round/repository.py#L43-L56)<!--at: def lock_open_round--> | `.with_for_update()` — một dòng, quên là không có gì báo |
 
 ### Vì sao vẫn giữ
 
@@ -306,7 +306,7 @@ nói *"tra một dòng"*. `get_qc(...) is None` nói *"vòng này chưa kiểm"*
 tưởng mình đang lồng trong transaction của người khác và **không commit**. Không lỗi, không
 cảnh báo — dữ liệu chỉ đơn giản biến mất.
 
-**Xem code:** [`common/deps.py:71-81`](../mes-backend/app/common/deps.py#L71-L81)<!--at: user = auth_repo.get_user_by_id -> return actor--> — dòng
+**Xem code:** [`common/deps.py:79-85`](../mes-backend/app/common/deps.py#L79-L85)<!--at: user = auth_repo.get_user_by_id -> return actor--> — dòng
 `db.rollback()` cuối `current_actor` tồn tại **chỉ vì** lý do này. Chú thích ngay trên nó nói rõ.
 
 ### Vì sao
@@ -343,8 +343,8 @@ Người ──gán vai──► Vai ──gán quyền──► Quyền ──g
 | Mở ra | Vai trò |
 |---|---|
 | [`security/permissions.py:40-55`](../mes-backend/app/common/security/permissions.py#L40-L55)<!--at: # ══ Bảng quyền -> ] + [PLANNER]--> | `ROLE_PERMISSIONS` — **toàn bộ luật §9b.4**, và 13 vai *sinh ra* từ chính bảng này |
-| [`security/permissions.py:65-83`](../mes-backend/app/common/security/permissions.py#L65-L83)<!--at: def permission_for--> | `permission_for` — **nơi ra quyết định** (PDP) |
-| [`security/actor.py:33-47`](../mes-backend/app/common/security/actor.py#L33-L47)<!--at: def require_step--> | `Actor.require_step` — **nơi thi hành** (PEP) |
+| [`security/permissions.py:76-94`](../mes-backend/app/common/security/permissions.py#L76-L94)<!--at: def permission_for--> | `permission_for` — **nơi ra quyết định** (PDP) |
+| [`security/actor.py:36-50`](../mes-backend/app/common/security/actor.py#L36-L50)<!--at: def require_step--> | `Actor.require_step` — **nơi thi hành** (PEP) |
 
 Router chỉ viết đúng một dòng: `actor.require_step(0)` — xem lại mục 2.
 
@@ -427,8 +427,8 @@ Gom hết `round_id` lại, hỏi mỗi bảng **đúng một câu**, rồi mớ
 
 | Mở ra | Là gì |
 |---|---|
-| [`round/repository.py:111-126`](../mes-backend/app/modules/round/repository.py#L111-L126)<!--at: def steps_of_rounds--> | `steps_of_rounds` — bản theo lô, trả `dict[round_id, …]` |
-| [`board/service.py:52-117`](../mes-backend/app/modules/board/service.py#L52-L117)<!--at: def trace--> | `trace` sau khi sửa — năm lời gọi nằm NGOÀI vòng lặp |
+| [`round/repository.py:128-143`](../mes-backend/app/modules/round/repository.py#L128-L143)<!--at: def steps_of_rounds--> | `steps_of_rounds` — bản theo lô, trả `dict[round_id, …]` |
+| [`board/service.py:108-183`](../mes-backend/app/modules/board/service.py#L108-L183)<!--at: def trace--> | `trace` sau khi sửa — năm lời gọi nằm NGOÀI vòng lặp |
 
 Điểm đáng học: hàm theo lô **trả `dict` chứ không trả `list`**. Người gọi tra thẳng
 `steps.get(rnd.id, [])`, không phải tự nhóm lại — mà tự nhóm chính là chỗ dễ ghép nhầm dữ
@@ -449,7 +449,7 @@ Nay cả hai dựng từ một `QUEUE_SQL` duy nhất:
 
 | Mở ra | Là gì |
 |---|---|
-| [`board/repository.py:91-104`](../mes-backend/app/modules/board/repository.py#L91-L104)<!--at: def queue_counts--> | `queue_counts` — đếm cả sáu trạm bằng MỘT câu, dựng từ `QUEUE_SQL` |
+| [`board/repository.py:175-201`](../mes-backend/app/modules/board/repository.py#L175-L201)<!--at: def queue_counts--> | `queue_counts` — đếm cả sáu trạm bằng MỘT câu, dựng từ `QUEUE_SQL` |
 
 `station_counts`: **7 câu → 1**. Và badge với danh sách không thể lệch nhau được nữa.
 
@@ -460,7 +460,7 @@ như cũ — **vẫn chạy đúng, chỉ chậm dần**, không ai biết.
 
 | Mở ra | Là gì |
 |---|---|
-| [`tests/test_board.py:70-98`](../mes-backend/tests/test_board.py#L70-L98)<!--at: def test_trace_KHONG_hoi_them_khi_MO_co_nhieu_vong--> | Đếm SQL ở MO 1 vòng và 2 vòng, bắt bằng nhau |
+| [`tests/test_board.py:147-173`](../mes-backend/tests/test_board.py#L147-L173)<!--at: def test_trace_KHONG_hoi_them_khi_MO_co_nhieu_vong--> | Đếm SQL ở MO 1 vòng và 2 vòng, bắt bằng nhau |
 
 Test này đã được **kiểm ngược**: đưa một truy vấn trở lại vào vòng lặp thì nó đỏ ngay.
 Sửa một lỗi hiệu năng mà không kiểm ngược test thì không biết test có răng hay không.
@@ -510,8 +510,8 @@ Toàn bộ nằm ở hai module: `board/` và `scan/`. Chín module còn lại t
 
 | Mở ra | Là gì |
 |---|---|
-| [`packing/repository.py:35-40`](../mes-backend/app/modules/packing/repository.py#L35-L40)<!--at: def packing_of_rounds--> | **ORM** — một bảng, lọc theo khoá, dùng `.in_(round_ids)` |
-| [`board/repository.py:107-126`](../mes-backend/app/modules/board/repository.py#L107-L126)<!--at: def line_rows_of_rounds--> | **SQL thô** — đọc view `v_line_time` JOIN `line`; chỗ DUY NHẤT dùng `= ANY` |
+| [`packing/repository.py:37-42`](../mes-backend/app/modules/packing/repository.py#L37-L42)<!--at: def packing_of_rounds--> | **ORM** — một bảng, lọc theo khoá, dùng `.in_(round_ids)` |
+| [`board/repository.py:203-223`](../mes-backend/app/modules/board/repository.py#L203-L223)<!--at: def line_rows_of_rounds--> | **SQL thô** — đọc view `v_line_time` JOIN `line`; chỗ DUY NHẤT dùng `= ANY` |
 | [`scan/repository.py:39-51`](../mes-backend/app/modules/scan/repository.py#L39-L51)<!--at: def scan_remember--> | **SQL thô** — `ON CONFLICT … DO UPDATE`, upsert của Postgres |
 
 ### Vì sao không gộp về một kiểu

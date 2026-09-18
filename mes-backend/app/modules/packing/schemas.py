@@ -6,6 +6,8 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from app.common.schemas import NoteText
+
 
 class PackingFinishIn(BaseModel):
     """`qty_packed` là con số đẩy tiến độ MO (BRD §6b.2), không phải `qty_ok`.
@@ -16,7 +18,7 @@ class PackingFinishIn(BaseModel):
     """
 
     qty_packed: int = Field(gt=0)
-    note_text: str | None = None
+    note_text: NoteText | None = None
 
 
 class PackingHourlyIn(BaseModel):
@@ -33,7 +35,7 @@ class PackingHourlyIn(BaseModel):
     work_date: date
     slot_hour: int = Field(ge=0, le=23, description="Khung giờ bắt đầu, 0-23")
     boxes: int = Field(gt=0, description="Số thùng ĐẦY đóng được trong khung giờ đó")
-    note: str | None = None
+    note: NoteText | None = None
 
 
 class PackingHourlyOut(BaseModel):

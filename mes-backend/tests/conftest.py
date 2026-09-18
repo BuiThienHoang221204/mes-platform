@@ -165,9 +165,23 @@ def flow(db: Session, actor: uuid.UUID):
                 reason_code_id=None, reason_text=reason, actor_id=actor,
             )
 
+        def assign_only(self, code: str, line_code: str):
+            """Gán chuyền nhưng KHÔNG cho chạy — dựng đúng vế `never_ran` của §16."""
+            return production_service.assign_line(
+                db, code=code, line_code=line_code, actor_id=actor)
+
         def run_line(self, code: str, line_code: str = "L01"):
             production_service.assign_line(db, code=code, line_code=line_code, actor_id=actor)
             production_service.line_start(db, code=code, line_code=line_code, actor_id=actor)
+
+        def hold_line(self, code: str, line_code: str = "L01", reason: str = "Hỏng khuôn"):
+            return production_service.line_hold(
+                db, code=code, line_code=line_code,
+                reason_code_id=None, reason_text=reason, actor_id=actor,
+            )
+
+        def start_line(self, code: str, line_code: str = "L01"):
+            return production_service.line_start(db, code=code, line_code=line_code, actor_id=actor)
 
         def close_production(self, code: str, ok: int, ng: int = 0, short: int = 0,
                              ng_reason: str | None = None, short_reason: str | None = None):
@@ -210,9 +224,7 @@ def flow(db: Session, actor: uuid.UUID):
                                                   note_text=note, actor_id=actor)
 
         def warehouse_in(self, code: str):
-            return warehouse_in_service.complete(
-                db, code=code, qty_received=None, actor_id=actor
-            )
+            return warehouse_in_service.complete(db, code=code, actor_id=actor)
 
         def progress(self, code: str):
             return round_service.progress(db, self.round_of(code).mo_id)

@@ -159,7 +159,7 @@ chạm CSDL".
 | Nhóm | Hàm | Vì sao |
 |---|---|---|
 | **Chỉ đọc** | `board/`: `running_board` · `queue` · `station_counts` · `trace` | đọc thì không có gì để commit hay huỷ |
-| **Không chạm CSDL** | `mo/parse_csv` | hàm thuần, không nhận `db` — gắn vào là hỏng |
+| **Không chạm CSDL** | `reports/shift.bins_of` | hàm thuần, không nhận `db` — gắn vào là hỏng |
 | **Nội bộ** | `round/`: `lock_round` · `progress` · `required_sec_for` · `open_first_round` · `open_next_round` · `close_round_completed` · `step_service.guard_can_accept` · `step_service.accept` | luôn được gọi từ trong một điểm vào đã mở giao dịch |
 | **Ngoại lệ** | `auth/refresh` | xem §5.2 |
 

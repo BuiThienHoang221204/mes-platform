@@ -25,6 +25,7 @@ from app.common.uow import transactional
 from app.common.vocab.action_codes import Act
 from app.common.vocab.error_codes import Err
 from app.modules.packing import repository as packing_repo
+from app.modules.packing import service as packing_service
 from app.modules.production import repository as production_repo
 from app.modules.round import service as round_service
 
@@ -72,9 +73,8 @@ def add_packing_hourly(db: Session, *, code: str, work_date: date, slot_hour: in
             f"{mo.code} chưa khai quy cách (pcs/thùng) — không đếm thùng được",
             code=Err.NO_PCS_PER_BOX,
         )
-    pack = packing_repo.get_packing(db, rnd.id)
-    if pack is None:
-        raise DomainError("Chưa bắt đầu đóng thùng", code=Err.NO_PACK)
+    # Ghi thùng đầu tiên tự mở sổ — không bắt bấm thêm một nút không hỏi gì.
+    pack = packing_service.open_book(db, rnd, actor_id)
     if pack.completed_at is not None:
         raise DomainError("Đã kết thúc đóng thùng rồi — không ghi thêm", code=Err.PACK_DONE)
 

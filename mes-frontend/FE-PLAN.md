@@ -555,7 +555,7 @@ src/components/common/PwaInstallPrompt.tsx
 ```json
 {
   "id": "/",
-  "name": "MES — Điều hành sản xuất",
+  "name": "MES | Amphenol RF",
   "short_name": "MES",
   "start_url": "/scan",
   "scope": "/",

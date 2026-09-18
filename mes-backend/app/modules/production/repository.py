@@ -17,10 +17,11 @@ import uuid
 from collections import defaultdict
 from datetime import date
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.common.vocab.enums import SegmentKind
+from app.modules.catalog.models import Line
 from app.modules.production.models import HourlyOutput, LineSegment, Production
 
 
@@ -89,12 +90,52 @@ def open_segments_of(db: Session, round_id: uuid.UUID) -> list[LineSegment]:
     ))
 
 
+def held_line_codes(db: Session, round_id: uuid.UUID) -> list[str]:
+    """Mã những chuyền ĐANG DỪNG của vòng — đoạn WAIT còn mở và có ghi lý do.
+
+    Khác `never_ran`: chuyền dừng đã từng chạy nên có đoạn RUN trong lịch sử, lọt
+    qua phép trừ tập hợp. §16 chặn cả hai, nên phải hỏi riêng.
+    """
+    return list(db.scalars(
+        select(Line.code)
+        .join(LineSegment, LineSegment.line_id == Line.id)
+        .where(
+            LineSegment.round_id == round_id,
+            LineSegment.ended_at.is_(None),
+            LineSegment.kind == SegmentKind.WAIT,
+            LineSegment.hold_reason_text.is_not(None),
+        )
+        .order_by(Line.code)
+    ))
+
+
 def hourly_of(db: Session, round_id: uuid.UUID) -> list[HourlyOutput]:
     """Sản lượng từng giờ của vòng, xếp theo ngày rồi khung giờ."""
     return list(db.scalars(
         select(HourlyOutput).where(HourlyOutput.round_id == round_id)
         .order_by(HourlyOutput.work_date, HourlyOutput.slot_hour)
     ))
+
+
+def hourly_page(db: Session, round_id: uuid.UUID, *,
+                limit: int, offset: int = 0) -> list[HourlyOutput]:
+    """MỘT TRANG sản lượng giờ của vòng. Một vòng chạy một tuần là ~56 dòng.
+
+    `(work_date, slot_hour)` đã là duy nhất trong một vòng — chỉ mục duy nhất của
+    bảng bảo đảm điều đó — nên cặp này đủ làm khoá sắp ổn định, không cần thêm.
+    """
+    return list(db.scalars(
+        select(HourlyOutput).where(HourlyOutput.round_id == round_id)
+        .order_by(HourlyOutput.work_date, HourlyOutput.slot_hour)
+        .limit(limit).offset(offset)
+    ))
+
+
+def count_hourly(db: Session, round_id: uuid.UUID) -> int:
+    return db.scalar(
+        select(func.count()).select_from(HourlyOutput)
+        .where(HourlyOutput.round_id == round_id)
+    ) or 0
 
 
 def hourly_of_rounds(

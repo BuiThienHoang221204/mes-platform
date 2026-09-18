@@ -30,7 +30,11 @@ class JsonFormatter(logging.Formatter):
 
 
 def setup_logging(level: int = logging.INFO) -> None:
-    handler = logging.StreamHandler(sys.stdout)
+    stream = sys.stdout
+    reconfigure = getattr(stream, "reconfigure", None)
+    if reconfigure is not None:
+        reconfigure(encoding="utf-8", errors="replace")
+    handler = logging.StreamHandler(stream)
     handler.setFormatter(JsonFormatter())
     root = logging.getLogger()
     root.handlers = [handler]

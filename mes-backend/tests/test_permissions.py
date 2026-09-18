@@ -187,7 +187,7 @@ def test_KHO_VAT_TU_khong_nhap_kho_thanh_pham_duoc(client, make_mo):
     """Lỗ hổng §9b.1: trước đây cùng một vai KHO nên người giao tự nhận được."""
     code = make_mo()
     client.vai("WAREHOUSE_OUT_MEMBER")
-    r = client.post(f"/v1/warehouse-in/{code}/complete", json={"qty_received": 1})
+    r = client.post(f"/v1/warehouse-in/{code}/complete")
     assert r.status_code == 403
 
 
@@ -259,6 +259,8 @@ def test_MOI_endpoint_deu_khai_bao_quyen():
         "/board/queue/{station}": "nt",
         "/board/at/{station}": "nt — cùng dữ liệu, chỉ khác lát cắt đã nhận hay chưa",
         "/board/counts": "nt",
+        "/reports/mo-progress": "báo cáo tổng — §9b.5 như /board/*, chỉ có số cộng dồn cả xưởng",
+        "/reports/hourly": "nt — không có hàng đợi hay danh sách lệnh của riêng trạm nào",
         "/healthz": "thăm dò sống chết",
         "/readyz": "nt",
         "/openapi.json": "trang /docs",
@@ -287,3 +289,49 @@ def test_MOI_endpoint_deu_khai_bao_quyen():
         if r.path not in CO_Y_MO and not any(g in inspect.getsource(r.endpoint) for g in GAC)
     ]
     assert not thieu, f"endpoint không khai báo quyền: {thieu}"
+
+
+# ══ §12.4 — phạm vi XEM của từng trạm ═══════════════════════════════════════
+def test_QC_khong_doc_duoc_hang_doi_cua_Kho(client):
+    """Giấu nút không phải là phân quyền.
+
+    Sidebar không hiện đường dẫn sang trạm khác, nhưng gõ thẳng URL hay gọi `curl`
+    thì trước đây đọc được hàng đợi của mọi phòng ban.
+    """
+    client.vai("QC_MEMBER")
+    assert client.get("/v1/board/queue/0").status_code == 403
+    assert client.get("/v1/board/at/0").status_code == 403
+    assert client.get("/v1/board/queue/5").status_code == 403
+
+
+def test_moi_vai_doc_duoc_tram_CUA_MINH(client):
+    client.vai("QC_MEMBER")
+    assert client.get("/v1/board/queue/2").status_code == 200
+    assert client.get("/v1/board/at/2").status_code == 200
+
+
+def test_moi_vai_doc_duoc_tram_4(client):
+    """§9b.4 — mọi phòng ban đều View được Step 4, gồm cả Đóng thùng."""
+    for role in ("WAREHOUSE_OUT_MEMBER", "SETUP_MEMBER", "QC_MEMBER", "WAREHOUSE_IN_MEMBER"):
+        client.vai(role)
+        assert client.get("/v1/board/queue/4").status_code == 200, role
+        assert client.get("/v1/board/at/4").status_code == 200, role
+
+
+def test_PLANNER_doc_duoc_moi_tram(client):
+    client.vai(PLANNER)
+    for n in range(6):
+        assert client.get(f"/v1/board/queue/{n}").status_code == 200, n
+        assert client.get(f"/v1/board/at/{n}").status_code == 200, n
+
+
+def test_bang_dang_chay_va_badge_thi_ca_xuong_deu_xem_duoc(client):
+    """§9b.5 — ngoại lệ có chủ đích, không phải sót.
+
+    Giấu bớt thì mỗi tổ mù về công đoạn trước và sau mình, gọi điện hỏi nhau nhiều
+    hơn. Cái bị giới hạn là DANH SÁCH lệnh của từng trạm, không phải bức tranh chung.
+    """
+    for role in ("WAREHOUSE_OUT_MEMBER", "QC_MEMBER", "SETUP_LEADER"):
+        client.vai(role)
+        assert client.get("/v1/board/running").status_code == 200, role
+        assert client.get("/v1/board/counts").status_code == 200, role

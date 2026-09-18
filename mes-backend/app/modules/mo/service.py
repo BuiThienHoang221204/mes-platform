@@ -2,7 +2,6 @@
 
     NewMo                                  dữ liệu một lệnh sắp tạo
     create(db, items, actor_id)            tạo lệnh — MỘT transaction cho cả danh sách
-    parse_csv(csv)                         đọc CSV 4 cột
     submit(db, mo, actor_id)               chốt lệnh + MỞ VÒNG 1
     cancel(db, mo, reason, actor_id)       huỷ kèm lý do
 
@@ -20,6 +19,7 @@ from sqlalchemy.orm import Session
 from app.common import clock
 from app.common.errors import DomainError, Invalid
 from app.common.event_log import repository as event_repo
+from app.common.schemas import MAX_IMPORT_ROWS
 from app.common.uow import transactional
 from app.common.vocab.action_codes import Act
 from app.common.vocab.enums import MoStatus
@@ -41,6 +41,10 @@ class NewMo:
     pcs_per_box: int = 0
 
 
+
+# Một lần nhập không quá chừng này lệnh. Con số này để chặn tệp hỏng và tệp cố
+# tình, không phải để giới hạn nghiệp vụ — xưởng nhập nhiều hơn thì chia tệp.
+
 def _check_code(code: str) -> str:
     c = normalize(code)
     if not MO_STRICT.match(c):
@@ -52,7 +56,7 @@ def _check_code(code: str) -> str:
 
 @transactional
 def create(db: Session, items: list[NewMo], actor_id: uuid.UUID) -> list[ManufacturingOrder]:
-    """Tạo lệnh. Nhận DANH SÁCH vì `POST /mos/import` đưa cả file CSV vào một lần;
+    """Tạo lệnh. Nhận DANH SÁCH vì `POST /mos/import-excel` đưa cả tệp Excel vào một lần;
     `POST /mos` chỉ truyền một phần tử.
     """
     if not items:
@@ -74,31 +78,6 @@ def create(db: Session, items: list[NewMo], actor_id: uuid.UUID) -> list[Manufac
                  reason=f"{mo.product_name} · {mo.quantity} {mo.unit}", actor_id=actor_id)
     return made
 
-
-def parse_csv(text_body: str) -> list[NewMo]:
-    """4 cột bắt buộc + 1 tuỳ chọn:
-
-        Mã, Tên con hàng, Số lượng, TG yêu cầu Step4 (phút)[, Quy cách pcs/thùng]
-
-    Cột 5 thêm SAU nên phải để tuỳ chọn — file CSV cũ của xưởng vẫn nhập được,
-    và thiếu nó thì quy cách là 0 = mặt hàng không đóng thùng.
-    """
-    items: list[NewMo] = []
-    for line in (line.strip() for line in text_body.splitlines()):
-        if not line:
-            continue
-        parts = [p.strip() for p in line.split(",")]
-        if len(parts) < 4:
-            raise Invalid(f'Dòng invalid định dạng: "{line}" — cần 4 cột')
-        try:
-            qty, mins = int(parts[2]), int(parts[3])
-            box = int(parts[4]) if len(parts) > 4 and parts[4] else 0
-        except ValueError as exc:
-            raise Invalid(f'Dòng invalid số: "{line}"') from exc
-        items.append(NewMo(parts[0], parts[1], qty, mins * 60, box))
-    return items
-
-
 @transactional
 def submit(db: Session, code: str, actor_id: uuid.UUID) -> None:
     """Submit khoá cứng đơn VÀ mở vòng 1 — từ đây MO có mặt ở hàng đợi Kho."""
@@ -111,6 +90,38 @@ def submit(db: Session, code: str, actor_id: uuid.UUID) -> None:
     round_service.open_first_round(db, mo, actor_id)
     event_repo.log(db, mo_id=mo.id, action=Act.MO_SUBMIT,
              from_state=MoStatus.DRAFT, to_state=MoStatus.PROCESSING, actor_id=actor_id)
+
+
+@transactional
+def submit_batch(db: Session, *, codes: list[str], actor_id: uuid.UUID) -> int:
+    """Chốt cả lô — MỘT đơn vị công việc.
+
+    Một mã hỏng thì cả lô quay đầu. `submit` bên dưới cũng có `@transactional`
+    nhưng nó NHẬP VÀO giao dịch này chứ không mở cái mới — giống `handover_batch`.
+    Không có nó thì mã thứ 7 hỏng mà sáu mã đầu đã mở vòng 1 rồi.
+    """
+    _check_batch(codes)
+    for code in codes:
+        submit(db, code, actor_id)
+    return len(codes)
+
+
+@transactional
+def cancel_batch(db: Session, *, codes: list[str], reason: str, actor_id: uuid.UUID) -> int:
+    """Huỷ cả lô với CÙNG một lý do — một mã hỏng thì cả lô quay đầu."""
+    _check_batch(codes)
+    for code in codes:
+        cancel(db, code, reason, actor_id)
+    return len(codes)
+
+
+def _check_batch(codes: list[str]) -> None:
+    if not codes:
+        raise Invalid("Chưa chọn lệnh nào")
+    if len(codes) > MAX_IMPORT_ROWS:
+        raise Invalid(f"Chọn {len(codes)} lệnh, quá {MAX_IMPORT_ROWS} cho phép — chia nhỏ ra")
+    if len(set(codes)) != len(codes):
+        raise Invalid("Danh sách có mã trùng")
 
 
 @transactional

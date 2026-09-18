@@ -16,7 +16,13 @@ Không sửa gì, chỉ báo. Lệch thì thoát mã 1 — chạy được trong
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
+
+_out = getattr(sys.stdout, "reconfigure", None)
+if _out is not None:
+    _out(encoding="utf-8", errors="replace")
+
 
 GOC = Path(__file__).resolve().parents[2]
 BE = GOC / "mes-backend"

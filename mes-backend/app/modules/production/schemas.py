@@ -6,6 +6,8 @@ from datetime import date
 
 from pydantic import BaseModel, Field
 
+from app.common.schemas import NoteText, ReasonText
+
 _LINE_CODE = Field(examples=["L02"], pattern=r"^L\d{2}$")
 
 
@@ -26,7 +28,7 @@ class LineHoldIn(BaseModel):
 
     line_code: str = _LINE_CODE
     reason_code_id: int | None = None
-    reason_text: str | None = None
+    reason_text: ReasonText | None = None
 
 
 class ProductionCloseIn(BaseModel):
@@ -43,9 +45,9 @@ class ProductionCloseIn(BaseModel):
     qty_ng: int = Field(ge=0, description="HỎNG — làm ra rồi nhưng hỏng")
     qty_short: int = Field(ge=0, description="THIẾU — không làm ra được")
     ng_reason_code_id: int | None = None
-    ng_reason_text: str | None = None
+    ng_reason_text: ReasonText | None = None
     short_reason_code_id: int | None = None
-    short_reason_text: str | None = None
+    short_reason_text: ReasonText | None = None
 
 
 class HourlyIn(BaseModel):
@@ -70,4 +72,4 @@ class HourlyIn(BaseModel):
     headcount: int = Field(gt=0, description="Số người đứng chuyền khung giờ đó")
     target_qty: int = Field(gt=0, description="Sản lượng YÊU CẦU của khung giờ đó")
     qty: int = Field(gt=0, description="Sản lượng THỰC TẾ làm ra")
-    note: str | None = None
+    note: NoteText | None = None

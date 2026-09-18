@@ -465,7 +465,7 @@ Chia theo **trạm**, đúng như người vận hành nghĩ — không chia the
 | **Đăng nhập** | `POST /v1/auth/login` · `/refresh` · `/logout` | cookie httpOnly, refresh xoay vòng |
 | | `POST /v1/auth/station-token` | token gắn vào THIẾT BỊ ở trạm · chỉ Planner |
 | **Quét** | `POST /v1/scan` | body chỉ `{raw}` — **trạm lấy từ token thiết bị** |
-| **Lệnh** | `POST /v1/mos` · `POST /v1/mos/import` | tạo lẻ · nhập từ CSV |
+| **Lệnh** | `POST /v1/mos` · `POST /v1/mos/bulk` | tạo lẻ · nhập từ tệp Excel |
 | | `POST /v1/mos/{code}/submit` · `POST /v1/mos/{code}/cancel` | huỷ bắt buộc có lý do |
 | **Kho** | `POST /v1/warehouse/{code}/handover` · `POST /v1/warehouse/handover-batch` | §7A cả lô |
 | **QC** | `POST /v1/qc/{code}` | `{result, reason_code_id?, reason_text?}` |
@@ -805,7 +805,7 @@ ENV_FILE = ROOT / ".env"
 
 | # | Câu hỏi | Chặn phần nào |
 |---|---|---|
-| ~~**#36**~~ | ~~Mã MO do hệ thống cấp hay lấy từ ERP?~~ | **Đã chốt 2026-09-15 — lấy từ ERP.** Đã bỏ `POST /mos/batch` và hàm sinh mã liền số. Mã vào hệ thống qua nhập tay hoặc `POST /mos/import` |
+| ~~**#36**~~ | ~~Mã MO do hệ thống cấp hay lấy từ ERP?~~ | **Đã chốt 2026-09-15 — lấy từ ERP.** Đã bỏ `POST /mos/batch` và hàm sinh mã liền số. Mã vào hệ thống qua nhập tay hoặc `POST /mos/bulk` |
 | ~~#26~~ | ~~Phân quyền siết tới đâu?~~ | **Đã chốt 2026-09-14** — BRD §9b. Còn lại là việc code, xem §6 |
 | **#40** | Bỏ in ở Kho thì QR dán lên hàng từ đâu? | Không chặn code, nhưng **chặn chạy thật**: không có tem thì sáu trạm không quét được gì |
 | **#38** | Đóng thùng có cần ô nhập SL? | `packing_service` — bỏ được thì `qty_packed` thành cột tính từ `production.qty_ok`, bớt một ô nhập và một trigger |

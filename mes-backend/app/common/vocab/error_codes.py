@@ -38,6 +38,7 @@ class Err(StrEnum):
     NOT_FOUND = "NOT_FOUND"
     INVALID = "INVALID"
     FORBIDDEN = "FORBIDDEN"
+    UNAUTHENTICATED = "UNAUTHENTICATED"   # chưa đăng nhập hoặc token hết hạn — client nên refresh
 
     # ══ Lệnh sản xuất ═══════════════════════════════════════════════════════
     MO_CODE = "MO_CODE"                     # mã không đúng dạng M + 6 chữ số
@@ -77,7 +78,7 @@ class Err(StrEnum):
     LINE_RUNNING = "LINE_RUNNING"           # đang chạy rồi
     LINE_NOT_RUNNING = "LINE_NOT_RUNNING"   # không đang chạy, không dừng được
     LINE_NOT_RUN = "LINE_NOT_RUN"
-    LINE_BUSY = "LINE_BUSY"                 # chuyền chạy MO khác cùng khung giờ
+    LINE_HELD = "LINE_HELD"                 # còn chuyền ĐANG DỪNG, chưa chốt sổ được (§16)
     LINE_IN_USE = "LINE_IN_USE"             # xoá chuyền đã có lịch sử chạy
     LINE_DUPLICATE = "LINE_DUPLICATE"       # thêm chuyền trùng mã
     HOLD_REASON = "HOLD_REASON"             # dừng máy mà không ghi lý do (§17)
@@ -103,7 +104,6 @@ class Err(StrEnum):
     # ══ Đóng thùng — nằm TRONG trạm 4 ═════════════════════════════════════════
     NO_RUN = "NO_RUN"                       # chưa chuyền nào chạy (§7b)
     PACK_STARTED = "PACK_STARTED"           # đã bắt đầu đóng thùng rồi
-    NO_PACK = "NO_PACK"                     # chưa bắt đầu, không kết thúc được
     PACK_DONE = "PACK_DONE"                 # đã kết thúc rồi
     PACK_STATE = "PACK_STATE"               # kết thúc mà thiếu SL đã đóng
     PACK_OVER_OK = "PACK_OVER_OK"           # đóng vượt SL đạt — trigger ném
@@ -120,6 +120,8 @@ class Err(StrEnum):
 
     # ══ Quét QR ═════════════════════════════════════════════════════════════
     SCAN_READ = "SCAN_READ"                 # đầu đọc trả chuỗi không đọc được
+    SCAN_STATION = "SCAN_STATION"           # làm được nhiều trạm, chưa khai quét cho trạm nào
 
     # ══ Chỉ CSDL ném ra ═════════════════════════════════════════════════════
     DB = "DB"                               # lỗi CSDL không nhận ra được
+    DB_UNAVAILABLE = "DB_UNAVAILABLE"       # không mở được kết nối tới CSDL

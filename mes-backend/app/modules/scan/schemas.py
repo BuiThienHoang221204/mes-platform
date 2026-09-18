@@ -16,6 +16,11 @@ class ScanIn(BaseModel):
         examples=["XM068820"],
         description="Chuỗi thô từ đầu đọc — GIỮ NGUYÊN tiền tố, server tự bỏ phần trước chữ M",
     )
+    station: StationNo | None = Field(
+        default=None,
+        description="Chỉ khai khi người quét thao tác được NHIỀU trạm (Bàn team leader, PLANNER). "
+        "Vai một trạm thì bỏ trống, server tự suy. Server luôn kiểm lại quyền.",
+    )
 
 
 class ScanOut(BaseModel):

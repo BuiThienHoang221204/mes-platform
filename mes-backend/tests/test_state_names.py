@@ -83,7 +83,7 @@ def test_hai_von_tu_trong_CUNG_hai_cot(db, make_mo, flow):
     from app.modules.mo import repository as mo_repo
 
     nhat_ky = {e.action: (e.from_state, e.to_state)
-               for e in event_repo.events_of(db, mo_repo.get_mo(db, code).id)}
+               for e in event_repo.events_of(db, mo_repo.get_mo(db, code).id, limit=500)}
 
     assert nhat_ky["MO_SUBMIT"] == (MoStatus.DRAFT, MoStatus.PROCESSING)
     assert nhat_ky["RUN_START"] == (State.WAITING, State.ASSEMBLING)

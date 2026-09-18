@@ -28,6 +28,11 @@ import re
 import sys
 from pathlib import Path
 
+_out = getattr(sys.stdout, "reconfigure", None)
+if _out is not None:
+    _out(encoding="utf-8", errors="replace")
+
+
 GOC = Path(__file__).resolve().parents[2]          # thư mục dự án
 BE = GOC / "mes-backend"
 DOCS = GOC / "docs"

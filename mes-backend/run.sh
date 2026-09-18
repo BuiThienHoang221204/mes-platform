@@ -41,6 +41,9 @@ case "${1:-help}" in
   docs)       $PY tools/docs_link.py && $PY tools/docs_check.py ;;
   docs-check) $PY tools/docs_link.py --check && $PY tools/docs_check.py ;;
 
+  # Dữ liệu mẫu cho máy phát triển — mã lệnh đều bắt đầu bằng M2, xem tools/seed_demo.py
+  seed-demo) $PY tools/seed_demo.py "${@:2}" ;;
+
   mig)     $PY -m alembic upgrade head ;;
   mig-new) $PY -m alembic revision -m "${2:?cần tên: ./run.sh mig-new \"them cot abc\"}" ;;
   mig-down) $PY -m alembic downgrade -1 ;;

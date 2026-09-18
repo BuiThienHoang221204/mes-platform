@@ -1,7 +1,8 @@
 """Truy vấn nhật ký `mo_event` — CHỈ GHI THÊM.
 
     log(db, ..., action=Act.X)             ghi một dòng nhật ký
-    events_of(db, mo_id, limit=500)        đọc theo thứ tự mới nhất trước
+    events_of(db, mo_id, limit, offset)    đọc một TRANG, mới nhất trước
+    count_events(db, mo_id)                tổng số dòng, để biết còn trang sau không
 
 Không có hàm sửa hay xoá, và cũng không thể có: RULE ở DB chặn UPDATE/DELETE.
 9/10 service đều gọi `log` — đây là thứ dùng chung nhất của cả hệ thống.
@@ -11,7 +12,7 @@ from __future__ import annotations
 
 import uuid
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.common.event_log.models import MoEvent
@@ -32,9 +33,28 @@ def log(db: Session, *, mo_id: uuid.UUID, action: Act, round_id: uuid.UUID | Non
                    actor_id=actor_id))
 
 
-def events_of(db: Session, mo_id: uuid.UUID, limit: int = 500) -> list[MoEvent]:
-    """Nhật ký của một MO, mới nhất trước, mặc định 500 dòng gần nhất."""
+def events_of(db: Session, mo_id: uuid.UUID, *, limit: int, offset: int = 0) -> list[MoEvent]:
+    """Một TRANG nhật ký, mới nhất trước.
+
+    `limit` BẮT BUỘC truyền, không có mặc định. Hàm này trước đây mặc định 500 và
+    tên nó đọc như "mọi dòng của MO"; đổi mặc định thành một trang là mọi chỗ gọi
+    cũ âm thầm mất dòng mà không ai báo. Bắt khai rõ thì chỗ nào cần cả sổ vẫn lấy
+    được cả sổ, chỗ nào phân trang thì nói ra là phân trang.
+
+    Sắp theo `(occurred_at DESC, id DESC)` chứ không chỉ theo thời điểm: nhiều
+    dòng sinh ra trong CÙNG một transaction có `occurred_at` bằng nhau tới từng
+    micro giây, và thứ tự không xác định thì phân trang trả dòng trùng ở trang này
+    rồi bỏ sót dòng khác ở trang sau. `id` là khoá phụ để thứ tự luôn xác định.
+    """
     return list(db.scalars(
         select(MoEvent).where(MoEvent.mo_id == mo_id)
-        .order_by(MoEvent.occurred_at.desc(), MoEvent.id.desc()).limit(limit)
+        .order_by(MoEvent.occurred_at.desc(), MoEvent.id.desc())
+        .limit(limit).offset(offset)
     ))
+
+
+def count_events(db: Session, mo_id: uuid.UUID) -> int:
+    """Tổng số dòng nhật ký — màn hình cần biết còn trang sau hay không."""
+    return db.scalar(
+        select(func.count()).select_from(MoEvent).where(MoEvent.mo_id == mo_id)
+    ) or 0

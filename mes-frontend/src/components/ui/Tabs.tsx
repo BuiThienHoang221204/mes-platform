@@ -58,7 +58,7 @@ export function Tabs({ tabs, initial, actions, className = "" }: Props) {
                 onClick={() => setActive(t.id)}
                 className={`flex min-w-0 shrink-0 items-center gap-2 rounded-t-card px-3 py-2.5 text-body sm:px-4 ${
                   on
-                    ? "-mb-px border border-b-0 border-line bg-surface font-semibold text-fg"
+                    ? "-mb-px bg-surface font-semibold text-fg"
                     : "text-fg-muted hover:bg-surface-3 hover:text-fg"
                 }`}
               >

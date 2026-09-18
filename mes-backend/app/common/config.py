@@ -5,6 +5,8 @@
     MES_SCAN_*       →  settings.scan.dedupe_seconds
     MES_COOKIE_*     →  settings.cookie.secure
     MES_CORS_*       →  settings.cors.origins
+    MES_REPORT_*     →  settings.report.target_pct
+    MES_TZ           →  settings.tz
 
 File này KHÔNG chứa giá trị. Nguồn giá trị, theo thứ tự ưu tiên:
 
@@ -21,7 +23,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Literal
 
-from pydantic import Field, ValidationError
+from pydantic import Field, ValidationError, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Neo vào GỐC DỰ ÁN, không phải thư mục đang đứng: alembic, pytest và uvicorn hay
@@ -52,6 +54,8 @@ class DatabaseSettings(BaseSettings):
     pool_size: int = Field(default=5, gt=0)
     max_overflow: int = Field(default=5, ge=0)
     echo: bool = Field(default=False, description="In mọi câu SQL — chỉ bật khi soi lỗi")
+    connect_timeout: int = Field(default=5, gt=0,
+                                 description="Giây chờ mở kết nối trước khi báo lỗi")
 
 
 # ══ Nhóm jwt ════════════════════════════════════════════════════════════════
@@ -102,6 +106,50 @@ class CookieSettings(BaseSettings):
     domain: str | None = Field(default=None, description="Bỏ trống = đúng host đang phục vụ")
 
 
+# ══ Nhóm report ═════════════════════════════════════════════════════════════
+class ReportSettings(BaseSettings):
+    """Giờ đi làm và ngưỡng đạt định mức — nguồn DUY NHẤT cho màn Báo cáo sản xuất.
+
+    Khung gộp của biểu đồ sản lượng giờ bám đúng sáu mốc dưới đây, và cả câu SQL
+    gộp khung lẫn nhãn trên màn hình đều sinh ra từ chúng. Chép tay sang JS thì
+    đổi giờ làm là hai nơi lệch nhau mà không ai báo.
+
+    `max_*` là trần chặn đầu vào. Thiếu trần thì `from=1900-01-01` quét sạch bảng,
+    và mỗi khoảng ngày lạ lại để lại một mục trong `read_cache` — bộ nhớ chỉ có lên.
+    """
+
+    model_config = _config("MES_REPORT_")
+
+    target_pct: int = Field(default=85, ge=1, le=100, description="Đạt bao nhiêu % định mức là ĐẠT")
+
+    day_start: int = Field(default=6, ge=0, le=23, description="Khung 1 giờ trải từ mốc này")
+    shift_start: int = Field(default=8, ge=0, le=23)
+    lunch_start: int = Field(default=12, ge=1, le=24)
+    lunch_end: int = Field(default=13, ge=1, le=24)
+    shift_end: int = Field(default=17, ge=1, le=24)
+    day_end: int = Field(default=22, ge=1, le=24, description="…tới mốc này")
+
+    max_days: int = Field(default=31, gt=0, le=366, description="Trần độ dài khoảng ngày")
+    max_codes: int = Field(default=200, gt=0, le=2000, description="Trần số mã lệnh lọc một lần")
+    max_rows: int = Field(default=200, gt=0, le=1000, description="Trần số dòng của tiến độ lệnh")
+
+    @model_validator(mode="after")
+    def _moc_phai_tang_dan(self) -> ReportSettings:
+        moc = (self.day_start, self.shift_start, self.lunch_start,
+               self.lunch_end, self.shift_end, self.day_end)
+        if list(moc) != sorted(moc) or len(set(moc)) != len(moc):
+            raise ValueError(
+                "sáu mốc giờ phải tăng dần và khác nhau: "
+                "day_start < shift_start < lunch_start < lunch_end < shift_end < day_end"
+            )
+        return self
+
+    @property
+    def shift_span(self) -> int:
+        """Khoảng cách đầu–cuối ca, tính cả giờ nghỉ. 08→17 là 9."""
+        return self.shift_end - self.shift_start
+
+
 # ══ Nhóm CORS ═══════════════════════════════════════════════════════════════
 class CorsSettings(BaseSettings):
     model_config = _config("MES_CORS_")
@@ -116,11 +164,17 @@ class Settings(BaseSettings):
     model_config = _config("MES_")
 
     env: str = Field(default="dev", description="dev | staging | prod")
+
+    tz: str = Field(
+        default="Asia/Ho_Chi_Minh",
+        description="Múi giờ của XƯỞNG — quyết định 'ngày' trong mọi bộ lọc theo ngày",
+    )
     database: DatabaseSettings = Field(default_factory=DatabaseSettings)
     jwt: JwtSettings = Field(default_factory=JwtSettings)
     scan: ScanSettings = Field(default_factory=ScanSettings)
     cookie: CookieSettings = Field(default_factory=CookieSettings)
     cors: CorsSettings = Field(default_factory=CorsSettings)
+    report: ReportSettings = Field(default_factory=ReportSettings)
 
 
 # (tên thuộc tính, tiền tố biến môi trường, lớp) — thêm nhóm mới thì thêm một dòng.
@@ -130,6 +184,7 @@ GROUPS = (
     ("scan", "MES_SCAN_", ScanSettings),
     ("cookie", "MES_COOKIE_", CookieSettings),
     ("cors", "MES_CORS_", CorsSettings),
+    ("report", "MES_REPORT_", ReportSettings),
 )
 
 

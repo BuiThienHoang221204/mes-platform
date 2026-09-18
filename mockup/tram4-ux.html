@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trạm 4 — thiết kế lại luồng chuyền và đóng thùng</title>
+<style>
+:root{
+  --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F7F7F7; --surface-3:#F0F0F0;
+  --line:#EBEBEB; --line-strong:#DDDDDD;
+  --fg:#1A1A1A; --fg-muted:#6B7280; --fg-subtle:#9CA3AF;
+  --accent:#0E6E99; --accent-on:#FFFFFF; --accent-soft:#E3F2F9; --accent-line:#A9D4E6;
+  --ok:#0A7A34; --ok-soft:#E2F4E9;
+  --warn:#8A5A06; --warn-soft:#FBF0DD;
+  --danger:#B02A2A; --danger-soft:#FAE8E8;
+  --r-sm:10px; --r-md:14px; --r-lg:20px; --r-pill:9999px;
+  --mono:ui-monospace,'Cascadia Mono','Segoe UI Mono',Consolas,monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--surface-2);color:var(--fg);
+  font:16px/1.6 'Google Sans Flex',system-ui,-apple-system,'Segoe UI',sans-serif;}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px 96px}
+h1{font-size:34px;line-height:1.2;margin:0 0 8px}
+h2{font-size:25px;margin:48px 0 6px;scroll-margin-top:72px}
+h3{font-size:19px;margin:28px 0 8px}
+p{margin:10px 0}
+code{font-family:var(--mono);background:var(--surface-3);padding:1px 6px;border-radius:6px;font-size:.88em}
+
+.top{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.94);
+  backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin-bottom:28px}
+.top .wrap{padding:12px 16px;display:flex;gap:18px;flex-wrap:wrap;align-items:center}
+.top b{font-size:15px}
+.top a{font-size:14px;text-decoration:none;color:var(--fg-muted)}
+.top a:hover{color:var(--accent)}
+
+header.hero{padding:40px 0 4px}
+.lede{font-size:18px;color:var(--fg-muted);max-width:70ch}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-lg);
+  padding:22px 24px;margin:16px 0;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.card.flush{padding:0;overflow:hidden}
+.card>h3:first-child{margin-top:0}
+.bad{border-left:4px solid var(--danger);background:var(--danger-soft)}
+.warnbox{border-left:4px solid var(--warn);background:var(--warn-soft)}
+.okbox{border-left:4px solid var(--ok);background:var(--ok-soft)}
+
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:var(--r-pill);
+  padding:3px 12px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--danger-soft);color:var(--danger)}
+.pill.flat{background:var(--surface-3);color:var(--fg-muted)}
+.pill.acc{background:var(--accent-soft);color:var(--accent)}
+
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:11px 16px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);font-weight:600}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.mono{font-family:var(--mono)}
+
+.grid2{display:grid;gap:16px;grid-template-columns:1fr 1fr}
+@media(max-width:840px){.grid2{grid-template-columns:1fr}}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  min-height:46px;padding:0 20px;border-radius:var(--r-sm);border:1px solid var(--line-strong);
+  background:var(--surface);color:var(--fg);font:inherit;font-weight:600;font-size:15px;cursor:pointer}
+.btn:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-on)}
+.btn.primary:hover:not(:disabled){background:#0A5877;color:#fff}
+.btn.danger{background:var(--danger);border-color:var(--danger);color:#fff}
+.btn.danger:hover:not(:disabled){color:#fff}
+.btn.sm{min-height:38px;padding:0 14px;font-size:14px}
+.btn.big{min-height:54px;font-size:16px;padding:0 26px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+label.f{display:block;font-size:13px;font-weight:600;color:var(--fg-muted);margin-bottom:5px}
+.inp{width:100%;min-height:46px;padding:0 13px;border:1px solid var(--line-strong);
+  border-radius:var(--r-sm);background:var(--surface);font:inherit;font-size:16px}
+.inp:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:var(--accent)}
+.inp.err{border-color:var(--danger);background:var(--danger-soft)}
+.hint{font-size:12.5px;color:var(--fg-subtle);margin-top:5px}
+.errtxt{font-size:13px;color:var(--danger);font-weight:600;margin-top:6px}
+
+.frame{border:1px solid var(--line-strong);border-radius:var(--r-lg);overflow:hidden;
+  background:var(--surface-2);box-shadow:0 10px 30px rgba(0,0,0,.08);margin-top:16px}
+.frame .bar{background:var(--surface-3);border-bottom:1px solid var(--line-strong);
+  padding:9px 16px;font-size:12.5px;color:var(--fg-muted);display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line-strong);display:inline-block}
+.frame .body{padding:20px}
+
+.next{border:2px solid var(--accent);background:var(--accent-soft);border-radius:var(--r-md);
+  padding:16px 18px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.next .txt{flex:1;min-width:240px}
+.next .lbl{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--accent)}
+.next .big{font-size:20px;font-weight:700;margin:2px 0}
+.next .sub{font-size:13.5px;color:var(--fg-muted)}
+.next.done{border-color:var(--ok);background:var(--ok-soft)}
+.next.done .lbl{color:var(--ok)}
+.next.alert{border-color:var(--warn);background:var(--warn-soft)}
+.next.alert .lbl{color:var(--warn)}
+
+.sect{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-md);margin-top:16px}
+.sect>.hd{padding:13px 18px;border-bottom:1px solid var(--line);display:flex;
+  gap:10px;align-items:baseline;flex-wrap:wrap}
+.sect>.hd .t{font-size:12px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--fg-subtle)}
+.sect>.hd .s{font-size:13px;color:var(--fg-subtle);flex:1}
+.sect>.bd{padding:18px}
+.sect.off{opacity:.45;pointer-events:none}
+
+.two{display:grid;gap:22px;grid-template-columns:1fr 1fr}
+.two>div{min-width:0}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.colhd{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--fg-subtle);padding-bottom:9px;margin-bottom:13px;border-bottom:1px solid var(--line)}
+.fieldrow{margin-bottom:13px}
+
+.task{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid var(--line)}
+.task:last-child{border-bottom:0}
+.task .n{flex:0 0 30px;height:30px;border-radius:50%;background:var(--surface-3);
+  color:var(--fg-muted);display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700}
+.task.done .n{background:var(--ok);color:#fff}
+.task.now .n{background:var(--accent);color:#fff}
+.task .m{flex:1;min-width:0}
+.task .ti{font-size:16.5px;font-weight:600}
+.task.off .ti{color:var(--fg-subtle)}
+.task .ds{font-size:13.5px;color:var(--fg-muted);margin-top:2px}
+
+.recon{background:var(--surface-2);border:1px solid var(--line);border-radius:var(--r-sm);
+  padding:14px 16px;margin:14px 0;font-variant-numeric:tabular-nums}
+.recon .r{display:flex;justify-content:space-between;gap:16px;padding:5px 0;font-size:15px}
+.recon .r.tot{border-top:1px solid var(--line-strong);margin-top:7px;padding-top:10px;font-weight:700}
+.recon .r span:last-child{font-family:var(--mono)}
+
+.choice{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;margin-top:10px;
+  border:1px solid var(--line-strong);border-radius:var(--r-sm);background:var(--surface);cursor:pointer}
+.choice:hover{border-color:var(--accent-line)}
+.choice.sel{border-color:var(--accent);border-width:2px;background:var(--accent-soft);padding:13px 15px}
+.choice .rd{flex:0 0 19px;height:19px;border-radius:50%;border:2px solid var(--line-strong);margin-top:3px}
+.choice.sel .rd{border-color:var(--accent);border-width:6px}
+.choice .ct{font-size:15.5px;font-weight:600}
+.choice .cs{font-size:13px;color:var(--fg-muted);margin-top:2px}
+
+.lines{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(112px,1fr))}
+.ln{min-height:56px;border:1px solid var(--line-strong);border-radius:var(--r-sm);
+  background:var(--surface);font:inherit;font-weight:700;font-family:var(--mono);font-size:17px;
+  cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
+.ln small{font-family:var(--font-sans);font-size:11px;font-weight:600;letter-spacing:.04em}
+.ln.on{border-color:var(--accent);border-width:2px;background:var(--accent-soft);color:var(--accent)}
+.ln.run{border-color:var(--ok);border-width:2px;background:var(--ok-soft);color:var(--ok)}
+.ln.hold{border-color:var(--danger);border-width:2px;background:var(--danger-soft);color:var(--danger)}
+.ln:disabled{opacity:.35;cursor:not-allowed}
+
+.log{max-height:230px;overflow:auto;font-family:var(--mono);font-size:12.5px;line-height:1.75}
+.log div{padding:2px 0;border-bottom:1px solid var(--line);color:var(--fg-muted)}
+.log div:last-child{border-bottom:0}
+.log b{color:var(--fg)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:50;
+  background:var(--fg);color:#fff;padding:13px 22px;border-radius:var(--r-pill);
+  font-size:14.5px;font-weight:600;box-shadow:0 10px 30px rgba(0,0,0,.25);
+  opacity:0;pointer-events:none;transition:opacity .18s, transform .18s;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+.toast.bad{background:var(--danger)}
+.toast.ok{background:var(--ok)}
+
+.tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:18px 0 0}
+.tools .sp{flex:1}
+
+ul.tight{margin:8px 0;padding-left:22px} ul.tight li{margin:5px 0}
+.kbd{font-family:var(--mono);font-size:13px;background:var(--surface-3);
+  border:1px solid var(--line-strong);border-radius:5px;padding:1px 6px}
+.oldtab{display:flex;border:1px solid var(--line);border-radius:var(--r-md);
+  overflow:hidden;background:var(--surface);font-size:13.5px}
+.oldtab>div{padding:11px 13px;border-right:1px solid var(--line);flex:1;min-width:0}
+.oldtab>div:last-child{border-right:0}
+.oldtab .on{background:var(--accent-soft)}
+.oldtab .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oldtab .sb{font-size:11.5px;color:var(--fg-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.foot{margin-top:60px;padding-top:22px;border-top:1px solid var(--line);
+  font-size:13.5px;color:var(--fg-subtle)}
+</style>
+</head>
+<body>
+
+<nav class="top"><div class="wrap">
+  <b>Trạm 4 · thiết kế lại</b>
+  <a href="#chan">Chẩn đoán</a>
+  <a href="#loi">2 lỗi thật</a>
+  <a href="#ng">Nguyên tắc</a>
+  <a href="#mock">Bấm thử</a>
+  <a href="#sosanh">So sánh</a>
+</div></nav>
+
+<div class="wrap">
+
+<header class="hero">
+  <h1>Trạm 4 — chuyền và đóng thùng</h1>
+  <p class="lede">Bốn màn hình <b>Sản lượng giờ · Chốt sổ SX · Đóng thùng · Kết thúc đóng thùng</b>
+  hiện tại không nói cho người dùng biết phải bấm gì trước, gì sau, và cái nào còn bấm được.
+  Tài liệu này mổ xẻ vì sao, rồi đưa một bản thay thế <b>bấm thử được thật</b> ở mục 4.</p>
+</header>
+
+<h2 id="chan">1 · Chẩn đoán</h2>
+
+<p>Bốn màn hình đó không rối vì thiếu chữ hướng dẫn. Chúng rối vì <b>được chia theo cấu trúc dữ
+liệu của backend, không theo công việc của người đứng máy</b>. Bốn endpoint thành bốn tab.</p>
+
+<div class="card">
+  <h3 style="margin-top:0">Người đứng máy thật ra làm gì</h3>
+  <p style="margin-bottom:0">Hỏi họ mô tả ca làm, câu trả lời không có chữ &ldquo;tab&rdquo; nào:</p>
+  <ul class="tight">
+    <li><b>Mỗi giờ</b> &mdash; ghi làm được bao nhiêu, đóng được mấy thùng. Hai con số, một lần cầm bút, <b>cùng một lúc</b>.</li>
+    <li><b>Cuối vòng</b> &mdash; chốt sổ sản xuất, rồi chốt sổ đóng thùng. Đúng thứ tự đó.</li>
+  </ul>
+  <p style="margin-bottom:0">Hai thời điểm. Màn hình đang chia thành bốn nơi, và hai việc làm cùng lúc
+  thì bị đẩy sang hai tab khác nhau.</p>
+</div>
+
+<h3>Sáu vấn đề cụ thể</h3>
+
+<div class="card flush"><table>
+  <tr><th style="width:34px">#</th><th>Vấn đề</th><th>Hậu quả người dùng gặp</th></tr>
+  <tr><td class="mono">1</td>
+    <td><b>Thanh bước là thanh điều hướng đội lốt thanh tiến độ.</b>
+      Đánh số 1-2-3 rồi rẽ nhánh, nhìn như &ldquo;làm theo thứ tự&rdquo;, nhưng bấm vào chỉ
+      <i>chuyển trang</i> chứ không làm gì.</td>
+    <td>Người mới bấm lần lượt 1→2→3→4→5 và tưởng đã hoàn thành quy trình,
+      trong khi chưa nhập gì cả.</td></tr>
+  <tr><td class="mono">2</td>
+    <td><b>Thanh bước không mang trạng thái.</b>
+      <span class="pill flat">Chốt sổ SX</span> trông y hệt nhau dù đã chốt hay chưa.</td>
+    <td>Phải bấm vào từng tab mới biết mình đang ở đâu. Đúng câu hỏi
+      &ldquo;<i>cái nào bấm được</i>&rdquo; của bạn.</td></tr>
+  <tr><td class="mono">3</td>
+    <td><b>&ldquo;Sản lượng giờ&rdquo; không phải một bước.</b> Nó lặp 8&ndash;10 lần một ca.
+      Xếp ngang hàng với &ldquo;Chốt sổ SX&rdquo; &mdash; việc làm đúng một lần &mdash; là sai loại.</td>
+    <td>Ghi xong giờ 16h, màn hình im. Không gì nói &ldquo;17h quay lại đây&rdquo;.</td></tr>
+  <tr><td class="mono">4</td>
+    <td><b>Hai bộ chọn độc lập, không nói chuyện với nhau.</b>
+      Chọn lệnh ở bảng trên, chọn tab ở thanh dưới. 2 lệnh × 4 tab = 8 tổ hợp.</td>
+    <td>Mở nhầm tab cho nhầm lệnh mà không có gì cản.</td></tr>
+  <tr><td class="mono">5</td>
+    <td><b>Mỗi tab lặp hai khối giống hệt nhau trước khi tới phần khác nhau.</b>
+      Bảng <i>Đang chạy tại Sản xuất</i> + 4 ô thống kê &asymp; 600px.</td>
+    <td>Bốn ảnh chụp màn hình của bạn nhìn gần như trùng nhau.</td></tr>
+  <tr><td class="mono">6</td>
+    <td><b>Không có câu trả lời cho &ldquo;giờ tôi bấm gì&rdquo;.</b></td>
+    <td>Onboarding phải dạy miệng. Dạy xong vẫn quên, vì màn hình không nhắc lại.</td></tr>
+</table></div>
+
+<h2 id="loi">2 · Hai lỗi thật, không phải chuyện bố cục</h2>
+
+<div class="card bad">
+  <h3 style="margin-top:0">Lỗi A &mdash; &ldquo;Thùng lẻ 800 pcs&rdquo; là sai</h3>
+  <p>Số thật lấy từ API của bạn, lệnh <span class="mono">M011110</span>:</p>
+  <div class="recon" style="background:#fff">
+    <div class="r"><span>Chuyền làm ra</span><span>1.000 pcs</span></div>
+    <div class="r"><span>Đã ghi sổ thùng</span><span>200 pcs &nbsp;(1 thùng)</span></div>
+    <div class="r tot"><span>Chênh</span><span>800 pcs</span></div>
+  </div>
+  <p>Màn hình gọi 800 pcs đó là <b>Thùng lẻ &mdash; chưa đủ thùng</b>. Nhưng quy cách là
+  <b>200 pcs/thùng</b>, và 800 ÷ 200 = <b>4 thùng đầy chằn chặn</b>. Lẻ thật sự là <b>0</b>.</p>
+  <p style="margin-bottom:0">Công thức đang là <code>le_pcs = made − packed</code>, gộp chung hai thứ khác hẳn nhau:
+  <b>hàng đã đóng nhưng chưa ghi sổ</b> (việc còn phải làm) và <b>hàng lẻ chưa đủ một thùng</b>
+  (bình thường). Đúng phải là <code>lẻ = (made − packed) % pcs_per_box</code>, phần còn lại là
+  <b>thùng chưa ghi sổ</b>.</p>
+</div>
+
+<div class="card bad">
+  <h3 style="margin-top:0">Lỗi B &mdash; ô &ldquo;Tổng pcs đã đóng&rdquo; có mặc định nguy hiểm</h3>
+  <p>Ô đó để trống với gợi ý <span class="kbd">200</span>. Bấm <b>Kết thúc đóng thùng</b>
+  mà không gõ gì thì hệ thống nhận <b>200</b>.</p>
+  <p>Hậu quả: 800 pcs đã làm ra biến thành <b>hàng thiếu</b>, hệ thống <b>mở vòng 2</b> để làm bù
+  800 cái đang nằm sẵn trong thùng. Không cảnh báo, không hỏi lại, không hoàn tác được.</p>
+  <p style="margin-bottom:0">Và con số đáng lẽ bắt được chuyện này &mdash; <b>chênh 800</b> &mdash; thì đang bị dán nhãn
+  <i>&ldquo;KHÔNG phải hàng thiếu&rdquo;</i>. Lỗi A làm lỗi B trở nên vô hình.</p>
+</div>
+
+<h2 id="ng">3 · Nguyên tắc thiết kế lại</h2>
+
+<div class="card flush"><table>
+  <tr><th style="width:34px">#</th><th>Nguyên tắc</th><th>Vì sao</th></tr>
+  <tr><td class="mono">1</td>
+    <td><b>Chia theo <i>khi nào làm</i>, không theo <i>endpoint nào</i>.</b>
+      Hai khối: <i>Trong ca</i> (lặp) và <i>Kết thúc vòng</i> (một lần, có thứ tự).</td>
+    <td>Khớp cách người ta thật sự làm việc. Hai số ghi cùng lúc thì nằm cạnh nhau.</td></tr>
+  <tr><td class="mono">2</td>
+    <td><b>Một trang, không nhảy tab</b> cho phần song song.</td>
+    <td>Nhánh song song là ràng buộc thứ tự ở backend, không phải cấu trúc điều hướng.
+      Bắt người dùng dịch đồ thị phụ thuộc thành thao tác bấm là đẩy việc của máy sang cho người.</td></tr>
+  <tr><td class="mono">3</td>
+    <td><b>Luôn có ô &ldquo;Việc tiếp theo&rdquo;</b> ở đầu trang: một câu, một nút.</td>
+    <td>Trả lời thẳng câu &ldquo;tôi phải bấm cái nào&rdquo;. Đây là thứ làm onboarding tự chạy.</td></tr>
+  <tr><td class="mono">4</td>
+    <td><b>Mọi thao tác mang trạng thái nhìn thấy được</b>: xong · tới lượt · khoá + <i>lý do khoá</i>.</td>
+    <td>Nút xám mà không nói vì sao thì người dùng tưởng hệ thống hỏng.</td></tr>
+  <tr><td class="mono">5</td>
+    <td><b>Không có mặc định im lặng ở thao tác không hoàn tác được.</b></td>
+    <td>Sửa lỗi B. Chốt sổ đóng thùng mở vòng mới &mdash; không có nút hoàn tác.</td></tr>
+  <tr><td class="mono">6</td>
+    <td><b>Gọi đúng tên con số.</b> Tách <i>thùng chưa ghi sổ</i> khỏi <i>hàng lẻ</i>.</td>
+    <td>Sửa lỗi A. Một cái là việc còn phải làm, một cái là bình thường.</td></tr>
+</table></div>
+
+<h2 id="mock">4 · Bấm thử</h2>
+<p>Đây là bản chạy được, không phải ảnh. Tick chuyền, gõ số, chốt sổ &mdash; mọi ràng buộc của
+backend đều được áp: ba số phải cộng đúng mục tiêu, hỏng và thiếu bắt buộc ghi lý do,
+không ghi trùng khung giờ, không đóng thùng nhiều hơn số làm ra, không kết thúc đóng thùng
+trước khi chốt sổ.</p>
+
+<div class="tools">
+  <button class="btn sm" data-jump="0">Làm lại từ đầu</button>
+  <button class="btn sm" data-jump="1">Tua: đã chạy chuyền</button>
+  <button class="btn sm" data-jump="2">Tua: đã chốt sổ, lệch 800</button>
+  <span class="sp"></span>
+  <span class="hint" style="margin:0">Không gọi API — mọi thứ chạy trong trình duyệt.</span>
+</div>
+
+<div class="frame">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    <span style="margin-left:8px">Trạm 4 · Sản xuất</span>
+    <span class="sp" style="flex:1"></span>
+    <span id="clock">Giờ xưởng 16:00</span></div>
+  <div class="body">
+
+    <div class="card" style="margin:0 0 16px;display:flex;gap:16px;align-items:center;flex-wrap:wrap">
+      <div style="flex:1;min-width:220px">
+        <div style="font-size:20px;font-weight:700" class="mono">M011110</div>
+        <div style="color:var(--fg-muted);font-size:14px">Vỏ hộp số · quy cách 200 pcs/thùng</div>
+      </div>
+      <span class="pill acc">Vòng 1 · mục tiêu 1.000 pcs</span>
+      <button class="btn" data-act="noop">Đổi lệnh</button>
+    </div>
+
+    <div id="nextbox"></div>
+
+    <div class="sect" id="secLine">
+      <div class="hd"><span class="t">Chuyền</span><span class="s" id="lineSub"></span></div>
+      <div class="bd"><div class="lines" id="lineGrid"></div>
+        <div class="tools" id="lineActs"></div>
+        <div class="hint" id="lineHint"></div>
+      </div>
+    </div>
+
+    <div class="sect" id="secRun">
+      <div class="hd"><span class="t">Trong ca</span><span class="s" id="runSub"></span></div>
+      <div class="bd">
+        <div style="max-width:320px;margin-bottom:18px">
+          <label class="f">Khung giờ</label>
+          <select class="inp" id="fSlot"></select>
+        </div>
+        <div class="two">
+          <div>
+            <div class="colhd">Chuyền</div>
+            <div class="fieldrow"><label class="f">Số người đứng chuyền</label>
+              <input class="inp" id="fPeople" type="number" inputmode="numeric" placeholder="ví dụ 8"></div>
+            <div class="fieldrow"><label class="f">Sản lượng yêu cầu</label>
+              <input class="inp" id="fReq" type="number" inputmode="numeric" placeholder="định mức giờ này"></div>
+            <div class="fieldrow"><label class="f">Sản lượng thực tế</label>
+              <input class="inp" id="fAct" type="number" inputmode="numeric" placeholder="làm ra được"></div>
+            <div class="hint">Đủ ba số mới tính được năng suất và phần trăm đạt.</div>
+          </div>
+          <div>
+            <div class="colhd">Đóng thùng</div>
+            <div id="packGate"></div>
+            <div class="recon" style="margin-top:18px" id="runRecon"></div>
+          </div>
+        </div>
+        <div id="runErr"></div>
+        <div style="margin-top:18px;display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+          <button class="btn primary big" data-act="ghi">Ghi cả hai cho giờ này</button>
+          <span class="hint" style="margin:0">Một nút, hai sổ. Bỏ trống bên nào thì bên đó không ghi.</span>
+        </div>
+        <div id="hourTbl"></div>
+      </div>
+    </div>
+
+    <div class="sect" id="secEnd">
+      <div class="hd"><span class="t">Kết thúc vòng</span>
+        <span class="s">làm đúng thứ tự &mdash; hai việc này không hoàn tác được</span></div>
+      <div class="bd" style="padding-top:4px">
+        <div class="task" id="t1">
+          <div class="n">1</div>
+          <div class="m" style="width:100%">
+            <div class="ti">Chốt sổ sản xuất</div>
+            <div class="ds" id="t1d"></div>
+            <div id="t1body"></div>
+          </div>
+          <div id="t1a"></div>
+        </div>
+        <div class="task" id="t2">
+          <div class="n">2</div>
+          <div class="m" style="width:100%">
+            <div class="ti">Kết thúc đóng thùng</div>
+            <div class="ds" id="t2d"></div>
+            <div id="t2body"></div>
+          </div>
+          <div id="t2a"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sect">
+      <div class="hd"><span class="t">Nhật ký</span><span class="s">mọi thao tác đều ghi lại</span></div>
+      <div class="bd"><div class="log" id="log"></div></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="card okbox" style="margin-top:22px">
+  <h3 style="margin-top:0">Thử đúng chỗ đau</h3>
+  <p style="margin-bottom:0">Bấm <b>&ldquo;Tua: đã chốt sổ, lệch 800&rdquo;</b> &mdash; đó là trạng thái thật của
+  <span class="mono">M011110</span> ngay lúc này. Màn hình hiện tại cho bạn bấm <i>Kết thúc đóng thùng</i>
+  với số mặc định 200 và không nói gì. Bản này chặn lại, chỉ rõ 800 pcs kia là
+  <b>4 thùng đầy chưa ghi sổ</b>, và bắt chọn rõ ràng giữa hai đường trước khi mở nút.</p>
+</div>
+
+<h2 id="sosanh">5 · So sánh</h2>
+
+<div class="grid2">
+  <div class="card">
+    <h3 style="margin-top:0">Hiện tại <span class="pill bad">4 tab</span></h3>
+    <div class="oldtab" style="margin:14px 0">
+      <div><div class="nm">Sản lượng giờ</div><div class="sb">Ba số bắt buộc</div></div>
+      <div><div class="nm">Chốt sổ SX</div><div class="sb">Ba ô cộng đúng</div></div>
+      <div><div class="nm">Đóng thùng</div><div class="sb">Song song</div></div>
+      <div class="on"><div class="nm">Kết thúc đóng thùng</div><div class="sb">Sau chốt sổ</div></div>
+    </div>
+    <ul class="tight" style="margin-bottom:0">
+      <li>Không ô nào cho biết đã xong hay chưa</li>
+      <li>Hai việc làm cùng lúc nằm ở hai tab</li>
+      <li>Mỗi tab lặp ~600px nội dung giống nhau</li>
+      <li>Không có gợi ý việc kế tiếp</li>
+      <li>Ô số cuối có mặc định im lặng</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h3 style="margin-top:0">Đề xuất <span class="pill ok">1 trang</span></h3>
+    <div style="margin:14px 0">
+      <div class="next" style="padding:12px 14px;margin:0">
+        <div class="txt"><div class="lbl">Việc tiếp theo</div>
+        <div class="big" style="font-size:16px">Ghi sản lượng giờ 16:00–17:00</div></div>
+      </div>
+      <div style="display:flex;gap:9px;margin-top:9px;flex-wrap:wrap">
+        <span class="pill flat">Chuyền</span>
+        <span class="pill flat">Trong ca · lặp</span>
+        <span class="pill flat">Kết thúc vòng · 1 → 2</span>
+      </div>
+    </div>
+    <ul class="tight" style="margin-bottom:0">
+      <li>Mỗi việc mang trạng thái: xong · tới lượt · khoá kèm lý do</li>
+      <li>Hai sổ ghi cùng lúc, một nút</li>
+      <li>Không cuộn tìm, không nhảy tab</li>
+      <li>Luôn có một câu nói việc kế tiếp</li>
+      <li>Lệch số thì bắt chọn rõ ràng</li>
+    </ul>
+  </div>
+</div>
+
+<h3>Việc phải làm nếu bạn chốt hướng này</h3>
+<div class="card flush"><table>
+  <tr><th style="width:34px">#</th><th>Việc</th><th>Chỗ sửa</th><th>Loại</th></tr>
+  <tr><td class="mono">1</td><td>Tách <code>le_pcs</code> thành <b>thùng chưa ghi sổ</b> và <b>lẻ thật</b></td>
+    <td class="mono">board/service.py · packing/hourly_service.py</td><td><span class="pill bad">Lỗi</span></td></tr>
+  <tr><td class="mono">2</td><td>Bỏ mặc định im lặng ở <b>Kết thúc đóng thùng</b>, bắt chọn khi lệch</td>
+    <td class="mono">PackingPanel.tsx</td><td><span class="pill bad">Lỗi</span></td></tr>
+  <tr><td class="mono">3</td><td>Gộp 4 bước cuối của trạm 4 thành <b>1 bước</b> trên thanh bước</td>
+    <td class="mono">constants/stationSteps.ts</td><td><span class="pill warn">UX</span></td></tr>
+  <tr><td class="mono">4</td><td>Dựng khối <b>Việc tiếp theo</b> suy từ trạng thái vòng</td>
+    <td class="mono">ProductionWorkspace.tsx</td><td><span class="pill warn">UX</span></td></tr>
+  <tr><td class="mono">5</td><td>Gộp form sản lượng giờ và form thùng giờ thành <b>một</b></td>
+    <td class="mono">HourlyForm.tsx · PackingPanel.tsx</td><td><span class="pill warn">UX</span></td></tr>
+  <tr><td class="mono">6</td><td>Bảng chọn lệnh thu thành thanh gọn có nút <b>Đổi lệnh</b></td>
+    <td class="mono">production/page.tsx</td><td><span class="pill flat">Gọn</span></td></tr>
+</table></div>
+
+<p class="foot">Prototype tĩnh, không gọi API. Số liệu gốc lấy từ
+<span class="mono">M011110</span> &mdash; mục tiêu 1.000 · quy cách 200 pcs/thùng · 6 chuyền khả dụng.</p>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const PCS_PER_BOX = 200, TARGET = 1000, ALL_LINES = ["L01","L02","L03","L04","L05","L06"];
+const nf = n => Number(n).toLocaleString("vi-VN");
+
+let S, pickChoice;
+
+function reset(){
+  S = { lines:[], hourly:[], boxes:[], prod:null, packDone:null, packOpenAt:null, log:[], hour:16 };
+  pickChoice = null;
+  say("Bắt đầu lại từ đầu");
+}
+
+function stamp(){ return String(S.hour).padStart(2,"0") + ":00"; }
+function say(t){ S.log.unshift(stamp() + "  " + t); }
+
+function openPackBook(){
+  if(S.packOpenAt) return;
+  S.packOpenAt = stamp();
+  say("MỞ SỔ ĐÓNG THÙNG — tự động khi ghi thùng đầu tiên, chạy song song với chuyền");
+}
+
+function madePcs(){
+  return S.prod ? S.prod.ok : S.hourly.reduce((n,h)=>n+h.actual, 0);
+}
+function packedPcs(){ return S.boxes.reduce((n,b)=>n+b.boxes, 0) * PCS_PER_BOX; }
+function totalBoxes(){ return S.boxes.reduce((n,b)=>n+b.boxes, 0); }
+function runningLines(){ return S.lines.filter(l=>l.st==="RUN"); }
+function hasRun(){ return S.lines.some(l=>l.ran); }
+
+function toast(msg, kind){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.className = "toast show " + (kind||"");
+  clearTimeout(t._h);
+  t._h = setTimeout(()=>{ t.className = "toast " + (kind||""); }, 2600);
+}
+
+function nextAction(){
+  if(!S.lines.length)
+    return {lbl:"Việc tiếp theo", big:"Chọn chuyền cho lệnh này",
+      sub:"Tick những chuyền sẽ chạy rồi bấm Thêm. Từ lúc đó đồng hồ thời gian chờ bắt đầu đếm.",
+      tone:"", focus:"secLine"};
+  if(!runningLines().length && !S.prod)
+    return {lbl:"Việc tiếp theo", big:"Cho chuyền vào Đang lắp ráp",
+      sub:"Thời gian thực tế chỉ đếm khi chuyền chạy. Chưa chạy thì chưa ghi sản lượng được.",
+      tone:"", focus:"secLine"};
+  if(!S.prod){
+    const sum = S.hourly.reduce((n,h)=>n+h.actual,0);
+    if(sum >= TARGET)
+      return {lbl:"Việc tiếp theo", big:"Chốt sổ sản xuất",
+        sub:"Σ sản lượng giờ đã đạt " + nf(sum) + "/" + nf(TARGET) + " pcs. Khai đạt · hỏng · thiếu để chốt vòng.",
+        tone:"", focus:"secEnd"};
+    return {lbl:"Việc tiếp theo", big:"Ghi sản lượng giờ " + stamp() + " – " + String(S.hour+1).padStart(2,"0") + ":00",
+      sub:"Cuối mỗi giờ ghi một lần. Ghi luôn số thùng đóng được trong giờ đó, cùng một nút."
+        + (S.hourly.length ? " Đã ghi " + S.hourly.length + " giờ · " + nf(sum) + "/" + nf(TARGET) + " pcs." : ""),
+      tone:"", focus:"secRun"};
+  }
+  if(S.packDone)
+    return {lbl:"Xong việc của trạm 4", big:"Chờ Kho nhập quét nhận",
+      sub:"Lệnh đã nằm ở hàng đợi Kho nhập. Không còn việc gì ở trạm này.", tone:"done"};
+  const diff = madePcs() - packedPcs();
+  if(diff > 0){
+    const fb = Math.floor(diff / PCS_PER_BOX);
+    return {lbl:"Cần xử lý", big: fb ? "Còn " + fb + " thùng đầy chưa ghi sổ" : "Còn " + nf(diff) + " pcs lẻ chưa ghi sổ",
+      sub:"Chuyền làm ra " + nf(madePcs()) + " pcs nhưng sổ thùng mới có " + nf(packedPcs())
+        + ". Ghi nốt rồi hãy kết thúc đóng thùng.", tone:"alert", focus:"secRun"};
+  }
+  return {lbl:"Việc tiếp theo", big:"Kết thúc đóng thùng",
+    sub:"Sổ thùng đã khớp sản lượng chuyền. Chốt xong lệnh sang hàng đợi Kho nhập.",
+    tone:"", focus:"secEnd"};
+}
+
+function renderLines(){
+  const sub = document.getElementById("lineSub");
+  const done = !!S.packDone;
+  sub.textContent = S.lines.length
+    ? S.lines.length + " chuyền · " + runningLines().length + " đang lắp ráp"
+    : "chưa chia chuyền";
+
+  const grid = document.getElementById("lineGrid");
+  grid.innerHTML = ALL_LINES.map(c=>{
+    const l = S.lines.find(x=>x.code===c);
+    const cls = !l ? (pickSet.has(c) ? "on" : "")
+      : l.st==="RUN" ? "run" : l.st==="HOLD" ? "hold" : "on";
+    const lab = !l ? (pickSet.has(c) ? "sẽ thêm" : "trống")
+      : l.st==="RUN" ? "đang lắp ráp" : l.st==="HOLD" ? "đang dừng" : "chờ xử lý";
+    return '<button class="ln ' + cls + '" data-line="' + c + '"' + (done?" disabled":"") + '>'
+      + c + '<small>' + lab + '</small></button>';
+  }).join("");
+
+  const acts = document.getElementById("lineActs");
+  let h = "";
+  if(pickSet.size) h += '<button class="btn primary" data-act="addline">Thêm ' + pickSet.size + ' chuyền</button>';
+  const idle = S.lines.filter(l=>l.st==="WAIT" || l.st==="HOLD");
+  if(idle.length && !done) h += '<button class="btn primary" data-act="runline">Cho chạy ' + idle.length + ' chuyền</button>';
+  if(runningLines().length && !S.prod) h += '<button class="btn danger" data-act="holdline">Dừng chuyền</button>';
+  acts.innerHTML = h;
+
+  document.getElementById("lineHint").textContent = !S.lines.length
+    ? "Tick chuyền rồi bấm Thêm. Một chuyền là dây chuyền có nhiều chỗ ngồi — lệnh ít linh kiện chỉ dùng vài chỗ, chỗ còn lại chạy lệnh khác."
+    : "Thời gian chờ đếm khi chuyền ở Chờ xử lý, dừng khi sang Đang lắp ráp. Bấm Dừng thì đồng hồ thực tế đứng.";
+}
+
+function renderRun(){
+  const open = runningLines().length > 0 && !S.packDone;
+  const sec = document.getElementById("secRun");
+  sec.classList.toggle("off", !open);
+  document.getElementById("runSub").textContent = !hasRun()
+    ? "mở được sau khi có chuyền vào Đang lắp ráp"
+    : S.packDone ? "đã kết thúc đóng thùng — không ghi thêm được"
+    : "ghi lại mỗi giờ · đã ghi " + S.hourly.length + " giờ";
+
+  const sel = document.getElementById("fSlot");
+  if(sel.dataset.h !== String(S.hour)){
+    sel.innerHTML = Array.from({length:10},(_,i)=>{
+      const h = 8 + i + 6;
+      return '<option value="'+h+'"'+(h===S.hour?" selected":"")+'>'
+        + String(h).padStart(2,"0")+':00 – '+String(h+1).padStart(2,"0")+':00</option>';
+    }).join("");
+    sel.dataset.h = String(S.hour);
+  }
+
+  const made = madePcs(), packed = packedPcs(), diff = Math.max(0, made - packed);
+  const fb = Math.floor(diff / PCS_PER_BOX), rem = diff % PCS_PER_BOX;
+  document.getElementById("runRecon").innerHTML =
+    '<div class="r"><span>Sổ đóng thùng</span><span>'
+      + (S.packOpenAt ? 'mở lúc ' + S.packOpenAt : 'chưa mở') + '</span></div>'
+    + '<div class="r"><span>Đã ghi sổ</span><span>' + totalBoxes() + ' thùng · ' + nf(packed) + ' pcs</span></div>'
+    + '<div class="r"><span>Chuyền làm ra</span><span>' + nf(made) + ' pcs</span></div>'
+    + (diff ? '<div class="r"><span>Chưa ghi sổ</span><span>' + fb + ' thùng'
+        + (rem ? ' + ' + nf(rem) + ' lẻ' : '') + '</span></div>' : '');
+  document.getElementById("packGate").innerHTML =
+    '<div class="fieldrow"><label class="f">Số thùng ĐẦY đóng được</label>'
+    + '<input class="inp" id="fBox" type="number" inputmode="numeric" placeholder="ví dụ 2"></div>'
+    + '<div class="hint">Quy cách ' + PCS_PER_BOX + ' pcs/thùng. Chỉ đếm thùng đầy — hàng chưa đủ '
+    + 'thùng để trên bàn, giờ sau gom tiếp.</div>'
+    + '<div class="hint" style="margin-top:8px">'
+    + (S.packOpenAt
+        ? 'Sổ đóng thùng mở lúc <b>' + S.packOpenAt + '</b>.'
+        : 'Không có nút <i>Bắt đầu đóng thùng</i> riêng — gõ số thùng đầu tiên là sổ <b>tự mở</b>, '
+          + 'và nhật ký ghi lại mốc đó.')
+    + '</div>';
+
+  const tbl = document.getElementById("hourTbl");
+  if(!S.hourly.length && !S.boxes.length){ tbl.innerHTML = ""; return; }
+  const rows = S.hourly.map(h=>{
+    const b = S.boxes.find(x=>x.slot===h.slot);
+    const pct = h.req ? Math.round(h.actual/h.req*100) : null;
+    return '<tr><td class="mono">' + String(h.slot).padStart(2,"0") + 'h</td>'
+      + '<td class="num">' + nf(h.people) + '</td>'
+      + '<td class="num">' + nf(h.req) + '</td>'
+      + '<td class="num"><b>' + nf(h.actual) + '</b></td>'
+      + '<td>' + (pct===null?"—":'<span class="pill ' + (pct>=100?"ok":"warn") + '">' + pct + '%</span>') + '</td>'
+      + '<td class="num">' + (b ? b.boxes + ' thùng' : '—') + '</td></tr>';
+  }).join("");
+  tbl.innerHTML = '<div style="margin-top:20px;border:1px solid var(--line);border-radius:10px;overflow:hidden">'
+    + '<table><tr><th>Giờ</th><th class="num">Người</th><th class="num">Yêu cầu</th>'
+    + '<th class="num">Thực tế</th><th>Đạt</th><th class="num">Thùng</th></tr>' + rows + '</table></div>';
+}
+
+function renderEnd(){
+  const t1 = document.getElementById("t1"), t2 = document.getElementById("t2");
+  const canClose = hasRun() && !runningLines().some(l=>l.st==="HOLD");
+
+  t1.className = "task " + (S.prod ? "done" : canClose ? "now" : "off");
+  document.getElementById("t1d").textContent = S.prod
+    ? "Đã chốt " + S.prod.at + " · đạt " + nf(S.prod.ok) + " · hỏng " + nf(S.prod.ng) + " · thiếu " + nf(S.prod.short)
+    : !hasRun() ? "Khoá — phải có chuyền vào Đang lắp ráp trước đã."
+    : "Ba số đạt · hỏng · thiếu phải cộng đúng bằng " + nf(TARGET) + ".";
+  document.getElementById("t1a").innerHTML = S.prod ? '<span class="pill ok">Đã chốt</span>' : "";
+
+  const b1 = document.getElementById("t1body");
+  if(S.prod || !canClose){ b1.innerHTML = ""; }
+  else {
+    const sum = S.hourly.reduce((n,h)=>n+h.actual,0);
+    b1.innerHTML = '<div class="recon"><div class="r"><span>Σ sản lượng giờ đã ghi</span><span>'
+      + nf(sum) + ' pcs</span></div><div class="r"><span>Mục tiêu vòng</span><span>' + nf(TARGET) + ' pcs</span></div></div>'
+      + '<div class="two" style="margin-top:12px">'
+      + '<div><div class="fieldrow"><label class="f">Đạt</label><input class="inp" id="cOk" type="number" placeholder="' + sum + '"></div>'
+      + '<div class="fieldrow"><label class="f">Hỏng</label><input class="inp" id="cNg" type="number" placeholder="0"></div>'
+      + '<div class="fieldrow"><label class="f">Thiếu</label><input class="inp" id="cSh" type="number" placeholder="0"></div></div>'
+      + '<div><div class="fieldrow"><label class="f">Lý do hỏng</label><input class="inp" id="cNgR" placeholder="bắt buộc nếu hỏng > 0"></div>'
+      + '<div class="fieldrow"><label class="f">Lý do thiếu</label><input class="inp" id="cShR" placeholder="bắt buộc nếu thiếu > 0"></div>'
+      + '<div class="hint">Ba số phải cộng đúng bằng ' + nf(TARGET) + '. Ràng buộc này nằm ở CSDL, không lách được.</div></div></div>'
+      + '<div id="closeErr"></div>'
+      + '<div style="margin-top:14px"><button class="btn primary big" data-act="close">Chốt sổ sản xuất</button></div>';
+  }
+
+  t2.className = "task " + (S.packDone ? "done" : S.prod ? "now" : "off");
+  document.getElementById("t2a").innerHTML = S.packDone ? '<span class="pill ok">Đã xong</span>' : "";
+  document.getElementById("t2d").textContent = S.packDone
+    ? "Đã kết thúc " + S.packDone.at + " · đóng " + nf(S.packDone.qty) + " pcs"
+    : !S.prod ? "Khoá — phải chốt sổ sản xuất trước, vì tới lúc đó mới biết có bao nhiêu hàng đạt để đối chiếu."
+    : "Sản xuất đã chốt sổ — kết thúc được rồi.";
+
+  const b2 = document.getElementById("t2body");
+  if(!S.prod || S.packDone){ b2.innerHTML = ""; return; }
+
+  const made = madePcs(), packed = packedPcs(), diff = made - packed;
+  const fb = Math.floor(diff / PCS_PER_BOX), rem = diff % PCS_PER_BOX;
+  let h = '<div class="recon">'
+    + '<div class="r"><span>Đã ghi sổ thùng</span><span>' + nf(packed) + ' pcs</span></div>'
+    + '<div class="r"><span>Chuyền làm ra (đạt đã chốt)</span><span>' + nf(made) + ' pcs</span></div>'
+    + '<div class="r tot"><span>Chênh</span><span>' + nf(diff) + ' pcs</span></div></div>';
+
+  if(diff > 0 && packed === 0){
+    h += '<div class="card warnbox" style="margin:12px 0 0;padding:14px 16px">'
+      + '<b>Chưa ghi thùng nào.</b> Cả ' + nf(diff) + ' pcs đã làm ra chưa vào sổ đóng thùng. '
+      + 'Không có đường chốt 0 pcs — CSDL từ chối, vì một vòng đóng 0 thùng thì không có gì '
+      + 'để giao cho Kho nhập.</div>'
+      + '<div style="margin-top:14px"><button class="btn primary big" data-act="fillbox" data-n="'
+      + fb + '">Ghi ' + fb + ' thùng</button></div>';
+    b2.innerHTML = h; return;
+  }
+  if(diff <= 0){
+    h += '<div class="card okbox" style="margin:12px 0 0;padding:14px 16px">'
+      + '<b>Sổ thùng khớp với sản lượng chuyền.</b> Chốt được rồi.</div>'
+      + '<div style="margin-top:14px"><button class="btn primary big" data-act="packdone" data-qty="' + packed + '">'
+      + 'Kết thúc đóng thùng · ' + nf(packed) + ' pcs</button></div>';
+  } else {
+    h += '<div class="card warnbox" style="margin:12px 0 0;padding:14px 16px">'
+      + '<b>Chênh ' + nf(diff) + ' pcs = ' + fb + ' thùng đầy chưa ghi sổ'
+      + (rem ? ' + ' + nf(rem) + ' pcs lẻ' : ' · lẻ 0') + '.</b><br>'
+      + 'Chốt bây giờ thì ' + nf(diff) + ' pcs này thành <b>hàng thiếu</b>, và hệ thống mở '
+      + '<b>vòng 2</b> để làm bù số hàng đang nằm sẵn trong thùng. Không hoàn tác được.</div>'
+      + '<div class="choice' + (pickChoice==="ghi"?" sel":"") + '" data-choice="ghi"><div class="rd"></div><div>'
+      + '<div class="ct">Quay lại ghi nốt ' + fb + ' thùng</div>'
+      + '<div class="cs">Nên chọn cái này. Ghi xong sổ khớp, chốt một phát là xong vòng.</div></div></div>'
+      + '<div class="choice' + (pickChoice==="chot"?" sel":"") + '" data-choice="chot"><div class="rd"></div><div>'
+      + '<div class="ct">Chốt ' + nf(packed) + ' pcs — chấp nhận thiếu ' + nf(diff) + '</div>'
+      + '<div class="cs">Chỉ chọn khi ' + nf(diff) + ' pcs kia thật sự chưa đóng thùng được. Hệ thống sẽ mở vòng 2.</div></div></div>'
+      + '<div style="margin-top:14px;display:flex;gap:12px;flex-wrap:wrap">'
+      + '<button class="btn primary big" data-act="fillbox" data-n="' + fb + '"' + (pickChoice==="ghi"?"":" disabled") + '>Ghi ' + fb + ' thùng</button>'
+      + '<button class="btn big" data-act="packdone" data-qty="' + packed + '"' + (pickChoice==="chot"?"":" disabled") + '>Kết thúc đóng thùng</button></div>'
+      + '<div class="hint">Không nút nào mở sẵn — phải chọn một dòng ở trên. Đây là chỗ thay cho mặc định im lặng.</div>';
+  }
+  b2.innerHTML = h;
+}
+
+function render(){
+  const n = nextAction();
+  document.getElementById("nextbox").innerHTML =
+    '<div class="next ' + n.tone + '">'
+    + '<div class="txt"><div class="lbl">' + n.lbl + '</div>'
+    + '<div class="big">' + n.big + '</div><div class="sub">' + n.sub + '</div></div>'
+    + (n.focus ? '<button class="btn primary big" data-goto="' + n.focus + '">Tới chỗ làm</button>' : '')
+    + '</div>';
+  document.getElementById("clock").textContent = "Giờ xưởng " + stamp();
+  renderLines(); renderRun(); renderEnd();
+  document.getElementById("log").innerHTML =
+    S.log.length ? S.log.map(l=>'<div>' + l + '</div>').join("")
+    : '<div>chưa có thao tác nào</div>';
+}
+
+const pickSet = new Set();
+
+function doGhi(){
+  const slot = Number(document.getElementById("fSlot").value);
+  const people = Number(document.getElementById("fPeople").value || 0);
+  const req = Number(document.getElementById("fReq").value || 0);
+  const act = Number(document.getElementById("fAct").value || 0);
+  const box = Number(document.getElementById("fBox").value || 0);
+  const err = document.getElementById("runErr");
+  err.innerHTML = "";
+
+  if(!act && !box){ err.innerHTML = '<div class="errtxt">Chưa nhập gì — điền sản lượng thực tế hoặc số thùng.</div>'; return; }
+  if(act && (!people || !req)){
+    err.innerHTML = '<div class="errtxt">Ghi sản lượng phải đủ ba số: số người, sản lượng yêu cầu, sản lượng thực tế. Thiếu một số thì không tính được năng suất.</div>'; return;
+  }
+  if(act && S.hourly.some(h=>h.slot===slot)){
+    err.innerHTML = '<div class="errtxt">Khung giờ ' + String(slot).padStart(2,"0") + 'h đã ghi sản lượng rồi. Mỗi khung chỉ ghi một lần.</div>'; return;
+  }
+  if(box && S.boxes.some(b=>b.slot===slot)){
+    err.innerHTML = '<div class="errtxt">Khung giờ ' + String(slot).padStart(2,"0") + 'h đã ghi thùng rồi.</div>'; return;
+  }
+  const madeAfter = S.prod ? S.prod.ok : S.hourly.reduce((n,h)=>n+h.actual,0) + act;
+  if(box && packedPcs() + box*PCS_PER_BOX > madeAfter){
+    err.innerHTML = '<div class="errtxt">Đóng ' + nf(packedPcs()+box*PCS_PER_BOX)
+      + ' pcs nhưng chuyền mới làm ra ' + nf(madeAfter) + ' pcs — không đóng thùng hàng chưa tồn tại.</div>'; return;
+  }
+
+  if(act){ S.hourly.push({slot, people, req, actual:act});
+    say("Ghi sản lượng " + String(slot).padStart(2,"0") + "h · " + people + " người · " + nf(act) + "/" + nf(req) + " pcs"); }
+  if(box){
+    openPackBook();
+    S.boxes.push({slot, boxes:box});
+    say("Ghi thùng " + String(slot).padStart(2,"0") + "h · " + box + " thùng × " + PCS_PER_BOX + " = " + nf(box*PCS_PER_BOX) + " pcs"); }
+
+  ["fPeople","fReq","fAct","fBox"].forEach(id=>{const e=document.getElementById(id); if(e) e.value="";});
+  if(slot >= S.hour) S.hour = Math.min(slot + 1, 23);
+  toast("Đã ghi khung " + String(slot).padStart(2,"0") + "h", "ok");
+  render();
+}
+
+function doClose(){
+  const ok = Number(document.getElementById("cOk").value || 0);
+  const ng = Number(document.getElementById("cNg").value || 0);
+  const sh = Number(document.getElementById("cSh").value || 0);
+  const ngR = document.getElementById("cNgR").value.trim();
+  const shR = document.getElementById("cShR").value.trim();
+  const err = document.getElementById("closeErr");
+  err.innerHTML = "";
+
+  if(ok + ng + sh !== TARGET){
+    err.innerHTML = '<div class="errtxt">' + nf(ok) + ' + ' + nf(ng) + ' + ' + nf(sh) + ' = ' + nf(ok+ng+sh)
+      + ', phải bằng đúng ' + nf(TARGET) + '. Lệch ' + nf(Math.abs(TARGET-ok-ng-sh)) + ' pcs.</div>'; return;
+  }
+  if(ng > 0 && !ngR){ err.innerHTML = '<div class="errtxt">Có hàng hỏng thì bắt buộc ghi lý do — không thì cuối tháng không ai truy ra hỏng vì đâu.</div>'; return; }
+  if(sh > 0 && !shR){ err.innerHTML = '<div class="errtxt">Có hàng thiếu thì bắt buộc ghi lý do.</div>'; return; }
+  if(packedPcs() > ok){
+    err.innerHTML = '<div class="errtxt">Đã ghi sổ ' + nf(packedPcs()) + ' pcs thùng, nhiều hơn số đạt ' + nf(ok) + ' pcs. Sửa lại một trong hai.</div>'; return;
+  }
+
+  S.prod = {ok, ng, short:sh, at:stamp()};
+  S.lines.forEach(l=>{ if(l.st==="RUN"||l.st==="HOLD") l.st="DONE"; });
+  say("CHỐT SỔ SX · đạt " + nf(ok) + " · hỏng " + nf(ng) + " · thiếu " + nf(sh));
+  toast("Đã chốt sổ sản xuất", "ok");
+  render();
+}
+
+document.addEventListener("click", e => {
+  const j = e.target.closest("[data-jump]");
+  if(j){
+    reset(); pickSet.clear();
+    const k = Number(j.dataset.jump);
+    if(k >= 1){
+      S.lines = ["L01","L02","L03"].map(c=>({code:c, st:"RUN", ran:true}));
+      say("Thêm chuyền L01, L02, L03"); say("Cho chạy L01, L02, L03");
+    }
+    if(k >= 2){
+      S.hourly = [{slot:16, people:8, req:1000, actual:1000}];
+      S.boxes = [{slot:16, boxes:1}];
+      S.packOpenAt = "16:00";
+      S.hour = 17;
+      S.prod = {ok:1000, ng:0, short:0, at:"16:29"};
+      S.lines.forEach(l=>l.st="DONE");
+      say("Ghi sản lượng 16h · 8 người · 1.000/1.000 pcs");
+      say("MỞ SỔ ĐÓNG THÙNG — tự động khi ghi thùng đầu tiên, chạy song song với chuyền");
+      say("Ghi thùng 16h · 1 thùng × 200 = 200 pcs");
+      say("CHỐT SỔ SX · đạt 1.000 · hỏng 0 · thiếu 0");
+    }
+    render(); return;
+  }
+
+  const g = e.target.closest("[data-goto]");
+  if(g){ document.getElementById(g.dataset.goto).scrollIntoView({behavior:"smooth", block:"center"}); return; }
+
+  const ln = e.target.closest("[data-line]");
+  if(ln && !ln.disabled){
+    const c = ln.dataset.line;
+    if(S.lines.some(x=>x.code===c)){ toast("Chuyền " + c + " đã có trong vòng này rồi"); return; }
+    pickSet.has(c) ? pickSet.delete(c) : pickSet.add(c);
+    render(); return;
+  }
+
+  const ch = e.target.closest("[data-choice]");
+  if(ch){ pickChoice = ch.dataset.choice; render(); return; }
+
+  const a = e.target.closest("[data-act]");
+  if(!a || a.disabled) return;
+  const act = a.dataset.act;
+
+  if(act === "noop"){ toast("Bảng chọn lệnh — ngoài phạm vi mockup này"); return; }
+
+  if(act === "addline"){
+    [...pickSet].sort().forEach(c=>S.lines.push({code:c, st:"WAIT", ran:false}));
+    say("Thêm chuyền " + [...pickSet].sort().join(", ") + " — thời gian chờ bắt đầu đếm");
+    toast("Đã thêm " + pickSet.size + " chuyền", "ok");
+    pickSet.clear(); render(); return;
+  }
+  if(act === "runline"){
+    const idle = S.lines.filter(l=>l.st==="WAIT"||l.st==="HOLD");
+    idle.forEach(l=>{ l.st="RUN"; l.ran=true; });
+    say("Cho chạy " + idle.map(l=>l.code).join(", ") + " — thời gian thực tế bắt đầu đếm");
+    toast("Đã cho chạy " + idle.length + " chuyền", "ok"); render(); return;
+  }
+  if(act === "holdline"){
+    const r = runningLines();
+    r.forEach(l=>l.st="HOLD");
+    say("DỪNG " + r.map(l=>l.code).join(", ") + " — thời gian thực tế đứng, thời gian chờ chạy tiếp");
+    toast("Đã dừng " + r.length + " chuyền — chốt sổ sẽ bị chặn cho tới khi chạy lại");
+    render(); return;
+  }
+  if(act === "ghi"){ doGhi(); return; }
+  if(act === "close"){ doClose(); return; }
+  if(act === "fillbox"){
+    const n = Number(a.dataset.n);
+    openPackBook();
+    S.boxes.push({slot:S.hour, boxes:n});
+    say("Ghi bù " + n + " thùng × " + PCS_PER_BOX + " = " + nf(n*PCS_PER_BOX) + " pcs");
+    pickChoice = null;
+    toast("Đã ghi " + n + " thùng — sổ khớp rồi", "ok"); render(); return;
+  }
+  if(act === "packdone"){
+    const qty = Number(a.dataset.qty);
+    S.packDone = {qty, at:stamp()};
+    const thieu = S.prod.ok - qty;
+    say("KẾT THÚC ĐÓNG THÙNG · " + nf(qty) + " pcs" + (thieu>0 ? " — thiếu " + nf(thieu) + ", mở vòng 2" : ""));
+    toast(thieu > 0 ? "Đã chốt " + nf(qty) + " pcs — hệ thống mở vòng 2 làm bù " + nf(thieu)
+      : "Xong trạm 4 — lệnh sang hàng đợi Kho nhập", thieu > 0 ? "bad" : "ok");
+    render(); return;
+  }
+});
+
+reset();
+render();
+</script>
+</body>
+</html>

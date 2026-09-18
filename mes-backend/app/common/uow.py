@@ -22,6 +22,8 @@ from typing import Any, TypeVar
 
 from sqlalchemy.orm import Session
 
+from app.common import read_cache
+
 # Đánh dấu "giao dịch này DO MÌNH mở". Dùng ContextVar chứ không phải thuộc tính
 # của Session vì nó tự cô lập theo từng request/luồng.
 _owned: ContextVar[bool] = ContextVar("uow_owned", default=False)
@@ -57,6 +59,9 @@ def transaction(db: Session) -> Iterator[None]:
     try:
         with (db.begin_nested() if db.in_transaction() else db.begin()):
             yield
+        # Thoát êm nghĩa là đã ghi xong. Mọi bảng dùng chung phải coi là cũ —
+        # người vừa quét nhận phải thấy hàng đợi đổi ngay, không đợi TTL.
+        read_cache.bump()
     finally:
         _owned.reset(token)
 

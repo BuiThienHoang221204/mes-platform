@@ -89,7 +89,7 @@ hiếm khi chia hết cho quy cách.
 | --- | --- | --- |
 | [mo/models.py](app/modules/mo/models.py#L33) | 33 | `pcs_per_box: Mapped[int]`, default 0 |
 | [mo/schemas.py](app/modules/mo/schemas.py#L15) | 15 · 35 | `MoCreateIn.pcs_per_box` (ge=0, default 0) · `MoOut.pcs_per_box` |
-| [mo/service.py](app/modules/mo/service.py#L41) | 41 · 78 | `NewMo.pcs_per_box = 0` · `parse_csv` nhận **cột 5 tuỳ chọn** |
+| [mo/service.py](app/modules/mo/service.py#L41) | 41 | `NewMo.pcs_per_box = 0` — cột Quy cách để trống là **không đóng thùng** |
 | [mo/repository.py](app/modules/mo/repository.py#L21) | 21 | `save_mo(..., pcs_per_box)` |
 | [mo/router.py](app/modules/mo/router.py#L34) | 34 | truyền xuống `NewMo` |
 

@@ -16,10 +16,14 @@ class QueueRow(BaseModel):
 
 
 class StationCounts(BaseModel):
-    """Badge mỗi trạm.
+    """Hai con số cho mỗi trạm, không phải một.
 
-    Riêng Kho (0) đếm HAI nhóm rời nhau: lệnh chờ nhận và lệnh đã nhận nhưng
-    chưa bàn giao. Bỏ nhóm thứ hai thì badge hiện 0 trong khi MO còn nằm ở Kho.
+    `counts` là việc CHƯA AI NHẬN — có người phải đi quét. `holding` là việc ĐANG
+    trong tay trạm — đang chạy, không ai cần làm gì thêm.
+
+    Gộp lại một số thì xưởng chạy ba lệnh ở Sản xuất mà màn hình hiện 0 khắp nơi,
+    và người đọc tưởng hệ thống hỏng.
     """
 
     counts: dict[StationNo, int]
+    holding: dict[StationNo, int]

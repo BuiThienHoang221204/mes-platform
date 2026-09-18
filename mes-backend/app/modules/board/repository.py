@@ -1,6 +1,6 @@
 """Truy vấn cho các màn hình điều hành — mọi câu SQL của `board/` nằm ở đây.
 
-    running_rows(db)                       bảng lệnh đang chạy, đọc view
+    running_rows(db, limit, offset)        MỘT TRANG bảng lệnh đang chạy, đọc view
     queue_rows(db, station)                hàng chờ một trạm
     at_station_rows(db, station)           lệnh ĐANG nằm trong tay một trạm
     queue_counts(db)                       đếm cả sáu trạm — MỘT câu
@@ -23,16 +23,14 @@ from __future__ import annotations
 
 import uuid
 from collections import defaultdict
+from datetime import date
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
+from app.common.config import settings
 from app.common.vocab.enums import STEP_NAMES
 
-# ── Hàng chờ từng trạm ──────────────────────────────────────────────────────
-# Trạm 0, 1, 5 có điều kiện riêng; ba trạm còn lại theo cùng một khuôn: đã xong
-# bước trước, chưa nhận bước này. `{prev}` và `{step}` thay bằng số ngay khi dựng
-# — chúng là int trong 0–5, không phải dữ liệu người dùng.
 _CHUNG = """
     SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
            EXTRACT(EPOCH FROM (now() - prev.accepted_at))::int AS waiting_sec
@@ -60,7 +58,7 @@ QUEUE_SQL: dict[int, str] = {
     """,
     5: """
         SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
-               pk.qty_packed,
+               m.pcs_per_box, pk.qty_packed,
                EXTRACT(EPOCH FROM (now() - pk.completed_at))::int AS waiting_sec
         FROM mo_round r JOIN manufacturing_order m ON m.id = r.mo_id
         JOIN production p ON p.round_id = r.id
@@ -68,10 +66,6 @@ QUEUE_SQL: dict[int, str] = {
         LEFT JOIN mo_step s ON s.round_id = r.id AND s.step_no = 5
         WHERE r.closed_at IS NULL AND s.id IS NULL
     """,
-    # Trạm 3 KHÔNG theo khuôn chung: phải có kết quả QC ĐẠT, không chỉ là "QC đã
-    # nhận". `guard_can_accept` chặn đúng chuyện này rồi, nhưng nếu hàng đợi vẫn
-    # liệt kê thì Bàn team leader nhìn thấy lệnh, quét vào, và ăn lỗi — màn hình
-    # hứa một đằng, hệ thống làm một nẻo.
     3: """
         SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
                EXTRACT(EPOCH FROM (now() - q.checked_at))::int AS waiting_sec
@@ -84,46 +78,74 @@ QUEUE_SQL: dict[int, str] = {
     **{n: _CHUNG.format(prev=n - 1, step=n) for n in (2, 4)},
 }
 
-# Kho còn nhóm thứ hai: đã quét nhận nhưng CHƯA bàn giao — hàng vẫn nằm ở kho,
-# vẫn cần người làm tiếp. Bỏ nhóm này thì badge hiện 0 trong khi kho còn hàng.
-CHO_BAN_GIAO_SQL = """
-    SELECT count(*) FROM mo_round r
-    JOIN mo_step s ON s.round_id = r.id AND s.step_no = 0
-    LEFT JOIN warehouse_out w ON w.round_id = r.id
-    WHERE r.closed_at IS NULL AND w.round_id IS NULL
+HOLDING_SQL = """
+    SELECT s.step_no, count(*) AS n
+    FROM mo_step s
+    JOIN mo_round r ON r.id = s.round_id
+    JOIN manufacturing_order m ON m.id = r.mo_id
+    WHERE s.closed_at IS NULL AND r.closed_at IS NULL
 """
 
+# Lọc theo NGÀY TẠO lệnh, quy về giờ tường của xưởng.
+#
+# `/board/counts` là ảnh chụp HIỆN TẠI, không phải lịch sử: nó đếm lệnh đang nằm ở
+# mỗi trạm ngay lúc hỏi. Bộ lọc này thu hẹp TẬP LỆNH được đếm, chứ không dựng lại
+# được tình trạng xưởng của một ngày đã qua — muốn thế phải phát lại nhật ký.
+_CREATED_BETWEEN = (
+    " AND (CAST(:date_from AS date) IS NULL"
+    "      OR timezone(:tz, m.created_at) >= CAST(:date_from AS date))"
+    " AND (CAST(:date_to AS date) IS NULL"
+    "      OR timezone(:tz, m.created_at) < CAST(:date_to AS date) + 1)"
+)
 
-def running_rows(db: Session) -> list[dict]:
-    """Bảng lệnh đang chạy — đọc thẳng view, không tính lại gì ở Python."""
-    return [dict(r) for r in
-            db.execute(text("SELECT * FROM v_round_board ORDER BY code")).mappings()]
+_PAGE = " LIMIT :limit OFFSET :offset"
 
+def _count_of(db: Session, sql: str, params: dict | None = None) -> int:
+    """Đếm bằng cách BỌC LẠI chính câu đang dùng, không viết câu đếm riêng.
 
-def queue_rows(db: Session, station: int) -> list[dict]:
-    """Hàng chờ của một trạm."""
-    sql = QUEUE_SQL[station] + " ORDER BY m.code"
-    return [dict(r) for r in db.execute(text(sql)).mappings()]
+    Viết riêng thì sớm muộn hai câu trôi khỏi nhau — danh sách một đằng, tổng một nẻo,
+    và không ai báo lỗi. Cùng lý lẽ với `QUEUE_SQL` là nguồn duy nhất của hàng chờ.
+    """
+    return db.scalar(text(f"SELECT count(*) FROM ({sql}) q"), params or {}) or 0
 
+def running_rows(db: Session, *, limit: int, offset: int = 0) -> list[dict]:
+    """MỘT TRANG bảng lệnh đang chạy — đọc thẳng view, không tính lại gì ở Python."""
+    return [dict(r) for r in db.execute(
+        text(f"SELECT * FROM v_round_board ORDER BY code{_PAGE}"),
+        {"limit": limit, "offset": offset}).mappings()]
+
+def count_running(db: Session) -> int:
+    return _count_of(db, "SELECT 1 FROM v_round_board")
+
+def queue_rows(db: Session, station: int, *, limit: int, offset: int = 0) -> list[dict]:
+    """MỘT TRANG hàng chờ của một trạm."""
+    sql = QUEUE_SQL[station] + f" ORDER BY m.code{_PAGE}"
+    return [dict(r) for r in db.execute(
+        text(sql), {"limit": limit, "offset": offset}).mappings()]
+
+def count_queue(db: Session, station: int) -> int:
+    return _count_of(db, QUEUE_SQL[station])
 
 AT_STATION_SQL = """
     SELECT m.code, m.product_name, m.quantity, m.pcs_per_box,
            r.round_no, r.target_qty,
            s.accepted_at, u.full_name AS accepted_by,
            EXTRACT(EPOCH FROM (now() - s.accepted_at))::int AS holding_sec,
-           w.handed_over_at, pk.qty_packed, pk.completed_at AS packing_done_at
+           w.handed_over_at, pk.qty_packed, pk.completed_at AS packing_done_at,
+           q.result::text AS qc_result, q.checked_at AS qc_checked_at
     FROM mo_step s
     JOIN mo_round r ON r.id = s.round_id
     JOIN manufacturing_order m ON m.id = r.mo_id
     JOIN app_user u ON u.id = s.accepted_by
     LEFT JOIN warehouse_out w ON w.round_id = r.id
     LEFT JOIN packing      pk ON pk.round_id = r.id
+    LEFT JOIN qc_result    q  ON q.round_id = r.id
     WHERE s.step_no = :station AND s.closed_at IS NULL AND r.closed_at IS NULL
-    ORDER BY s.accepted_at
+    ORDER BY s.accepted_at, m.code
 """
 
-
-def at_station_rows(db: Session, station: int) -> list[dict]:
+def at_station_rows(db: Session, station: int, *,
+                    limit: int, offset: int = 0) -> list[dict]:
     """Lệnh đã quét nhận ở trạm này và CHƯA đóng bước — tức đang trong tay họ.
 
     Khác `queue_rows` ở đúng một chỗ, nhưng là chỗ quan trọng nhất với người vận
@@ -133,30 +155,50 @@ def at_station_rows(db: Session, station: int) -> list[dict]:
     Bước chỉ đóng khi trạm SAU quét nhận (xem `MoStep`), nên `closed_at IS NULL`
     đúng nghĩa là "chưa ai lấy đi".
 
-    Kèm luôn ba mốc mà THAO TÁC của trạm cần để biết nút nào còn bấm được:
+    Kèm luôn các mốc mà THAO TÁC của trạm cần để biết nút nào còn bấm được:
     `handed_over_at` (trạm 0 đã giao chưa), `qty_packed` và `packing_done_at`
-    (trạm 5 nhận bao nhiêu). Không có chúng thì màn hình phải đoán, mà đoán sai
-    là hiện nút cho việc đã làm rồi.
+    (trạm 5 nhận bao nhiêu), `qc_result` và `qc_checked_at` (trạm 2 đã kết luận
+    chưa). Không có chúng thì màn hình phải đoán, mà đoán sai là hiện nút cho
+    việc đã làm rồi.
+
+    Trạm 2 giữ lệnh CẢ SAU KHI ra kết quả — bước chỉ đóng khi Bàn team leader quét
+    nhận. Nên "còn trong tay QC" và "chưa có kết quả" là hai chuyện khác nhau, và
+    chỉ `qc_result` phân biệt được.
     """
-    rows = db.execute(text(AT_STATION_SQL), {"station": station}).mappings()
+    rows = db.execute(text(AT_STATION_SQL + _PAGE),
+                      {"station": station, "limit": limit, "offset": offset}).mappings()
     return [dict(r) for r in rows]
 
+def count_at_station(db: Session, station: int) -> int:
+    return _count_of(db, AT_STATION_SQL, {"station": station})
 
-def queue_counts(db: Session) -> dict[int, int]:
-    """Đếm hàng chờ cả sáu trạm bằng MỘT câu, cộng sẵn nhóm chờ bàn giao vào trạm 0.
+def queue_counts(db: Session, *, date_from: date | None = None,
+                 date_to: date | None = None) -> tuple[dict[int, int], dict[int, int]]:
+    """Hai con số của mỗi trạm: CHỜ NHẬN và ĐANG GIỮ. Hai câu, không phải mười hai.
 
-    Dựng từ chính `QUEUE_SQL` nên con số luôn khớp danh sách — xem đầu file.
+    Gộp chung thành một số là đánh mất đúng thứ người quản lý cần phân biệt: chờ
+    nhận là việc chưa ai đụng vào — có người phải đi quét; đang giữ là việc đang
+    chạy — không cần ai làm gì thêm. Một trạm 0 chờ 3 đang giữ và một trạm 3 chờ
+    0 đang giữ là hai tình huống trái ngược nhau.
+
+    Nhóm chờ nhận dựng từ chính `QUEUE_SQL` nên con số luôn khớp danh sách của
+    `queue_rows` — xem đầu file.
     """
-    phan = [f"SELECT {n} AS step_no, count(*) AS n FROM ({sql}) q"
+    loc = {"date_from": date_from, "date_to": date_to, "tz": settings.tz}
+    parts = [f"SELECT {n} AS step_no, count(*) AS n FROM ({sql}{_CREATED_BETWEEN}) q"
             for n, sql in sorted(QUEUE_SQL.items())]
-    phan.append(f"SELECT 0 AS step_no, ({CHO_BAN_GIAO_SQL}) AS n")
-    rows = db.execute(text(" UNION ALL ".join(phan))).mappings().all()
+    waiting_rows = db.execute(text(" UNION ALL ".join(parts)), loc).mappings().all()
+    holding_rows = db.execute(
+        text(HOLDING_SQL + _CREATED_BETWEEN + " GROUP BY s.step_no"), loc).mappings().all()
 
-    dem = dict.fromkeys(STEP_NAMES, 0)
-    for r in rows:
-        dem[r["step_no"]] += r["n"]          # trạm 0 cộng dồn hai nhánh
-    return dem
-
+    waiting = dict.fromkeys(STEP_NAMES, 0)
+    holding = dict.fromkeys(STEP_NAMES, 0)
+    for r in waiting_rows:
+        waiting[r["step_no"]] += r["n"]
+    for r in holding_rows:
+        if r["step_no"] in holding:
+            holding[r["step_no"]] = r["n"]
+    return waiting, holding
 
 def line_rows_of_rounds(db: Session, round_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[dict]]:
     """Năng suất từng chuyền, cho NHIỀU vòng một lần. Vòng chưa có chuyền → thiếu khoá."""
@@ -165,7 +207,8 @@ def line_rows_of_rounds(db: Session, round_ids: list[uuid.UUID]) -> dict[uuid.UU
     rows = db.execute(
         text(
             """
-            SELECT t.round_id, l.code AS line_code, t.wait_sec, t.run_sec
+            SELECT t.round_id, l.code AS line_code, t.wait_sec, t.run_sec,
+                   t.current_kind, t.hold_reason_text, t.current_since
             FROM v_line_time t JOIN line l ON l.id = t.line_id
             WHERE t.round_id = ANY(:ids) ORDER BY l.code
             """
@@ -179,14 +222,12 @@ def line_rows_of_rounds(db: Session, round_ids: list[uuid.UUID]) -> dict[uuid.UU
         theo_vong[d.pop("round_id")].append(d)
     return dict(theo_vong)
 
-
 def step_totals(db: Session, mo_id: uuid.UUID) -> list[dict]:
     """Thời gian cộng dồn từng bước qua MỌI vòng của một MO."""
     return [dict(t) for t in db.execute(
         text("SELECT step_no, sec, rounds FROM v_step_total WHERE mo_id = :m ORDER BY step_no"),
         {"m": mo_id},
     ).mappings()]
-
 
 def mo_progress(db: Session, mo_id: uuid.UUID) -> dict:
     """Tiến độ một MO — đọc view, không cộng tay."""

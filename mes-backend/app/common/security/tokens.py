@@ -20,7 +20,7 @@ import jwt
 
 from app.common.clock import now
 from app.common.config import settings
-from app.common.errors import Forbidden
+from app.common.errors import Unauthenticated
 
 
 def hash_pin(pin: str) -> str:
@@ -90,4 +90,4 @@ def decode(token: str) -> dict:
     try:
         return jwt.decode(token, settings.jwt.secret, algorithms=["HS256"])
     except jwt.PyJWTError as exc:  # noqa: BLE001
-        raise Forbidden("Phiên đăng nhập không hợp lệ hoặc đã hết hạn") from exc
+        raise Unauthenticated("Phiên đăng nhập không hợp lệ hoặc đã hết hạn") from exc

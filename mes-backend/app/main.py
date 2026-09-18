@@ -3,22 +3,29 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from sqlalchemy import text
-from sqlalchemy.exc import DBAPIError, SQLAlchemyError
+from sqlalchemy.exc import DBAPIError, InterfaceError, OperationalError, SQLAlchemyError
 
 from app.common.config import settings
 from app.common.errors import DomainError, translate_db_error
 from app.common.logging import new_request_id, request_id_var, setup_logging
 from app.common.vocab.error_codes import Err
-from app.db.session import engine
+from app.db.session import db_target, log_db_status, probe_db
 from app.router import router
 
 setup_logging()
 log = logging.getLogger("mes")
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    log_db_status()
+    yield
 
 app = FastAPI(
     title="MES Platform API",
@@ -36,6 +43,7 @@ Nút **Authorize** dành cho hai trường hợp khác:
 """,
     # Giữ token đã Authorize qua mỗi lần tải lại trang.
     swagger_ui_parameters={"persistAuthorization": True},
+    lifespan=lifespan,
 )
 # Cookie chỉ đi kèm request khi CORS cho phép mang thông tin đăng nhập. Vì vậy
 # KHÔNG được dùng allow_origins=["*"] — trình duyệt từ chối cặp đó, và cookie sẽ
@@ -65,12 +73,37 @@ async def domain_error_handler(_: Request, exc: DomainError) -> JSONResponse:
                         content={"code": exc.code, "message": exc.message})
 
 
+CONNECT_ERRORS = (OperationalError, InterfaceError)
+
+
+def _is_connect_error(exc: SQLAlchemyError) -> bool:
+    if not isinstance(exc, CONNECT_ERRORS):
+        return False
+    if getattr(exc, "connection_invalidated", False):
+        return True
+    return getattr(getattr(exc, "orig", None), "sqlstate", None) is None
+
+
 @app.exception_handler(SQLAlchemyError)
-async def db_error_handler(_: Request, exc: SQLAlchemyError) -> JSONResponse:
+async def db_error_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:
     """Luật nằm ở DB nên lỗi DB là lỗi NGHIỆP VỤ — dịch, đừng trả 500.
 
     Một bảng ánh xạ duy nhất trong core/errors.py; router và service không bắt lỗi này.
     """
+    if _is_connect_error(exc):
+        log.error(
+            "KHÔNG KẾT NỐI ĐƯỢC CSDL khi xử lý %s %s — %s | %s",
+            request.method,
+            request.url.path,
+            db_target(),
+            getattr(exc, "orig", exc),
+        )
+        return JSONResponse(
+            status_code=503,
+            content={"code": Err.DB_UNAVAILABLE,
+                     "message": "Máy chủ chưa kết nối được cơ sở dữ liệu"},
+        )
+
     translated = translate_db_error(exc)
     if translated is not None:
         return JSONResponse(status_code=translated.status,
@@ -88,7 +121,13 @@ def healthz() -> dict:
 
 
 @app.get("/readyz", tags=["ops"])
-def readyz() -> dict:
-    with engine.connect() as conn:
-        conn.execute(text("SELECT 1"))
-    return {"ok": True, "db": True}
+def readyz() -> JSONResponse:
+    reason = probe_db()
+    if reason is None:
+        return JSONResponse(content={"ok": True, "db": True, "target": db_target()})
+    log.error("KHÔNG KẾT NỐI ĐƯỢC CSDL — %s | %s", db_target(), reason)
+    return JSONResponse(
+        status_code=503,
+        content={"ok": False, "db": False, "target": db_target(),
+                 "code": Err.DB_UNAVAILABLE, "reason": reason},
+    )

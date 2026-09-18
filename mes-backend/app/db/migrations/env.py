@@ -24,7 +24,7 @@ if not config.get_main_option("sqlalchemy.url", None):
     config.set_main_option("sqlalchemy.url", settings.database.url)
 
 if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
+    fileConfig(config.config_file_name, disable_existing_loggers=False)
 
 # CỐ Ý để None — dự án này KHÔNG so lược đồ bằng metadata.
 #

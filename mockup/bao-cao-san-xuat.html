@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Báo cáo sản xuất — demo giao diện</title>
+  <style>
+    :root {
+      --bg: #F7F7F7;
+      --surface: #FFFFFF;
+      --surface-2: #F7F7F7;
+      --surface-3: #F0F0F0;
+      --line: #EBEBEB;
+      --line-strong: #DDDDDD;
+      --fg: #1A1A1A;
+      --fg-muted: #6B7280;
+      --fg-subtle: #9CA3AF;
+      --accent: #0E6E99;
+      --accent-soft: #E3F2F9;
+      --ok: #0A7A34;
+      --ok-soft: #E2F4E9;
+      --warn: #8A5A06;
+      --warn-soft: #FBF0DD;
+      --danger: #B02A2A;
+      --danger-soft: #FAE8E8;
+      --brand: #FFDE17;
+
+      --series-1: #2a78d6;
+      --series-2: #eb6834;
+      --series-3: #1baf7a;
+      --tier-low: #A32222;
+      --tier-mid: #2a78d6;
+      --tier-high: #34A653;
+      --track: #EDEDED;
+      --grid: #EBEBEB;
+
+      --r-sm: 10px;
+      --r-md: 14px;
+      --r-lg: 20px;
+      --r-pill: 9999px;
+      --mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Consolas, monospace;
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #141414;
+      --surface: #1C1C1C;
+      --surface-2: #232323;
+      --surface-3: #2A2A2A;
+      --line: #2E2E2E;
+      --line-strong: #3A3A3A;
+      --fg: #F2F2F2;
+      --fg-muted: #A1A1AA;
+      --fg-subtle: #71717A;
+      --accent: #4CB8DE;
+      --accent-soft: #12303B;
+      --ok: #4ADE80;
+      --ok-soft: #10301D;
+      --warn: #FACC15;
+      --warn-soft: #332810;
+      --danger: #F87171;
+      --danger-soft: #3A1A1A;
+
+      --series-1: #3987e5;
+      --series-2: #d95926;
+      --series-3: #199e70;
+      --tier-low: #c83737;
+      --tier-mid: #2d82d7;
+      --tier-high: #40ad6a;
+      --track: #2E2E2E;
+      --grid: #2E2E2E;
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.6 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif
+    }
+
+    .shell {
+      display: flex;
+      min-height: 100dvh
+    }
+
+    .side {
+      width: 264px;
+      flex: 0 0 264px;
+      border-right: 1px solid var(--line);
+      background: var(--surface);
+      padding: 18px 14px
+    }
+
+    .brand {
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+      margin-bottom: 2px
+    }
+
+    .brand em {
+      font-style: normal;
+      color: var(--brand)
+    }
+
+    .brand small {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 400;
+      color: var(--fg-subtle);
+      letter-spacing: 0
+    }
+
+    .grp {
+      margin-top: 26px;
+      font-size: 11.5px;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: var(--fg-subtle);
+      padding: 0 10px 8px
+    }
+
+    .nav a {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 10px;
+      border-radius: var(--r-sm);
+      color: var(--fg-muted);
+      text-decoration: none;
+      font-size: 15px
+    }
+
+    .nav a.on {
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-weight: 600
+    }
+
+    .nav svg {
+      width: 19px;
+      height: 19px;
+      flex: 0 0 19px
+    }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      padding: 24px 28px 80px
+    }
+
+    .crumb {
+      font-size: 13.5px;
+      color: var(--fg-subtle);
+      margin-bottom: 14px
+    }
+
+    h1 {
+      font-size: 30px;
+      margin: 0 0 4px
+    }
+
+    .lede {
+      color: var(--fg-muted);
+      margin: 0 0 20px;
+      max-width: 72ch
+    }
+
+    .bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px
+    }
+
+    .sel,
+    .btn {
+      min-height: 40px;
+      border: 1px solid var(--line-strong);
+      border-radius: var(--r-sm);
+      background: var(--surface);
+      color: var(--fg);
+      font: inherit;
+      font-size: 14.5px;
+      padding: 0 12px;
+      cursor: pointer
+    }
+
+    .btn.sm {
+      min-height: 34px;
+      font-size: 13.5px;
+      padding: 0 10px
+    }
+
+    .btn[aria-pressed=true] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff
+    }
+
+    .sp {
+      flex: 1
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--r-lg);
+      margin-bottom: 20px;
+      overflow: hidden
+    }
+
+    .card>header {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: baseline;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface-2)
+    }
+
+    .card>header h2 {
+      font-size: 18px;
+      margin: 0
+    }
+
+    .card>header .meta {
+      font-size: 12.5px;
+      color: var(--fg-subtle)
+    }
+
+    .card>header .tools {
+      margin-left: auto;
+      display: flex;
+      gap: 8px;
+      align-items: center
+    }
+
+    .body {
+      padding: 20px
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-bottom: 14px;
+      font-size: 13.5px;
+      color: var(--fg-muted)
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px
+    }
+
+    .key {
+      width: 14px;
+      height: 3px;
+      border-radius: 2px;
+      display: inline-block
+    }
+
+    .key.sq {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px
+    }
+
+    /* ── Biểu đồ thanh: HTML thuần, không SVG ─────────────────────────── */
+    .rows {
+      display: grid;
+      gap: 14px
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: minmax(120px, 190px) 1fr auto;
+      gap: 14px;
+      align-items: center
+    }
+
+    .row .who {
+      min-width: 0
+    }
+
+    .row .who b {
+      display: block;
+      font-family: var(--mono);
+      font-size: 15px;
+      font-weight: 600
+    }
+
+    .row .who small {
+      display: block;
+      font-size: 12.5px;
+      color: var(--fg-subtle);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .track {
+      position: relative;
+      height: 22px;
+      border-radius: 0 4px 4px 0;
+      background: var(--track);
+      overflow: hidden
+    }
+
+    .fill {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 0 4px 4px 0;
+      background: var(--series-1)
+    }
+
+    .row .val {
+      font-family: var(--mono);
+      font-size: 14px;
+      font-variant-numeric: tabular-nums;
+      color: var(--fg);
+      white-space: nowrap;
+      text-align: right
+    }
+
+    .row .val i {
+      font-style: normal;
+      color: var(--fg-subtle)
+    }
+
+    /* xếp chồng: khe 2px màu nền làm việc tách, không viền */
+    .stack {
+      display: flex;
+      height: 22px;
+      border-radius: 0 4px 4px 0;
+      overflow: hidden;
+      background: var(--track)
+    }
+
+    .seg {
+      height: 100%
+    }
+
+    .seg+.seg {
+      margin-left: 2px
+    }
+
+    .seg:last-child {
+      border-radius: 0 4px 4px 0
+    }
+
+    .hoverable {
+      cursor: default
+    }
+
+    .hoverable:hover .fill,
+    .hoverable:hover .seg {
+      filter: brightness(1.12)
+    }
+
+    /* ── Thanh xếp hạng lệnh trong một khung giờ ─────────────────────── */
+    .hbar {
+      display: grid;
+      gap: 7px;
+      margin-top: 4px
+    }
+
+    .hbar .r {
+      display: grid;
+      grid-template-columns: 96px 1fr 128px;
+      gap: 12px;
+      align-items: center
+    }
+
+    .hbar .r .c {
+      font-family: var(--mono);
+      font-size: 13px
+    }
+
+    .hbar .r .t {
+      position: relative;
+      height: 18px;
+      background: var(--track);
+      border-radius: 0 3px 3px 0
+    }
+
+    .hbar .r .t i {
+      position: absolute;
+      inset: 0 auto 0 0;
+      border-radius: 0 3px 3px 0;
+      background: var(--series-1)
+    }
+
+    .hbar .r .t i.low {
+      background: var(--tier-low)
+    }
+
+    .hbar .r .t i.mid {
+      background: var(--tier-mid)
+    }
+
+    .hbar .r .t i.high {
+      background: var(--tier-high)
+    }
+
+    .key.sq.low {
+      background: var(--tier-low)
+    }
+
+    .key.sq.mid {
+      background: var(--tier-mid)
+    }
+
+    .key.sq.high {
+      background: var(--tier-high)
+    }
+
+    /* HAI vạch vuông góc — đặc tả bullet chart của Stephen Few. Chúng đúng là hai
+   ranh giới màu, nên bậc của một thanh đọc được bằng VỊ TRÍ chứ không chỉ bằng
+   màu — người mù màu đọc được, máy in đen trắng cũng đọc được. */
+    .hbar .r .t u {
+      position: absolute;
+      top: -3px;
+      bottom: -3px;
+      width: 2px;
+      background: var(--fg-muted);
+      text-decoration: none
+    }
+
+    .hbar .r .t u.full {
+      background: var(--fg-subtle);
+      opacity: .6
+    }
+
+    .hbar .r .v {
+      text-align: right;
+      font-family: var(--mono);
+      font-variant-numeric: tabular-nums;
+      font-size: 13px
+    }
+
+    .hbar .r .v em {
+      font-style: normal;
+      color: var(--fg-subtle);
+      font-size: 11.5px;
+      margin-left: 6px
+    }
+
+    .hbar .r .v.bad {
+      color: var(--tier-low);
+      font-weight: 600
+    }
+
+    .daysum {
+      font-size: 13px;
+      color: var(--fg-muted);
+      margin: 0 0 14px
+    }
+
+    .daysum b {
+      color: var(--fg)
+    }
+
+    .daysum .bad {
+      color: var(--tier-low);
+      font-weight: 600
+    }
+
+    input[type=date].sel {
+      font-family: inherit
+    }
+
+    .hero {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 14px
+    }
+
+    .hero b {
+      font-size: 42px;
+      line-height: 1;
+      font-variant-numeric: tabular-nums
+    }
+
+    .hero b.bad {
+      color: var(--tier-low)
+    }
+
+    .hero span {
+      color: var(--fg-muted);
+      font-size: 14px
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--line)
+    }
+
+    th {
+      font-size: 11.5px;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--fg-subtle);
+      font-weight: 600
+    }
+
+    td.n,
+    th.n {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-family: var(--mono)
+    }
+
+    tr:last-child td {
+      border-bottom: 0
+    }
+
+    .hide {
+      display: none
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--fg-muted);
+      border-radius: var(--r-sm);
+      padding: 12px 14px;
+      font-size: 13.5px;
+      margin: 14px 0 0
+    }
+
+    .note.warn {
+      border-color: var(--warn);
+      background: var(--warn-soft);
+      color: var(--warn)
+    }
+
+    .note b {
+      color: inherit
+    }
+
+    .foot {
+      margin-top: 34px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line);
+      font-size: 13px;
+      color: var(--fg-subtle)
+    }
+
+    @media(max-width:900px) {
+      .side {
+        display: none
+      }
+
+      .main {
+        padding: 18px
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="shell">
+
+    <aside class="side">
+      <div class="brand">Amphenol<em>®RF</em><small>MES v2.3 · Amphenol RF</small></div>
+      <div class="grp">Xem chung</div>
+      <nav class="nav">
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
+          </svg>Bảng đang chạy</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="4" y="3" width="16" height="18" rx="2" />
+            <path d="M8 8h8M8 12h8M8 16h5" />
+          </svg>Luồng toàn quy trình</a>
+        <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 3v18h18" />
+            <path d="M7 15l4-5 3 3 5-7" />
+          </svg>Báo cáo sản xuất</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <div class="crumb">Xem chung › Báo cáo sản xuất</div>
+      <h1>Báo cáo sản xuất</h1>
+      <p class="lede">Ba câu hỏi: đơn nào sắp xong, giờ nào chuyền không đạt định mức, và hàng
+        đang dồn ở khúc nào. Riêng biểu đồ ② có <b>ba màn cho ba người xem</b> — thợ ở trạm,
+        tổ trưởng và điều độ hỏi ba câu khác nhau, ép chung một hình thì không câu nào trả lời trọn.</p>
+
+      <div class="bar">
+        <label style="font-size:13.5px;color:var(--fg-muted)">Số lệnh đang chạy</label>
+        <select class="sel" id="moCount">
+          <option value="3">3 lệnh</option>
+          <option value="8">8 lệnh</option>
+          <option value="24">24 lệnh</option>
+          <option value="100">100 lệnh</option>
+        </select>
+        <label style="font-size:13.5px;color:var(--fg-muted)">Khoảng xem</label>
+        <select class="sel" id="range">
+          <option value="7">7 ngày gần nhất</option>
+          <option value="3">3 ngày gần nhất</option>
+          <option value="1">Hôm nay</option>
+        </select>
+        <span class="sp"></span>
+        <button class="btn sm" id="theme">Sáng / Tối</button>
+      </div>
+
+      <!-- ① TIẾN ĐỘ THEO MO -->
+      <section class="card">
+        <header>
+          <h2>① Tiến độ theo lệnh</h2>
+          <span class="meta">pcs đã nhập kho trên tổng số phải làm</span>
+          <span class="tools"><button class="btn sm" data-table="t1">Xem dạng bảng</button></span>
+        </header>
+        <div class="body">
+          <div class="rows" id="c1"></div>
+          <div id="t1" class="hide" style="margin-top:16px"></div>
+          <p class="note"><b>Đo bằng số đã đóng thùng nhập kho, không phải SL đạt.</b>
+            Hàng đạt mà chưa đóng thùng thì chưa tính vào tiến độ đơn (§6b.2) — lấy SL đạt
+            thì đơn nhìn như sắp xong trong khi hàng còn nằm trên bàn.</p>
+        </div>
+      </section>
+
+      <!-- ② ĐẠT ĐỊNH MỨC THEO GIỜ -->
+      <section class="card">
+        <header>
+          <h2>② Đạt định mức theo giờ</h2>
+          <span class="meta" id="meta2"></span>
+          <span class="tools">
+            <label style="font-size:13px;color:var(--fg-muted)">Khung</label>
+            <select class="sel" id="bucket">
+              <option value="1" selected>1 giờ</option>
+              <option value="4">4 giờ</option>
+              <option value="9">9 giờ · cả ca</option>
+            </select>
+            <input type="date" class="sel" id="pickDate">
+            <select class="sel" id="pickSlot"></select>
+            <button class="btn sm" data-table="t2">Xem dạng bảng</button>
+          </span>
+        </header>
+        <div class="body">
+          <p class="daysum" id="daySum"></p>
+          <div id="plot2"></div>
+          <div id="t2" class="hide" style="margin-top:16px"></div>
+          <p class="note warn" id="warn2"></p>
+        </div>
+      </section>
+
+      <!-- ③ MO TRONG TỪNG BƯỚC -->
+      <section class="card">
+        <header>
+          <h2>MO theo giai đoạn</h2>
+          <span class="meta">giữ đúng thứ tự quy trình 0 → 5</span>
+          <span class="tools"><button class="btn sm" data-table="t3">Xem dạng bảng</button></span>
+        </header>
+        <div class="body">
+          <div class="legend">
+            <span><i class="key sq" style="background:var(--series-1)"></i>Chờ nhận</span>
+            <span><i class="key sq" style="background:var(--series-2)"></i>Đang làm</span>
+          </div>
+          <div class="rows" id="c3"></div>
+          <div id="t3" class="hide" style="margin-top:16px"></div>
+          <p class="note"><b>Không sắp theo số lượng.</b> Thứ tự 0→5 chính là thứ tự quy trình;
+            sắp theo giá trị thì mất luôn thông tin hàng đang dồn ở khúc nào.</p>
+        </div>
+      </section>
+
+      <p class="foot">Demo tĩnh, số liệu giả. Biểu đồ vẽ bằng div và CSS thuần, không thư viện, không cả SVG — màu
+        lấy từ biến CSS nên đổi Sáng/Tối là đúng ngay. Mục tiêu 85% khai ở một chỗ
+        (<code>TARGET_PCT</code>), sau này chuyển thành cấu hình thì chỉ sửa một dòng.
+        Dùng ô <b>Số lệnh đang chạy</b> để xem từng màn chịu được tới đâu: 3 · 8 · 24 · 100 lệnh.</p>
+    </main>
+  </div>
+
+  <script>
+    const nf = n => Math.round(n).toLocaleString("vi-VN");
+    const nf1 = n => n.toLocaleString("vi-VN", { maximumFractionDigits: 1 });
+
+    /* ═══ Số liệu giả ═══════════════════════════════════════════════════ */
+    const MOS = [
+      { code: "M011111", name: "Vỏ hộp số", quantity: 12000, done: 10400, ng: 300, short: 200 },
+      { code: "M011120", name: "Niềng xe", quantity: 9000, done: 7650, ng: 120, short: 0 },
+      { code: "M011133", name: "Chụp cáp N", quantity: 6000, done: 2400, ng: 0, short: 400 },
+      { code: "M011188", name: "Đầu nối SMA", quantity: 4000, done: 3960, ng: 40, short: 0 },
+      { code: "M011190", name: "Vòng đệm", quantity: 15000, done: 1500, ng: 0, short: 0 },
+      { code: "M011205", name: "Ốc hãm M6", quantity: 2500, done: 2500, ng: 0, short: 0 },
+    ];
+
+    const STEPS = [
+      { no: 0, name: "Kho xuất", wait: 3, hold: 2 },
+      { no: 1, name: "Setup máy", wait: 2, hold: 1 },
+      { no: 2, name: "QC", wait: 1, hold: 1 },
+      { no: 3, name: "Bàn team leader", wait: 0, hold: 1 },
+      { no: 4, name: "Sản xuất", wait: 1, hold: 4 },
+      { no: 5, name: "Kho nhập", wait: 2, hold: 0 },
+    ];
+
+    /* Dòng sản lượng giờ thô — y như bảng `hourly_output`.
+       Sinh theo SỐ LỆNH đang chạy để thấy giao diện gãy ở đâu khi xưởng bận. */
+    const TARGET_PCT = 85;     // mục tiêu: đạt 85% định mức
+    const SHIFT_START = 8;     // giờ đi làm 08:00–17:00, nghỉ trưa 12:00–13:00
+    const SHIFT_END = 17;
+    const LUNCH_START = 12;
+    const LUNCH_END = 13;
+    const WORK_BLOCKS = [[SHIFT_START, LUNCH_START], [LUNCH_END, SHIFT_END]];
+    const DAY_START = 6;       // khung 1 giờ trải cả ngày 06:00–22:00, kể giờ tăng ca
+    const DAY_END = 22;
+
+    const MISS_REASONS = ["Hỏng khuôn", "Chờ vật tư", "Đổi mã hàng", "Thiếu người",
+      "Máy dừng bảo trì", "Kẹt phôi", "Chờ QC duyệt"];
+
+    let SERIES = [];
+    let RAW = [];
+
+    function seed(n) {
+      SERIES = Array.from({ length: n }, (_, i) => "M0" + (11111 + i * 7));
+      RAW = [];
+      let st = 7;
+      const rnd = () => (st = (st * 1103515245 + 12345) % 2147483648) / 2147483648;
+      for (let d = 0; d < 3; d++) {
+        for (let h = DAY_START; h < DAY_END; h++) {
+          if (h >= LUNCH_START && h < LUNCH_END) continue;   // nghỉ trưa, line dừng
+          const overtime = h < SHIFT_START || h >= SHIFT_END;
+          SERIES.forEach((code, i) => {
+            if (overtime && rnd() < .75) return;            // tăng ca chỉ vài chuyền
+            if (rnd() < .12) return;                       // giờ không ghi sổ
+            const base = 9 + (i % 3) * 2.5;
+            const people = 6 + Math.round(rnd() * 8);
+            // Vài ca hỏng khuôn / thiếu liệu — để mốc mục tiêu 85% có việc để làm
+            const sot = ((i + d) % 4 === 1 && h >= 13) || ((i + d) % 7 === 2 && h < 14);
+            const rate = sot ? base * (0.55 + rnd() * 0.2) : base + rnd() * 5 - 2.5;
+            const miss = d === 0 && h < 9;                 // dòng cũ chưa có ô định mức
+            const qty = Math.max(0, Math.round(people * rate));
+            const tgt = miss ? null : people * base;
+            // Hụt định mức thì phải có LÝ DO. Vài dòng cố tình bỏ trống để thấy
+            // màn hình gọi tên chỗ thiếu — đó là cột mà bảng theo giờ sinh ra để ép ghi.
+            const hut = tgt && qty < tgt * TARGET_PCT / 100;
+            RAW.push({
+              code, day: d, hour: h, qty, people, target: tgt,
+              why: hut ? (rnd() < .22 ? null : MISS_REASONS[Math.floor(rnd() * MISS_REASONS.length)]) : null,
+            });
+          });
+        }
+      }
+    }
+
+    /* ═══ Gộp khung giờ theo GIỜ ĐI LÀM ═══════════════════════
+       Khung không đều nhau, vì ngày làm việc không đều nhau. Lý lẽ đầy đủ ở
+       KE-HOACH-BAO-CAO-SAN-XUAT.md §3.5. */
+    function binsOf(b) {
+      if (b >= 9) return [[SHIFT_START, SHIFT_END]];
+      // Khung 1 giờ KHÔNG cắt theo giờ đi làm: mỗi giờ một ô thì không ô nào
+      // đụng đến ô nào, nên trải cả ngày để nhìn được cả giờ tăng ca.
+      if (b === 1) return Array.from({ length: DAY_END - DAY_START },
+        (_, i) => [DAY_START + i, DAY_START + i + 1]);
+      const out = [];
+      for (const [s, e] of WORK_BLOCKS)
+        for (let h = s; h < e; h += b) out.push([h, Math.min(h + b, e)]);
+      return out;
+    }
+
+    function binOf(hour, b) {
+      const bins = binsOf(b);
+      if (hour < bins[0][0]) return bins[0][0];
+      let pick = bins[0][0];
+      for (const [start] of bins) if (hour >= start) pick = start;
+      return pick;
+    }
+
+    function binEnd(hour, b) {
+      const hit = binsOf(b).find(([start]) => start === hour);
+      return hit ? hit[1] : hour + b;
+    }
+
+    // Dòng bị đẩy sang khung khác với giờ thật của nó — tăng ca, hay trưa không
+    // nghỉ. Chỉ đúng với khung đã chọn: khung 1 giờ trải cả ngày nên không đẩy ai.
+    const folded = (hour, b) => {
+      const hit = binsOf(b).find(([start]) => start === binOf(hour, b));
+      return hour < hit[0] || hour >= hit[1];
+    };
+
+    function bucketize(b) {
+      const box = new Map();
+      let skipped = 0, outside = 0;
+      for (const r of RAW) {
+        // Bẫy B — thiếu ĐỊNH MỨC thì không tính được đạt bao nhiêu phần trăm.
+        // Loại khỏi CẢ tử lẫn mẫu; coi định mức là 0 thì tỷ lệ vọt lên vô hạn.
+        if (r.target == null || r.target <= 0) { skipped++; continue; }
+        // Giờ nằm ngoài mọi khung thì KHÔNG bỏ đi: gộp vào khung gần nhất để tổng
+        // còn đúng, rồi đếm ra dưới biểu đồ.
+        if (folded(r.hour, b)) outside++;
+        const day = r.day, hour = binOf(r.hour, b);
+        const key = `${r.code}|${day}|${hour}`;
+        const cur = box.get(key) || { code: r.code, day, hour, qty: 0, people: 0, target: 0 };
+        cur.qty += r.qty; cur.people += r.people; cur.target += r.target;
+        box.set(key, cur);
+      }
+      const rows = [...box.values()].sort((a, z) => a.day - z.day || a.hour - z.hour);
+      // Bẫy A — cộng tử rồi cộng mẫu, KHÔNG lấy trung bình các phần trăm
+      rows.forEach(r => r.rate = r.qty / r.target * 100);
+      return { rows, skipped, outside };
+    }
+
+    /** Nhãn ĐẦY ĐỦ cho tooltip và bảng số. */
+    /* Ngày THẬT, không phải số thứ tự. "Ngày 3" là chỉ số trong dữ liệu giả — ngoài
+       xưởng không ai gọi hôm nay là ngày 3, và sang tuần thì nó thành vô nghĩa. */
+    const NGAY_0 = (() => { const d = new Date(); d.setDate(d.getDate() - 2); return d; })();
+    const dateOf = day => {
+      const d = new Date(NGAY_0);
+      d.setDate(d.getDate() + day);
+      return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0");
+    };
+
+    /** ISO `yyyy-mm-dd` cho ô nhập ngày, và đường về. Ô nhập ngày của trình duyệt
+     *  chỉ hiểu đúng định dạng này. */
+    const isoOf = day => {
+      const d = new Date(NGAY_0);
+      d.setDate(d.getDate() + day);
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0")
+        + "-" + String(d.getDate()).padStart(2, "0");
+    };
+    const dayFromIso = iso => Math.round(
+      (new Date(iso + "T00:00:00") - new Date(NGAY_0.getFullYear(), NGAY_0.getMonth(),
+        NGAY_0.getDate())) / 86400000);
+
+    const hhmm = h => String(h).padStart(2, "0") + ":00";
+    const LBL = (day, hour, b) =>
+      `${dateOf(day)} · ${hhmm(hour)}–${hhmm(binEnd(hour, b))}`;
+
+    /* ═══ ① Tiến độ theo lệnh ══════════════════════════════════════════ */
+    function drawProgress() {
+      const el = document.getElementById("c1");
+      el.innerHTML = "";
+      MOS.forEach(m => {
+        const pct = Math.min(100, m.done / m.quantity * 100);
+        const row = document.createElement("div");
+        row.className = "row hoverable";
+        row.title = `${m.code} · đã nhập kho ${nf(m.done)}/${nf(m.quantity)} pcs`
+          + (m.ng ? ` · hỏng ${nf(m.ng)}` : "") + (m.short ? ` · thiếu ${nf(m.short)}` : "");
+
+        const who = document.createElement("div");
+        who.className = "who";
+        const b = document.createElement("b"); b.textContent = m.code;
+        const s = document.createElement("small"); s.textContent = m.name;
+        who.append(b, s);
+
+        const track = document.createElement("div"); track.className = "track";
+        const fill = document.createElement("div"); fill.className = "fill";
+        fill.style.width = pct + "%";
+        track.append(fill);
+
+        const val = document.createElement("div"); val.className = "val";
+        const i = document.createElement("i"); i.textContent = ` / ${nf(m.quantity)}`;
+        val.append(document.createTextNode(nf(m.done)), i,
+          document.createTextNode(`  ${Math.round(pct)}%`));
+
+        row.append(who, track, val);
+        el.append(row);
+      });
+
+      table("t1", ["Mã lệnh", "Con hàng", "Tổng SL", "Đã nhập kho", "Còn lại", "Hỏng", "Thiếu"],
+        MOS.map(m => [m.code, m.name, nf(m.quantity), nf(m.done),
+        nf(m.quantity - m.done), nf(m.ng), nf(m.short)]), [2, 3, 4, 5, 6]);
+    }
+
+    /* ═══ MO theo giai đoạn ══════════════════════════════════════ */
+    function drawSteps() {
+      const el = document.getElementById("c3");
+      el.innerHTML = "";
+      const max = Math.max(...STEPS.map(s => s.wait + s.hold), 1);
+      STEPS.forEach(s => {
+        const row = document.createElement("div");
+        row.className = "row hoverable";
+        row.title = `${s.no} · ${s.name} — chờ nhận ${s.wait}, đang làm ${s.hold}`;
+
+        const who = document.createElement("div"); who.className = "who";
+        const b = document.createElement("b"); b.textContent = s.no;
+        b.style.fontFamily = "inherit";
+        const nm = document.createElement("small"); nm.textContent = s.name;
+        nm.style.color = "var(--fg)"; nm.style.fontSize = "14.5px";
+        who.append(nm, b); who.style.display = "flex";
+        who.style.alignItems = "baseline"; who.style.gap = "8px";
+        b.style.order = "-1"; b.style.color = "var(--fg-subtle)";
+
+        const wrap = document.createElement("div");
+        const stack = document.createElement("div"); stack.className = "stack";
+        stack.style.width = ((s.wait + s.hold) / max * 100) + "%";
+        const total = s.wait + s.hold;
+        [["wait", "--series-1"], ["hold", "--series-2"]].forEach(([k, v]) => {
+          if (!s[k]) return;
+          const seg = document.createElement("div");
+          seg.className = "seg";
+          seg.style.flex = s[k];
+          seg.style.background = `var(${v})`;
+          stack.append(seg);
+        });
+        if (!total) stack.style.width = "2px";
+        wrap.append(stack);
+
+        const val = document.createElement("div"); val.className = "val";
+        val.textContent = total ? `${s.wait} + ${s.hold}` : "—";
+
+        row.append(who, wrap, val);
+        el.append(row);
+      });
+
+      table("t3", ["Bước", "Tên trạm", "Chờ nhận", "Đang làm", "Tổng"],
+        STEPS.map(s => [s.no, s.name, s.wait, s.hold, s.wait + s.hold]), [2, 3, 4]);
+    }
+
+    /* ═══ ② Đạt định mức theo giờ ══════════════════════════════════════
+       BA MÀN cho BA người xem, không ép làm một.
+    
+       Trong sản xuất tinh gọn, thứ dùng cho việc này KHÔNG phải biểu đồ mà là
+       Production Analysis Board — một tấm bảng treo cạnh chuyền. Lean Enterprise
+       Institute mô tả: "khi sản lượng không khớp kế hoạch thì GHI LẠI VẤN ĐỀ và
+       TÌM NGUYÊN NHÂN". Nên cột quan trọng nhất là cột CHỮ, và bản trước của tôi
+       không có chỗ nào ghi lý do — vẽ một thứ trông giống mà mất công dụng.
+    
+       Trạm      → bảng theo giờ + bullet chart cộng dồn ca
+       Tổ trưởng → small multiples, mỗi lệnh một ô, tệ nhất lên trước
+       Điều độ   → một số tổng + bảng sparkline xếp hạng                            */
+    /* ═══ ② Đạt định mức theo giờ ══════════════════════════════════════
+       MỘT khung giờ, TẤT CẢ lệnh chạy trong khung đó, xếp tệ nhất lên đầu.
+    
+       Thời gian là BỘ LỌC chứ không nằm trên trục. Bản gộp cột trước cố nhét hai
+       chiều (giờ × lệnh) vào một hình nên vỡ ở 8 lệnh — cột còn 2,5px. Bỏ một chiều
+       ra thì cột làm đúng việc nó giỏi nhất: xếp hạng. Chịu được 100 lệnh mà không
+       cần thêm màu nào, trong khi bảng màu đã kiểm chỉ có 3 ô.                      */
+    const TOP_CAP = 25;
+
+    /** Bậc đạt định mức: dưới mục tiêu · đạt mục tiêu nhưng chưa đủ · vượt định mức. */
+    const tierOf = rate => rate < TARGET_PCT ? "low" : rate <= 100 ? "mid" : "high";
+    const TIERS = [
+      ["low", "dưới " + TARGET_PCT + "% · hụt"],
+      ["mid", TARGET_PCT + "–100% · đạt mục tiêu"],
+      ["high", "trên 100% · vượt định mức"],
+    ];
+
+    function ranking(rows) {
+      const box = new Map();
+      for (const r of rows) {
+        const cur = box.get(r.code) || { code: r.code, qty: 0, target: 0 };
+        cur.qty += r.qty; cur.target += r.target;
+        box.set(r.code, cur);
+      }
+      const out = [...box.values()];
+      out.forEach(r => r.rate = r.qty / r.target * 100);
+      return out.sort((a, z) => a.rate - z.rate);
+    }
+
+    const slotKey = r => r.day + "|" + r.hour;
+    const slotsOf = rows => [...new Set(rows.map(slotKey))].sort((a, z) => {
+      const [d1, h1] = a.split("|").map(Number), [d2, h2] = z.split("|").map(Number);
+      return d1 - d2 || h1 - h2;
+    });
+
+    function drawRate() {
+      const b = Number(document.getElementById("bucket").value);
+      const packed = bucketize(b);
+      const rows = packed.rows, skipped = packed.skipped, outside = packed.outside;
+      const host = document.getElementById("plot2");
+      host.innerHTML = "";
+
+      const keys = slotsOf(rows);
+      if (!keys.length) { host.textContent = "Chưa có dòng sản lượng giờ nào."; return; }
+
+      /* HAI ô thay một. Một ô gộp cả ngày lẫn giờ thì xem 30 ngày là 480 mục —
+         không ai cuộn nổi. Tách ra còn 30 + 16.
+    
+         Cái dễ mất khi tách: ô gộp cũ ghi sẵn "3 lệnh, 1 hụt" ở từng mục, tức nó
+         vừa là ô chọn vừa là bản đồ chỉ chỗ có vấn đề. Ô nhập ngày của trình duyệt
+         không gắn nhãn được, nên phần đó chuyển xuống dòng tóm tắt ngay dưới. */
+      const days = [...new Set(rows.map(r => r.day))].sort((a, z) => a - z);
+      const dateEl = document.getElementById("pickDate");
+      dateEl.min = isoOf(days[0]);
+      dateEl.max = isoOf(days[days.length - 1]);
+      let dd = dateEl.value ? dayFromIso(dateEl.value) : days[days.length - 1];
+      if (!days.includes(dd)) dd = days[days.length - 1];
+      dateEl.value = isoOf(dd);
+
+      // Dòng tóm tắt NGÀY — giữ lại thứ ô nhập ngày không nói được
+      const inDay = keys.filter(k => Number(k.split("|")[0]) === dd);
+      const dayHut = inDay.filter(k => rows.some(r => slotKey(r) === k && r.rate < TARGET_PCT));
+      const ds = document.getElementById("daySum");
+      ds.innerHTML = "";
+      ds.append(document.createTextNode("Ngày "));
+      const bd = document.createElement("b"); bd.textContent = dateOf(dd); ds.append(bd);
+      ds.append(document.createTextNode(" có " + inDay.length + " khung giờ ghi sổ · "));
+      if (dayHut.length) {
+        const sp = document.createElement("span"); sp.className = "bad";
+        sp.textContent = dayHut.length + " khung có lệnh hụt";
+        ds.append(sp);
+      } else ds.append(document.createTextNode("không khung nào có lệnh hụt"));
+      const other = days.filter(d => d !== dd).length;
+      if (other) ds.append(document.createTextNode(
+        " · còn " + other + " ngày khác trong kỳ"));
+
+      // Ô giờ chỉ liệt kê khung CỦA NGÀY ĐÃ CHỌN, vẫn ghi sẵn số lệnh hụt
+      const sel = document.getElementById("pickSlot");
+      const cur = sel.value;
+      sel.innerHTML = "";
+      // Chỉ khung giờ, không kèm số. Số lệnh và số hụt của khung ĐANG CHỌN đã nằm
+      // ngay dòng tiêu đề bên dưới — nhắc lại trong ô chọn là đọc hai lần một thứ.
+      inDay.forEach(k => {
+        const [, h] = k.split("|").map(Number);
+        const o = document.createElement("option");
+        o.value = k;
+        o.textContent = `${hhmm(h)}–${hhmm(binEnd(h, b))}`;
+        sel.append(o);
+      });
+      sel.value = inDay.includes(cur) ? cur : inDay[inDay.length - 1];
+
+      const k = sel.value;
+      const hh = Number(k.split("|")[1]);
+      // Khung trước lấy theo TOÀN KỲ, không theo ngày: khung đầu ngày phải so được
+      // với khung cuối ngày hôm trước, nếu không thì mũi tên trống mỗi sáng.
+      const iNow = keys.indexOf(k);
+      const prevKey = iNow > 0 ? keys[iNow - 1] : null;
+      const now = rows.filter(r => slotKey(r) === k).sort((a, z) => a.rate - z.rate);
+      const prev = new Map(rows.filter(r => slotKey(r) === prevKey).map(r => [r.code, r.rate]));
+      const hut = now.filter(r => r.rate < TARGET_PCT);
+
+      const lg = document.createElement("div"); lg.className = "legend";
+      TIERS.forEach(([cls, txt]) => {
+        const item = document.createElement("span");
+        const sq = document.createElement("i"); sq.className = "key sq " + cls;
+        item.append(sq, document.createTextNode(txt));
+        lg.append(item);
+      });
+      host.append(lg);
+
+      const head = document.createElement("div"); head.className = "hero";
+      const q = now.reduce((n, r) => n + r.qty, 0), t = now.reduce((n, r) => n + r.target, 0);
+      const b1 = document.createElement("b");
+      b1.textContent = t ? nf1(q / t * 100) + "%" : "—";
+      if (t && q / t * 100 < TARGET_PCT) b1.className = "bad";
+      const sp = document.createElement("span");
+      sp.textContent = LBL(dd, hh, b) + " — " + now.length + " lệnh chạy, "
+        + (hut.length ? hut.length + " lệnh hụt" : "không lệnh nào hụt")
+        + " · làm được " + nf(q) + " trên định mức " + nf(t) + " cái";
+      head.append(b1, sp); host.append(head);
+
+      if (!now.length) {
+        const e = document.createElement("p"); e.className = "note";
+        e.textContent = "Khung này không lệnh nào ghi sổ.";
+        host.append(e); return;
+      }
+
+      // Trần KHÔNG được giấu lệnh hụt: 100 lệnh thì một khung có thể có 37 lệnh hụt,
+      // trần cứng 25 sẽ cắt mất 12 lệnh cần xử lý — đúng thứ màn này sinh ra để chỉ.
+      const cap = Math.max(TOP_CAP, hut.length);
+      // Thang luôn ôm trọn mốc 100%: hai vạch là ranh giới màu, thiếu một vạch
+      // thì không đọc được bậc bằng vị trí nữa.
+      const top = Math.max(...now.map(r => r.rate), 100) * 1.06;
+      const list = document.createElement("div"); list.className = "hbar";
+
+      now.slice(0, cap).forEach(r => {
+        const row = document.createElement("div"); row.className = "r";
+        row.title = r.code + " · " + nf(r.qty) + "/" + nf(r.target) + " cái";
+
+        const c = document.createElement("div"); c.className = "c"; c.textContent = r.code;
+
+        const tr = document.createElement("div"); tr.className = "t";
+        const fill = document.createElement("i");
+        fill.style.width = Math.min(100, r.rate / top * 100) + "%";
+        fill.className = tierOf(r.rate);
+        const mark = document.createElement("u");
+        mark.style.left = (TARGET_PCT / top * 100) + "%";
+        mark.title = "mục tiêu " + TARGET_PCT + "%";
+        const full = document.createElement("u"); full.className = "full";
+        full.style.left = (100 / top * 100) + "%";
+        full.title = "đủ định mức 100%";
+        tr.append(fill, mark, full);
+
+        const v = document.createElement("div");
+        v.className = "v" + (r.rate < TARGET_PCT ? " bad" : "");
+        v.textContent = nf1(r.rate) + "%";
+        // Chênh so với KHUNG TRƯỚC — bù chiều thời gian mà bộ lọc lấy đi
+        const pv = prev.get(r.code);
+        if (pv != null) {
+          const d = r.rate - pv;
+          const em = document.createElement("em");
+          em.textContent = (d >= 0 ? "▲" : "▼") + nf1(Math.abs(d));
+          const [pd, ph] = prevKey.split("|").map(Number);
+          em.title = "so với " + LBL(pd, ph, b);
+          v.append(em);
+        }
+        row.append(c, tr, v); list.append(row);
+      });
+      host.append(list);
+
+      if (now.length > cap) {
+        const an = now.slice(cap);
+        const m = document.createElement("div");
+        m.style.cssText = "font-size:13px;color:var(--fg-subtle);margin-top:10px";
+        m.textContent = "Còn " + an.length + " lệnh nữa, tất cả đều đạt mục tiêu.";
+        host.append(m);
+      }
+
+      const w = document.getElementById("warn2");
+      w.innerHTML = "";
+      const put = html => { const d = document.createElement("div"); d.innerHTML = html; w.append(d); };
+      put("<b>Một khung giờ, tất cả lệnh — thời gian là BỘ LỌC, không nằm trên trục.</b> "
+        + "Nhờ vậy trục chỉ còn một chiều, và màn này chịu được " + SERIES.length
+        + " lệnh mà không cần thêm màu nào.");
+      put("<b>Thanh nằm ngang chứ không dựng đứng:</b> mã lệnh dài 7 ký tự, kê dưới cột "
+        + "dọc thì phải xoay chữ hoặc cắt bớt. Nằm ngang thì mã đọc thẳng, và thêm lệnh "
+        + "chỉ là thêm một dòng.");
+      put("<b>Ba bậc màu: dưới " + TARGET_PCT + "% đỏ · " + TARGET_PCT + "–100% lam · "
+        + "trên 100% lục.</b> Đỏ–lục là cặp màu người mù màu hay đọc nhầm nhất, nên ba sắc "
+        + "này đã đo bằng máy: cặp tệ nhất cách nhau ΔE 16,2 (sáng) và 12,1 (tối), trên "
+        + "ngưỡng 8. Thêm <b>hai vạch dọc</b> đúng chỗ " + TARGET_PCT + "% và 100%: bậc của "
+        + "một thanh còn đọc được bằng vị trí, không chỉ bằng màu.");
+      put("<b>Mũi tên là chênh so với khung trước.</b> Lọc theo giờ lấy mất chiều thời "
+        + "gian, nên trả lại đúng phần dùng được: hụt lần đầu khác hẳn hụt lần thứ tư "
+        + "liên tiếp.");
+      put("<b>Đạt % là tỷ lệ — cộng tử rồi cộng mẫu (Σthực tế ÷ Σyêu cầu).</b> Lấy trung "
+        + "bình các phần trăm thì lệnh chạy 20 cái nặng ngang lệnh chạy 20.000 cái.");
+      put("<b>Khung 1 giờ trải cả ngày 06:00–22:00; khung 4 giờ và cả ca bám giờ đi "
+        + "làm 08:00–17:00.</b> Mỗi giờ một ô thì không ô nào đụng đến ô nào, nên giờ tăng "
+        + "ca hiện nguyên hình. Gom lại thì phải cắt theo buổi — <b>08:00–12:00</b> và "
+        + "<b>13:00–17:00</b> — vì khung nào ôm giờ nghỉ trưa thì tụt oan.");
+      if (skipped) put("Đã bỏ <b>" + skipped + " dòng</b> chưa khai sản lượng yêu cầu — "
+        + "không có mẫu số thì không tính được đạt bao nhiêu phần trăm.");
+      if (outside) put("<b>" + outside + " dòng</b> ghi ngoài giờ đi làm (tăng ca, hoặc "
+        + "trưa không nghỉ) đã gộp vào khung gần nhất — tổng vẫn đúng, nhưng nhãn khung "
+        + "không nói hết. Xem khung <b>1 giờ</b> để thấy đúng giờ của chúng.");
+
+      const rank = ranking(rows);
+      table("t2", ["Thời điểm", "Lệnh", "Yêu cầu", "Thực tế", "Số người", "Đạt %", "So mục tiêu"],
+        rows.sort((a, z) => a.day - z.day || a.hour - z.hour || a.code.localeCompare(z.code))
+          .map(r => [LBL(r.day, r.hour, b), r.code, nf(r.target), nf(r.qty), nf(r.people),
+          nf1(r.rate) + "%",
+          r.rate >= TARGET_PCT ? "Đạt" : "Thiếu " + nf1(TARGET_PCT - r.rate) + " điểm"]),
+        [2, 3, 4, 5]);
+
+      document.getElementById("meta2").textContent =
+        "một khung giờ · tất cả lệnh · tệ nhất lên đầu · cả kỳ "
+        + rank.filter(r => r.rate < TARGET_PCT).length + "/" + rank.length + " lệnh dưới mục tiêu";
+    }
+
+    /* ═══ Bảng số — bắt buộc có, vì một sắc không đủ tương phản ═════════ */
+    function table(id, head, rows, numCols) {
+      const box = document.getElementById(id);
+      box.innerHTML = "";
+      const t = document.createElement("table");
+      const tr = document.createElement("tr");
+      head.forEach((h, i) => {
+        const th = document.createElement("th");
+        if (numCols.includes(i)) th.className = "n";
+        th.textContent = h; tr.append(th);
+      });
+      t.append(tr);
+      rows.forEach(r => {
+        const row = document.createElement("tr");
+        r.forEach((c, i) => {
+          const td = document.createElement("td");
+          if (numCols.includes(i)) td.className = "n";
+          td.textContent = c; row.append(td);
+        });
+        t.append(row);
+      });
+      box.append(t);
+    }
+
+    document.addEventListener("click", e => {
+      const b = e.target.closest("[data-table]");
+      if (b) {
+        const el = document.getElementById(b.dataset.table);
+        const on = el.classList.toggle("hide");
+        b.textContent = on ? "Xem dạng bảng" : "Ẩn bảng";
+        return;
+      }
+      if (e.target.id === "theme") {
+        const cur = document.documentElement.getAttribute("data-theme");
+        document.documentElement.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+      }
+    });
+    document.getElementById("moCount").addEventListener("change", e => {
+      seed(Number(e.target.value));
+      document.getElementById("pickSlot").innerHTML = "";
+      document.getElementById("pickDate").value = "";
+      drawRate();
+    });
+    document.getElementById("pickSlot").addEventListener("change", drawRate);
+    document.getElementById("pickDate").addEventListener("change", () => {
+      document.getElementById("pickSlot").innerHTML = "";
+      drawRate();
+    });
+    document.getElementById("bucket").addEventListener("change", () => {
+      document.getElementById("pickSlot").innerHTML = "";
+      drawRate();
+    });
+
+    seed(3);
+    drawProgress();
+    drawSteps();
+    drawRate();
+  </script>
+</body>
+
+</html>

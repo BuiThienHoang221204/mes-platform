@@ -6,13 +6,15 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.common.schemas import ReasonText
+
 
 class QcDecideIn(BaseModel):
     """FAIL bắt buộc có lý do — CHECK `qc_fail_needs_reason` ở DB canh."""
 
     result: Literal["PASS", "FAIL"]
     reason_code_id: int | None = Field(default=None, description="Chọn từ danh mục để thống kê")
-    reason_text: str | None = Field(default=None, description="Nguyên văn người kiểm ghi")
+    reason_text: ReasonText | None = Field(default=None, description="Nguyên văn người kiểm ghi")
 
 
 class QcOut(BaseModel):

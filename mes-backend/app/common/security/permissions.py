@@ -62,6 +62,17 @@ def department_of(role: str) -> str | None:
     return role.rsplit("_", 1)[0] if role.endswith(_SUFFIXES) else None
 
 
+def full_stations(roles: tuple[str, ...] | list[str]) -> list[int]:
+    """Những trạm người này THAO TÁC được, theo thứ tự trạm.
+
+    Người quét cầm điện thoại của mình đi qua nhiều trạm, nên bước không suy được
+    từ thiết bị. Suy từ VAI: 10 trong 13 vai chỉ thao tác được đúng một trạm nên
+    quét là ra ngay trạm đó. Hai vai đa trạm (Bàn team leader có 3 và 4, PLANNER có
+    cả sáu) phải tự khai trạm — và `require_station` vẫn kiểm lại.
+    """
+    return [s for s in STATION_DEPARTMENT if permission_for(roles, s) == FULL]
+
+
 def permission_for(roles: tuple[str, ...] | list[str], step_no: int) -> str | None:
     """Mức quyền CAO NHẤT người này có trên một trạm. None = không thấy trạm đó.
 

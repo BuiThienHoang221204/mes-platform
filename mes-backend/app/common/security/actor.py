@@ -4,17 +4,20 @@
 `permissions.py` cạnh đây (PDP) — file này chỉ hỏi, không suy luận. Muốn đổi luật
 thì sửa đúng file kia.
 
-BRD §1b.3: "mã QR chỉ nói MO nào, không nói bước nào" — bước lấy từ THIẾT BỊ, xem
-`require_station`. Để client tự khai trạm trong body thì một máy giả được mọi trạm.
+BRD §1b.3: "mã QR chỉ nói MO nào, không nói bước nào" — bước suy từ VAI của người
+quét, xem `scan_station`. Người vận hành cầm điện thoại của mình đi qua nhiều trạm
+nên không suy được từ thiết bị; nhưng vai thì đi theo người, và `require_station`
+vẫn là nơi chặn cuối.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.common.errors import Forbidden
-from app.common.security.permissions import FULL, VIEW, permission_for
+from app.common.errors import Forbidden, Invalid
+from app.common.security.permissions import FULL, VIEW, full_stations, permission_for
 from app.common.vocab.enums import STEP_NAMES
+from app.common.vocab.error_codes import Err
 
 
 @dataclass(frozen=True)
@@ -45,6 +48,26 @@ class Actor:
             raise Forbidden(
                 f"{self.full_name} chỉ được XEM {STEP_NAMES[step_no]}, không thao tác được"
             )
+
+    def scan_station(self, asked: int | None) -> int:
+        """Quét này ăn vào trạm nào.
+
+        Khai rõ thì lấy theo khai — `require_station` ngay sau đó chặn nếu người này
+        không có quyền ở đó. Không khai mà chỉ làm được một trạm thì khỏi phải hỏi:
+        §1b chốt quét là một thao tác, không có nút bấm nào chen giữa.
+        """
+        if asked is not None:
+            return asked
+        own = full_stations(self.roles)
+        if len(own) == 1:
+            return own[0]
+        if not own:
+            raise Forbidden(f"{self.full_name} không thao tác được ở trạm nào")
+        names = ", ".join(STEP_NAMES[s] for s in own)
+        raise Invalid(
+            f"{self.full_name} làm được nhiều trạm ({names}) — chọn trạm trước khi quét",
+            code=Err.SCAN_STATION,
+        )
 
     def require_station(self, station_no: int) -> None:
         """Quét QR tại một trạm — cần quyền THAO TÁC ở trạm đó.

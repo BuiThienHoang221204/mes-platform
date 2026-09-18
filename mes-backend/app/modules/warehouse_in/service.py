@@ -1,7 +1,7 @@
 """Luật của trạm 5 — nơi MO đóng lại HOẶC chạy tiếp. Phòng Kho nhập.
 
     CompleteOutcome                        COMPLETED | ROUND_OPENED + số còn thiếu
-    complete(db, code, qty_received…)      nhận hàng về kho
+    complete(db, code, actor_id)           nhận hàng về kho
 
 Đây là chỗ DUY NHẤT quyết định MO xong hay chưa, nên cũng phải gọi `round_service`.
 Tiến độ tính theo SL ĐÃ ĐÓNG THÙNG của vòng, không theo SL đạt (§8).
@@ -40,13 +40,17 @@ class CompleteOutcome:
 
 
 @transactional
-def complete(db: Session, *, code: str,
-             qty_received: int | None, actor_id: uuid.UUID) -> CompleteOutcome:
+def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
     """BRD §8: tổng = qtyDone + SL đã đóng thùng của vòng này.
 
     Đủ  → COMPLETED.
     Thiếu → tự động về BÀN TEAM LEADER vòng mới. Không về Kho: máy đã setup đúng, hàng đã
     qua QC, chỉ là chưa làm đủ số.
+
+    **Không nhận số đếm từ client.** Hàng đã vào thùng bao nhiêu thì kho nhận bấy
+    nhiêu — đó cũng đúng là công thức §8 vốn dĩ đang dùng. Tham số `qty_received` cũ
+    được ghi xuống CSDL nhưng **không ai đọc**: gõ 0 hay 999.999 đều ra cùng kết cục,
+    vì tiến độ lấy từ `v_mo_progress.qty_done = SUM(packing.qty_packed)`.
     """
     mo, rnd = round_service.lock_round(db, code)
     if round_repo.get_step(db, rnd.id, 5) is None:
@@ -58,7 +62,7 @@ def complete(db: Session, *, code: str,
     if pack is None or pack.completed_at is None:
         raise DomainError("Chưa kết thúc đóng thùng", code=Err.NO_PACKING)
 
-    warehouse_in_repo.save_warehouse_in(db, rnd.id, qty_received=qty_received,
+    warehouse_in_repo.save_warehouse_in(db, rnd.id, qty_received=pack.qty_packed or 0,
                                    counted_at=clock.db_now(db), by=actor_id)
     step5 = round_repo.get_step(db, rnd.id, 5)
     if step5 is not None:

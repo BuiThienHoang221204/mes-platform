@@ -4,12 +4,12 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-from app.common.schemas import StationNo
+from app.common.schemas import EmployeeCode, Pin, StationNo
 
 
 class LoginIn(BaseModel):
-    emp_code: str = Field(examples=["NV030"])
-    pin: str
+    emp_code: EmployeeCode = Field(examples=["NV030"])
+    pin: Pin
 
 
 class SessionOut(BaseModel):

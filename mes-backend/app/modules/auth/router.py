@@ -16,7 +16,7 @@ from typing import Annotated
 from fastapi import APIRouter, Cookie, Response
 
 from app.common.deps import ActorDep, DbDep
-from app.common.errors import Forbidden
+from app.common.errors import Unauthenticated
 from app.common.schemas import OkOut
 from app.common.security.cookies import COOKIE_REFRESH, clear_token_cookies, set_token_cookies
 from app.common.security.permissions import PLANNER
@@ -43,7 +43,7 @@ def refresh(
     """Đổi refresh trong cookie lấy cặp MỚI. Cookie cũ bị ghi đè ngay.
     Gửi lại một refresh đã dùng = thu hồi toàn bộ phiên của người đó."""
     if not mes_refresh:
-        raise Forbidden("Thiếu phiên đăng nhập — đăng nhập lại")
+        raise Unauthenticated("Thiếu phiên đăng nhập — đăng nhập lại")
     pair = auth_service.refresh(db, refresh_raw=mes_refresh)
     set_token_cookies(response, access=pair.access_token, refresh=pair.refresh_token)
     return SessionOut(full_name=pair.full_name, roles=pair.roles)

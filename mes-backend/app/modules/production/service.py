@@ -108,6 +108,13 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
 
     Ba số không kiểm ở đây: trigger `production_balances` lo, và nó đúng cả khi
     có người ghi thẳng vào DB.
+
+    KHÔNG đóng bước 4 ở đây. Bước N đóng khi bước N+1 quét nhận (§9) — với bước 4
+    thì đó là Kho nhập. Chốt sổ SX mới xong NỬA việc của trạm 4: nhánh Đóng thùng
+    (§7b) chạy song song và BẮT BUỘC kết thúc sau khi chốt sổ. Đóng bước ở đây thì
+    lệnh rơi khỏi danh sách "đang ở trạm 4", không ai mở được màn Kết thúc đóng
+    thùng, `packing.completed_at` mãi NULL, và hàng đợi Kho nhập — vốn đòi đúng cột
+    đó — trống vĩnh viễn. Vòng kẹt lại không đường ra.
     """
     _, rnd = round_service.lock_round(db, code)
     if round_repo.get_step(db, rnd.id, 4) is None:
@@ -122,6 +129,18 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
             "Còn chuyền chưa vào Đang lắp ráp — §16 yêu cầu đóng đồng bộ", code=Err.LINE_NOT_RUN
         )
 
+    # §16 chặn HAI trường hợp, không phải một: chuyền chưa chạy lần nào, VÀ chuyền
+    # đã chạy rồi đang dừng. Phép trừ tập hợp ở trên chỉ bắt được vế đầu — chuyền
+    # dừng có đoạn RUN trong lịch sử nên lọt qua. Chốt sổ trong lúc cả lệnh đứng
+    # im thì SL đạt là số của một ca chưa làm xong, mà vòng thì đóng mất rồi.
+    held = production_repo.held_line_codes(db, rnd.id)
+    if held:
+        raise DomainError(
+            f"Còn chuyền đang dừng ({', '.join(held)}) — cho chạy lại hoặc trả lệnh "
+            "về Bàn team leader trước khi chốt sổ",
+            code=Err.LINE_HELD,
+        )
+
     now = clock.db_clock(db)
     for seg in production_repo.open_segments_of(db, rnd.id):
         seg.ended_at = now
@@ -134,10 +153,6 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
         by=actor_id,
     )
     db.flush()
-
-    step4 = round_repo.get_step(db, rnd.id, 4)
-    if step4 is not None:
-        round_repo.close_step(db, step4, actor_id)
 
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.STEP4_FINISH_ALL,
              from_state=State.ASSEMBLING, to_state=State.FINISHED,

@@ -20,7 +20,7 @@ from fastapi import Depends
 from fastapi.security import APIKeyCookie, APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
-from app.common.errors import Forbidden, NotFound
+from app.common.errors import NotFound, Unauthenticated
 from app.common.security.actor import Actor
 from app.common.security.cookies import COOKIE_ACCESS
 from app.common.security.tokens import decode
@@ -29,8 +29,19 @@ from app.modules.auth import repository as auth_repo
 
 DbDep = Annotated[Session, Depends(get_db)]
 
-# `auto_error=False` ở cả ba: thiếu thì trả None để tự ghép, chứ không để FastAPI
-# ném 403 với câu tiếng Anh mặc định — người ở xưởng đọc câu tiếng Việt của mình.
+PAGE_SIZE = 10
+PAGE_MAX = 100
+
+def page_params(limit: int = PAGE_SIZE, offset: int = 0) -> tuple[int, int]:
+    """Kẹp hai đầu NGAY TẠI CỬA, không để service phải nhớ làm việc đó.
+
+    `limit=999999` là một lượt quét sạch bảng, và với endpoint có cache thì còn là
+    một mục nằm lại trong bộ nhớ. `offset` âm làm Postgres ném lỗi cú pháp.
+    """
+    return max(1, min(limit, PAGE_MAX)), max(0, offset)
+
+PageDep = Annotated[tuple[int, int], Depends(page_params)]
+
 cookie_scheme = APIKeyCookie(
     name=COOKIE_ACCESS,
     auto_error=False,
@@ -52,7 +63,6 @@ station_scheme = APIKeyHeader(
     "Chỉ /v1/scan cần.",
 )
 
-
 def current_actor(
     db: DbDep,
     cookie_token: Annotated[str | None, Depends(cookie_scheme)] = None,
@@ -60,26 +70,19 @@ def current_actor(
 ) -> Actor:
     token = cookie_token or (creds.credentials if creds else None)
     if not token:
-        raise Forbidden("Thiếu token — đăng nhập lại")
+        raise Unauthenticated("Thiếu token — đăng nhập lại")
 
     payload = decode(token)
     if payload.get("typ") != "user":
-        raise Forbidden("Token này không phải token người dùng")
+        raise Unauthenticated("Token này không phải token người dùng")
 
-    # Đọc lại người dùng ở MỌI request: tắt `is_active` là chặn ngay, không phải
-    # đợi token hết hạn. Đây là lý do access token không cần thu hồi riêng.
     user = auth_repo.get_user_by_id(db, payload["sub"])
     if user is None or not user.is_active:
         raise NotFound("Tài khoản không còn hiệu lực")
     actor = Actor(user_id=str(user.id), full_name=user.full_name, roles=tuple(user.roles))
 
-    # ĐÓNG giao dịch chỉ-đọc mà câu SELECT trên vừa tự mở. Không đóng thì router
-    # gọi `with db.begin()` là gặp "A transaction is already begun on this Session"
-    # — tức MỌI endpoint ghi đều hỏng. Đọc xong giá trị rồi mới rollback, vì
-    # rollback làm hết hạn đối tượng ORM.
     db.rollback()
     return actor
-
 
 def current_station(
     token: Annotated[str | None, Depends(station_scheme)] = None,
@@ -93,12 +96,11 @@ def current_station(
     trạm, không đi qua màn hình đăng nhập của ai cả.
     """
     if not token:
-        raise Forbidden("Thiết bị chưa đăng ký trạm — thiếu X-Station-Token")
+        raise Unauthenticated("Thiết bị chưa đăng ký trạm — thiếu X-Station-Token")
     payload = decode(token)
     if payload.get("typ") != "station":
-        raise Forbidden("Token này không phải token trạm")
+        raise Unauthenticated("Token này không phải token trạm")
     return int(payload["station"])
-
 
 ActorDep = Annotated[Actor, Depends(current_actor)]
 StationDep = Annotated[int, Depends(current_station)]

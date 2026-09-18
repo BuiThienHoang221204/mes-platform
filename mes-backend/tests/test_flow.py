@@ -249,9 +249,9 @@ def test_liet_ke_lenh_loc_theo_trang_thai(db, actor, make_mo):
     mo_service.create(db, [mo_service.NewMo("M800001", "Vỏ nhựa F3", 500, 3600, 800)], actor)
     db.flush()
 
-    nhap = {m.code for m in mo_repo.list_mos(db, status=MoStatus.DRAFT)}
+    nhap = {m.code for m in mo_repo.list_mos(db, status=MoStatus.DRAFT, limit=50)}
     assert "M800001" in nhap, "lệnh DRAFT phải tìm lại được"
 
-    tat_ca = mo_repo.list_mos(db)
+    tat_ca = mo_repo.list_mos(db, limit=50)
     assert len(tat_ca) >= 2
     assert tat_ca[0].created_at >= tat_ca[-1].created_at, "mới nhất phải đứng trước"

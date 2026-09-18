@@ -23,6 +23,7 @@ from sqlalchemy.orm import Session
 
 from app.common import clock
 from app.common.errors import NotFound
+from app.modules.auth.models import AppUser
 from app.modules.mo.models import ManufacturingOrder
 from app.modules.round.models import MoRound, MoStep
 
@@ -106,6 +107,22 @@ def steps_of(db: Session, round_id: uuid.UUID) -> list[MoStep]:
     return list(db.scalars(
         select(MoStep).where(MoStep.round_id == round_id).order_by(MoStep.step_no)
     ))
+
+
+def names_of_users(db: Session, ids: list[uuid.UUID]) -> dict[uuid.UUID, str]:
+    """UUID → tên người, hỏi MỘT câu cho cả danh sách.
+
+    Truy cứu hiện `ai nhận` và `ai đóng` ở mọi bước của mọi vòng. Trả UUID thì cột
+    đó vô dụng — không ai nhận ra mình hay đồng nghiệp qua một chuỗi 36 ký tự, mà
+    đó chính là câu hỏi cả màn hình sinh ra để trả lời.
+    """
+    ids = [i for i in dict.fromkeys(ids) if i is not None]
+    if not ids:
+        return {}
+    rows = db.execute(
+        select(AppUser.id, AppUser.full_name).where(AppUser.id.in_(ids))
+    ).all()
+    return {r[0]: r[1] for r in rows}
 
 
 def steps_of_rounds(db: Session, round_ids: list[uuid.UUID]) -> dict[uuid.UUID, list[MoStep]]:
