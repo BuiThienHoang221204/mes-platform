@@ -1,15 +1,3 @@
-/* ═══════════════════════════════════════════════════════════════════════
-   globals.css — TẦNG TOKEN. Mọi màu/cỡ/bo góc của app bắt nguồn từ đây.
-
-   `tailwind.config.ts` KHÔNG định nghĩa giá trị nào — nó chỉ trỏ vào 49 biến
-   trong tệp này. Đổi tên một biến ở đây là class Tailwind tương ứng thành
-   `undefined`, và **không có thông báo lỗi nào**: build vẫn sạch, chỉ là mở
-   trình duyệt ra thấy nền trong suốt. Sửa ở đây thì đối chiếu lại config.
-
-   Thang chữ, bo góc, đổ bóng và font chép nguyên từ `roomify-ui` (FE-PLAN
-   §6.4) để component bê qua lại giữa hai dự án vẫn đúng tỉ lệ.
-   ═══════════════════════════════════════════════════════════════════════ */
-
 @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
 
 @font-face {
@@ -24,11 +12,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ═══ SÁNG ══════════════════════════════════════════════════════════════ */
 :root {
-  /* ── Nền và chữ — chép nguyên roomify ───────────────────────────────
-     bg == surface là có chủ ý: FE-PLAN §6.4 chốt "mặc định phẳng, phân
-     tách bằng viền border-line, không đổ bóng". */
   --color-bg: #FFFFFF;
   --color-surface: #FFFFFF;
   --color-surface-2: #F7F7F7;
@@ -40,21 +24,12 @@
   --color-fg-subtle: #9CA3AF;
   --color-overlay: rgba(0, 0, 0, .5);
 
-  /* ── Accent — màu của HÀNH ĐỘNG ─────────────────────────────────────
-     Cố tình KHÔNG dùng xanh lá / vàng / đỏ. Trong MES ba màu đó mang
-     nghĩa (đạt · cảnh báo · lỗi); lấy một trong ba làm màu nút thì cái
-     nút `Nhận` đọc thành một trạng thái. roomify để accent xanh lá được
-     vì nó không dày đặc trạng thái như đây. */
   --color-accent: #0E6E99;
   --color-accent-on: #FFFFFF;
   --color-accent-soft: #E3F2F9;
   --color-accent-strong: #0A5877;
   --color-accent-line: #A9D4E6;
 
-  /* ── Trạng thái ─────────────────────────────────────────────────────
-     Sắc độ chọn để ĐỌC ĐƯỢC KHI ĐẶT TRÊN NỀN `-soft`, vì đó là cách
-     dùng nhiều nhất (`bg-ok-soft text-ok` cho pill trạng thái). Lấy sắc
-     roomify nguyên bản thì chữ trên nền tint chỉ đạt ~2.8:1, hụt AA. */
   --color-ok: #0A7A34;
   --color-ok-on: #FFFFFF;
   --color-ok-soft: #E2F4E9;
@@ -65,13 +40,20 @@
   --color-danger-on: #FFFFFF;
   --color-danger-soft: #FAE8E8;
 
-  /* Vàng Amphenol RF — CHỈ cho dấu hiệu thương hiệu (logo, viền đầu trang).
-     Không dùng làm màu hành động: ngoài xưởng vàng nghĩa là cảnh báo. */
   --color-brand: #FFDE17;
+  --color-brand-on: #1A1A1A;
 
-  /* ── Bo góc ─────────────────────────────────────────────────────────
-     Một nguồn duy nhất. `rounded-field` / `rounded-card` / `rounded-pill`
-     đọc từ đây; cấm `rounded-2xl` hay `rounded-[22px]` rải trong component. */
+  /* Biểu đồ. HAI bảng cho HAI việc, không trộn — xem KE-HOACH-BAO-CAO-SAN-XUAT.md §3.3.
+     Bốn token trạng thái ở trên KHÔNG dùng làm màu chuỗi được: đo ra thì danger và
+     warn cách nhau ΔE 1,6 dưới mắt người mù màu đỏ–lục, danger và ok cách nhau 2,4. */
+  --color-series-1: #2a78d6;
+  --color-series-2: #eb6834;
+  --color-series-3: #1baf7a;
+
+  --color-tier-low: #A32222;
+  --color-tier-mid: #2a78d6;
+  --color-tier-high: #34A653;
+
   --r-xs: 8px;
   --r-sm: 10px;
   --r-md: 14px;
@@ -79,27 +61,14 @@
   --r-xl: 28px;
   --r-pill: 9999px;
 
-  /* ── Đổ bóng — chỉ cho thứ thật sự nổi (thanh hành động ghim đáy) ──── */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, .04);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, .06);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, .08);
 
-  /* ── Font ───────────────────────────────────────────────────────────
-     mono dùng stack hệ thống: không tải thêm font qua mạng cho một thứ
-     chỉ hiện ở mã lệnh và cột số. */
   --font-heading: 'SVN-Gilroy', 'Google Sans Flex', system-ui, sans-serif;
   --font-sans: 'Google Sans Flex', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'Cascadia Mono', 'Segoe UI Mono', Consolas, monospace;
 
-  /* ── Cỡ chữ ─────────────────────────────────────────────────────────
-     R29 — MES mặc định --fs: 1.15, KHÔNG phải 1. Thang gốc của roomify là
-     cho điện thoại cầm tay (body 15px); MES chạy trên máy tính bảng gắn
-     tường, người đeo găng, xưởng chói, và §1 chốt chữ tối thiểu 16px.
-     1.15 đưa body lên 17.3px mà vẫn giữ nguyên tỉ lệ cả thang.
-
-     R30 — ThemeProvider ghi đè --fs lúc chạy (5 nấc: .9 / 1 / 1.15 / 1.3 / 1.5).
-     Mọi cỡ chữ PHẢI qua calc() này, nếu không nút chỉnh cỡ chữ bấm vào
-     chỗ đó sẽ không ăn. */
   --fs: 1.15;
   --text-display: calc(40px * var(--fs));
   --text-h1: calc(32px * var(--fs));
@@ -115,9 +84,6 @@
   --text-badge: calc(12px * var(--fs));
 }
 
-/* ═══ TỐI — mặc định của MES (R32) ══════════════════════════════════════
-   ThemeProvider đổ lớp `.dark` lên <html>; tailwind.config để
-   darkMode: "class" nên mọi biến thể `dark:` bám vào lớp này. */
 .dark {
   --color-bg: #0D0F12;
   --color-surface: #16181D;
@@ -147,13 +113,22 @@
   --color-danger-soft: #2C1516;
 
   --color-brand: #FFDE17;
+  --color-brand-on: #1A1A1A;
+
+  /* Bậc riêng cho nền tối, không lật tự động từ bản sáng. */
+  --color-series-1: #3987e5;
+  --color-series-2: #d95926;
+  --color-series-3: #199e70;
+
+  --color-tier-low: #c83737;
+  --color-tier-mid: #2d82d7;
+  --color-tier-high: #40ad6a;
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, .22);
   --shadow-md: 0 4px 14px rgba(0, 0, 0, .28);
   --shadow-lg: 0 10px 30px rgba(0, 0, 0, .38);
 }
 
-/* ═══ Nền tảng ══════════════════════════════════════════════════════════ */
 body {
   background: var(--color-bg);
   color: var(--color-fg);
@@ -170,14 +145,44 @@ h1, h2, h3, h4, .font-heading {
   letter-spacing: -0.01em;
 }
 
-/* R34 — số thẳng hàng thì dùng .tnum, KHÔNG đổi sang font-mono.
-   tabular-nums ăn với cả font sans, nên cột số vẫn thẳng mà chữ không
-   bị lạc khỏi hệ. font-mono để dành cho mã lệnh, mã chuyền, mã lỗi. */
+/* Thanh cuộn mảnh, dùng token của app nên tự đúng ở cả chế độ sáng lẫn tối.
+
+   Mặc định của Windows dày 17px và luôn vẽ đường ray xám — trang vừa đủ một màn
+   với trang dư vài pixel lại rộng khác nhau, mọi thứ bên trong dịch ngang mỗi khi
+   nội dung đổi. Bản này 8px, đường ray trong suốt, con trượt bo tròn.
+
+   `.no-scrollbar` vẫn thắng vì chọn theo lớp, không phải theo dấu sao. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-line-strong);
+  background-clip: content-box;
+  border: 2px solid transparent;
+  border-radius: var(--r-pill);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fg-subtle);
+  background-clip: content-box;
+}
+
 .tnum {
   font-variant-numeric: tabular-nums;
 }
 
-/* Vùng chạm tối thiểu ngoài xưởng (§1) — dùng khi không tiện đặt class. */
 .touch-target {
   min-height: 56px;
   min-width: 56px;
@@ -186,12 +191,55 @@ h1, h2, h3, h4, .font-heading {
 .no-scrollbar::-webkit-scrollbar { display: none }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none }
 
-/* Tai thỏ khi chạy toàn màn hình (display: standalone) */
 .pt-safe { padding-top: env(safe-area-inset-top) }
 .pb-safe { padding-bottom: env(safe-area-inset-bottom) }
 
-/* Viền focus thấy được cả ngoài nắng — bàn phím và đầu đọc đều đi qua đây. */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
+}
+
+@keyframes rise-y {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+@keyframes rise-x {
+  from { transform: scaleX(0) }
+  to   { transform: scaleX(1) }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(4px) }
+  to   { opacity: 1; transform: translateY(0) }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .rise-y {
+    transform-origin: bottom;
+    animation: rise-y 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .rise-x {
+    transform-origin: left;
+    animation: rise-x 700ms cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  .fade-up {
+    animation: fade-up 420ms ease-out backwards;
+  }
+}
+
+.drawer {
+  grid-template-rows: 0fr;
+}
+
+.drawer[data-open] {
+  grid-template-rows: 1fr;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drawer {
+    transition: grid-template-rows 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
 }

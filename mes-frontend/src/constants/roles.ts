@@ -43,3 +43,31 @@ export function permissionFor(roles: string[], step: number): Perm {
 export function ownStations(roles: string[]): number[] {
   return [0, 1, 2, 3, 4, 5].filter((s) => permissionFor(roles, s) === FULL);
 }
+
+const DEPT_LABEL: Record<string, string> = {
+  WAREHOUSE_OUT: "Kho xuất",
+  SETUP: "Setup máy",
+  QC: "QC",
+  WAITING: "Bàn team leader",
+  PRODUCTION: "Sản xuất",
+  WAREHOUSE_IN: "Kho nhập",
+};
+
+const LEVEL_LABEL: Record<string, string> = { LEADER: "Tổ trưởng", MEMBER: "Thành viên" };
+
+export function roleLabel(roles: string[]): string {
+  if (roles.includes(PLANNER)) return "Planner · Điều độ";
+  const shown = roles
+    .map((r) => {
+      const m = /^(.*)_(LEADER|MEMBER)$/.exec(r);
+      if (!m) return null;
+      return `${DEPT_LABEL[m[1]] ?? m[1]} · ${LEVEL_LABEL[m[2]]}`;
+    })
+    .filter(Boolean);
+  return shown.length ? shown.join(" · ") : "Chưa có vai";
+}
+
+export function homeDept(roles: string[]): number | null {
+  const own = ownStations(roles);
+  return own.length === 1 ? own[0] : null;
+}

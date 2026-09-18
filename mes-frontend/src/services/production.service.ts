@@ -1,7 +1,8 @@
 import { getData, postData } from "./http";
-import type { OkOut } from "@/types/api";
+import { PAGE_SIZE } from "@/constants/pagination";
+import type { OkOut, Page } from "@/types/api";
 import type { PackingHourlyOut } from "@/types/mo";
-import type { Trace } from "@/types/trace";
+import type { EventPage, Trace, TraceBoxHourly, TraceHourly } from "@/types/trace";
 
 export type HourlyPayload = {
   work_date: string; slot_hour: number;
@@ -15,6 +16,13 @@ export type ClosePayload = {
 
 export const productionService = {
   trace: (code: string) => getData<Trace>(`/mos/${code}/trace`),
+
+  roundHourly: (code: string, round: number, offset: number, limit = PAGE_SIZE) =>
+    getData<Page<TraceHourly>>(`/mos/${code}/rounds/${round}/hourly`, { limit, offset }),
+  roundBoxes: (code: string, round: number, offset: number, limit = PAGE_SIZE) =>
+    getData<Page<TraceBoxHourly>>(`/mos/${code}/rounds/${round}/boxes`, { limit, offset }),
+  events: (code: string, limit: number, offset: number) =>
+    getData<EventPage>(`/mos/${code}/events?limit=${limit}&offset=${offset}`),
   lines: () => getData<{ id: number; code: string; name: string | null; is_active: boolean }[]>("/lines"),
 
   assign: (code: string, line_code: string) => postData<OkOut>(`/lines/${code}/assign`, { line_code }),

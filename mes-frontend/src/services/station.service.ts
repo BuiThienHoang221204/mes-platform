@@ -5,18 +5,26 @@ import type { QcResultValue } from "@/constants/status";
 
 /**
  * `POST /scan` là thao tác NHẬN của CẢ SÁU TRẠM (FE-PLAN §8.1).
- * Trạm lấy từ header `X-Station-Token` — KHÔNG lấy từ body, vì mã QR chỉ nói
- * MO nào chứ không nói bước nào (BRD §1b.3).
+ * Trạm suy từ VAI người quét. Chỉ vai đa trạm (Bàn team leader, PLANNER) mới
+ * phải khai `station`; server luôn kiểm lại quyền.
  */
 export const stationService = {
-  scan: (raw: string, stationToken: string) =>
-    postData<ScanOut>("/scan", { raw }, { headers: { "X-Station-Token": stationToken } }),
+  scan: (raw: string, station?: number | null) =>
+    postData<ScanOut>("/scan", station == null ? { raw } : { raw, station }),
 
   handover: (code: string) => postData<OkOut>(`/warehouse-out/${code}/handover`),
 
-  qc: (code: string, result: QcResultValue, reason_text?: string) =>
-    postData<QcOut>(`/qc/${code}`, { result, reason_code_id: null, reason_text: reason_text ?? null }),
+  handoverBatch: (codes: string[]) =>
+    postData<OkOut>("/warehouse-out/handover-batch", codes),
 
-  warehouseIn: (code: string, qty_received?: number | null) =>
-    postData<WarehouseInOut>(`/warehouse-in/${code}/complete`, { qty_received: qty_received ?? null }),
+  qc: (code: string, result: QcResultValue, reason?: { codeId?: number | null; text?: string | null }) =>
+    postData<QcOut>(`/qc/${code}`, {
+      result,
+      reason_code_id: reason?.codeId ?? null,
+      reason_text: reason?.text ?? null,
+    }),
+
+  // Không gửi số nào lên: số nhập kho LÀ số đã đóng thùng (§8), server tự lấy.
+  warehouseIn: (code: string) =>
+    postData<WarehouseInOut>(`/warehouse-in/${code}/complete`),
 };

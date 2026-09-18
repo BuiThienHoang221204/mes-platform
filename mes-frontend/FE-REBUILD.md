@@ -155,7 +155,7 @@ trong mockup, đó mới là chỗ của nó.
 | `waiting/scan` · `dispatch` | `/waiting` | `queue/3` · `at/3` — **không có endpoint riêng** |
 | `prod/*` (7 màn) | `/production` | `queue/4` · `at/4` · `lines/*` · `production/close` · `hourly` · `packing/*` |
 | `wh_in/scan` · `finish` | `/warehouse-in` | `queue/5` · `at/5` · `POST /warehouse-in/{code}/complete` |
-| `planner/create` · `book` | `/mos` | `POST /mos` · `/mos/import` · `/submit` · `/cancel` · `GET /mos` |
+| `planner/create` · `book` | `/mos` | `POST /mos` · `/mos/bulk` · `/submit` · `/cancel` · `GET /mos` |
 | `planner/dash` | `/mos` (khối đầu) | `GET /board/counts` |
 | `shared/board` · `planner/board` | `/running` | `GET /board/running` — refetch 10s |
 | `shared/trace` · `planner/trace` | `/mos/[code]/trace` | `GET /mos/{code}/trace` |
@@ -381,23 +381,231 @@ Mỗi màn xong chạy checklist §10 của FE-PLAN. Ba dòng hay trượt nhấ
 
 ---
 
-## 7. Cần bạn chốt trước khi tôi gõ code
+## 7. Đã chốt
+
+| Câu hỏi | Chốt | Hệ quả |
+| --- | --- | --- |
+| §11.2 — tablet ở trạm dùng tài khoản chung hay riêng? | **Mỗi người một tài khoản** | **Không** cần màn "chọn người" mỗi thao tác. `closed_by` lấy thẳng từ session. Nhưng ở trạm người ta đổi ca liên tục, nên `/login` phải là **bàn phím số lớn cho mã NV + PIN**, và sidebar cần nút `Đổi người` rõ ràng. Station token nằm ở thiết bị và **không** đổi khi đổi người — đúng lý do R22 tách hai thứ |
+| Q1 — "giống mockup" tới đâu? | **Bố cục + luồng**; da theo FE-PLAN | Đã dựng `globals.css` theo hệ token roomify, không lấy màu/font của mockup |
+| Phong cách code | **Không comment trong code** | Lý lẽ thiết kế và tham chiếu (BRD §x, FE-PLAN Rxx) để trong tệp `.md`, không nhét vào `.ts`/`.css` |
+
+### Tình trạng P0
+
+| Việc | Xong |
+| --- | :---: |
+| `globals.css` — 49 token, khớp đủ `tailwind.config.ts`, light + dark | ✅ |
+| Thang chữ 12 cỡ, tất cả nhân `var(--fs)`, mặc định `1.15` (R29) | ✅ |
+| `layout.tsx` — metadata, manifest, apple-touch-icon, `viewportFit: cover` | ✅ |
+| Script chống FOUC khớp từng chữ với `ThemeProvider` (R32) | ✅ |
+| Đăng ký service worker sau `load` (R24) | ✅ |
+| `PhosphorIcons.tsx` + `IconProvider` (R18) | ✅ |
+| `/` → `/scan` → `stationRoute()` · màn "Thiết bị chưa đăng ký trạm" (R22) | ✅ |
+| `/dev/kit` — trang kiểm chứng token | ✅ |
+| `/login` — mã NV + bàn phím số PIN, RHF + zod, lỗi server đổ vào `setError` (R9) | ✅ |
+| `/station-setup` — PLANNER gán trạm cho máy, dùng `useStationSwitch` có sẵn | ✅ |
+| `SessionBoot` — gọi `/auth/refresh` một lần khi mở app, chưa đăng nhập thì đá về `/login` | ✅ |
+| `AppButton` · `AppInput` · `AppCard` — ba primitive đầu của §6.3 | ✅ |
+| `pnpm lint` + `pnpm build` sạch · 8 route · tệp dài nhất 174 dòng | ✅ |
+
+### Tình trạng P1
+
+Đủ 11 primitive của §6.3, tất cả trong `components/ui/`, không cái nào import
+`hooks/` hay `services/` (R16):
+
+`AppButton` `AppInput` `AppSelect` `AppCard` `AppModal` · `StatusPill`
+(+ `MoStatusPill` `QcResultPill` `SegmentPill` đọc thẳng enum từ `constants/status.ts`)
+· `StationBadge` `RoundBadge` `QtyStat` · `EmptyState` `ErrorState`.
+
+`/dev/kit` xem được đủ mọi biến thể. Rà tự động: tệp dài nhất **179 dòng**, **0**
+comment, **0** hardcode màu/px, **0** chỗ import Phosphor ngoài `PhosphorIcons.tsx`.
+
+### Tình trạng P2
+
+| Việc | Xong |
+| --- | :---: |
+| `(station)/layout.tsx` — chặn chưa đăng nhập, `useWakeLock` (R28) | ✅ |
+| `StationSidebar` — 3 nhóm, nhãn `chỉ xem` trên Step 4, nút `Đổi người`, badge tồn từ `/board/counts` | ✅ |
+| `FlowHint` — `from → here → next` + nhánh quay lui, đọc `constants/flow.ts` | ✅ |
+| `ScanBar` + `ScanFeedback` — auto-focus, Enter = Nhận, phản hồi một dòng trong thanh | ✅ |
+| `QueueList` — bấm dòng nạp mã vào ô quét, hiện `waitingSince` đúng mốc từng trạm | ✅ |
+| `AtStationTable` — `/board/at/{n}`, cột "Đang giữ", không có nút "xong" (§8.2) | ✅ |
+| Trạm 0 hoàn chỉnh — bàn giao lẻ + `Bàn giao tất cả` (§7A) | ✅ |
+| `useHandoverBatch` + `stationService.handoverBatch` | ✅ |
+
+**Chưa có, còn 404:** `/running` `/trace` `/mos` `/production` (sidebar đã trỏ tới),
+và trạm 1–5. Máy gán trạm khác 0 thì `/scan` sẽ redirect vào route chưa tồn tại.
+
+**Sửa `useScanStore`** — thêm `draft` để `QueueList` nạp mã sang `ScanBar` mà không
+phải chạm DOM. Vẫn đúng §4.2: bốn store, và `draft` là trạng thái UI thuần của màn quét.
+
+### Tình trạng P3
+
+| Trạm | Route | Việc của trạm |
+| --- | --- | --- |
+| 1 · Setup | `/setup` | không có endpoint (§8.1) — hàng đợi + quét + đồng hồ bước |
+| 2 · QC | `/qc` | `QcDecideModal` — Đạt một chạm; Không đạt bắt buộc chọn lý do từ danh mục |
+| 3 · Bàn team leader | `/waiting` | không có endpoint — giống trạm 1 |
+| 5 · Kho nhập | `/warehouse-in` | `CompleteModal` — đối chiếu SL đã đóng thùng, nói rõ hai ngả Đủ / Thiếu |
+
+Nối thêm phần backend đã có mà FE bỏ trống:
+
+- `catalog.service.ts` + `useReasons(group)` — danh mục lý do, `staleTime: Infinity` (R4).
+  Group: `HOLD · NG · SHORT · QC · PACKING`, chép từ `0002_seed.py`.
+- **`stationService.qc` trước đây hardcode `reason_code_id: null`** nên mọi lý do QC
+  chỉ đi vào `reason_text` dạng chữ tự do — mất hẳn khả năng thống kê theo mã. Đã sửa
+  để gửi cả `codeId` lẫn `text`.
+
+**Còn 404:** `/production` (P4) · `/running` `/trace` `/mos` (P5).
+
+### Tình trạng P4 — trạm 4
+
+Đủ 6 trạm. `/production` dựng theo mô hình hai nhánh của mockup:
+
+| Khối | Ghi chú |
+| --- | --- |
+| `LinePicker` | tick nhiều chuyền rồi `Thêm vào bảng`; chuyền đã gán khoá lại |
+| `LineTable` | thời gian chờ / chạy từng chuyền · `Dừng` bắt buộc chọn lý do nhóm `HOLD` |
+| `HourlyForm` | ba số bắt buộc; `Đạt %` và `Năng suất` **tự tính để hiện**, không có ô nhập |
+| `CloseBookForm` | tổng sống `Σ khớp / đang dư / đang hụt`, **không chặn ở FE** (R8) |
+| `PackingPanel` | nhánh song song — mở ngay khi có chuyền chạy, **không chờ chốt sổ** |
+
+Hai chỗ bám đúng R23:
+
+- `packed_pcs` · `made_pcs` · `le_pcs` **lấy số server trả**, FE không tự tính lại.
+- `le_pcs` hiện kèm chữ **"chưa đủ thùng — KHÔNG phải hàng thiếu"**.
+
+MO đang mở nằm ở `?mo=` (R15), nên F5 hoặc gửi link cho tổ trưởng vẫn ra đúng bảng.
+
+### ⚠ Khoảng trống backend — chặn một phần §7.1/§7.2
+
+**Không endpoint nào trả trạng thái hiện tại của từng chuyền.**
+
+`v_line_time` chỉ cộng dồn `wait_sec` / `run_sec`; `v_round_board` không có cột chuyền
+nào. Nghĩa là FE **không biết** chuyền đang `WAIT` hay `RUN`, trong khi:
+
+- §7.1 [15A] chốt đúng ba trạng thái `Chờ xử lý ⇄ Đang lắp ráp → Hoàn thành`;
+- §7.2 yêu cầu cột `Hiện trạng Line` trên bảng đang chạy;
+- §7.4 [17] cần badge đỏ `ĐANG DỪNG L02` kèm lý do.
+
+Hiện `LineTable` phải hiện **cả hai** nút `Cho chạy` và `Dừng` rồi để server từ chối
+nước đi sai. Chạy được, nhưng người vận hành không nhìn ra chuyền nào đang chạy.
+
+**Cách sửa gọn nhất** — thêm trạng thái đoạn đang mở vào `v_line_time`:
+
+```sql
+(SELECT s.kind FROM line_segment s
+  WHERE s.round_id = ... AND s.line_id = ... AND s.ended_at IS NULL
+  LIMIT 1) AS current_kind
+```
+
+rồi `TraceLine` thêm `current_kind: "WAIT" | "RUN" | null`. `SegmentPill` ở FE đã dựng
+sẵn, chỉ chờ dữ liệu.
+
+### Tình trạng P5
+
+| Route | Nội dung |
+| --- | --- |
+| `/running` | Bảng treo tường — layout riêng không sidebar, `useWakeLock`, refetch 10s (R5). Hai cột kết quả **tách riêng**: `Kết quả thời gian` và `Sản lượng` |
+| `/trace` | Tra cứu — gõ hoặc quét mã, Enter là đi thẳng |
+| `/mos/[code]/trace` | Bốn tầng §9: tổng quan → `RoundTable` (các vòng) → `RoundDetail` (năng suất chuyền + sản lượng giờ + đóng thùng) |
+| `/mos` | Kế hoạch — tạo lẻ, nhập CSV, lọc theo trạng thái ở `?status=` (R15), chốt/huỷ lệnh |
+
+`RoundDetail` có dòng đối soát ba trường hợp của §7.2b: `Σ giờ = đạt` khớp · `Σ giờ < đạt`
+ghi sót, bình thường · `Σ giờ > đạt` **bất thường, báo đỏ**.
+
+**Sửa `types/board.ts`** — `RunningRow` thiếu 6 cột mà `v_round_board` thật sự trả
+(`required_sec` `late_sec` `qty_ng` `qty_short` `production_closed_at` `handed_over_at`).
+Thiếu type thì cột `Quá giờ bao lâu` không có dữ liệu mà cũng không có lỗi nào nổ ra —
+đúng cái bẫy FE-PLAN §8.3 cảnh báo về hai endpoint không gắn `response_model`.
+
+### Tổng kết — 16 route, không còn 404
+
+`pnpm lint` và `pnpm build` sạch. Tệp dài nhất **179 dòng**. Rà tự động: **0** comment ·
+**0** hardcode màu/px · **0** import Phosphor ngoài cửa · **0** fetch trong component ·
+**0** query key gõ tay.
+
+### Việc còn lại
+
+1. **`current_kind` của chuyền** — khoảng trống backend ở trên, chặn cột `Hiện trạng Line`.
+2. **`MO_CODE_RE = /M\d{6}/` thiếu chốt chặn `(?!\d)`** — quét `M0688201` (7 số) sẽ bị
+   cắt thành `M068820`, một mã **có thật**. §1b.2 gọi đây là "loại lỗi không ai phát hiện
+   được" và chốt phải TỪ CHỐI. Hiện chỉ dùng ở màn tra cứu nên hại ít, nhưng nên sửa.
+3. **P6** — `/catalog/lines` · `/account` (theme, cỡ chữ) · rà a11y theo §10.
+
+Đã thêm **một** token ngoài danh sách gốc: `--color-brand-on` (`#1A1A1A`, giống nhau ở
+cả hai theme vì vàng Amphenol không đảo màu). Không có nó thì chữ trên nền brand phải
+hardcode `text-[#1A1A1A]`, vi phạm R32. `tailwind.config.ts` đổi theo:
+`brand: { DEFAULT, on }`. Tổng còn **50 token**, vẫn khớp hai chiều.
+
+**Màu accent chọn xanh dương `#0E6E99` / `#4CB8DE`, không lấy xanh lá của roomify.**
+Trong MES xanh lá / vàng / đỏ **mang nghĩa** (đạt · cảnh báo · lỗi); lấy một trong ba
+làm màu nút thì cái nút `Nhận` đọc thành một trạng thái. Vàng Amphenol `#FFDE17` để
+riêng ở `--color-brand`, chỉ dùng cho dấu hiệu thương hiệu — ngoài xưởng vàng nghĩa là
+cảnh báo.
+
+---
+
+## 8. Còn cần bạn chốt
 
 | # | Câu hỏi | Đề xuất của tôi |
 | :---: | --- | --- |
-| **Q1** | "Giống mockup" là giống **bố cục + luồng** (giữ font/màu FE-PLAN), hay giống cả **màu + font**? | **Bố cục + luồng.** FE-PLAN §6.4 là luật, và mockup 14px/32px không dùng được ngoài xưởng |
-| **Q2** | Nút `Accept tất cả` của Kho — backend chưa có endpoint. Bỏ nút, hay chờ backend làm? | **Tạm bỏ**, giữ `Bàn giao tất cả` (có `handover-batch`). Ghi vào việc tồn của backend |
-| **Q3** | Có cần **nút đổi vai cho môi trường dev** để bạn/khách duyệt nhanh 13 vai không? | **Có, nhưng chỉ ở `/dev/`**, gate bằng `NODE_ENV !== "production"` |
-| **Q4** | Khối ghi chú trích BRD trong mockup — bỏ hết, hay giữ dạng thu gọn? | **Bỏ khỏi màn thao tác.** Phần cần lúc thao tác rút thành một dòng microcopy |
+| # | Câu hỏi | Đề xuất của tôi | Chậm nhất |
+| :---: | --- | --- | --- |
+| **Q2** | Nút `Accept tất cả` của Kho — backend chưa có endpoint | **Tạm bỏ**, giữ `Bàn giao tất cả` (có `handover-batch`). Ghi vào việc tồn backend | P2 |
+| **Q3** | Có cần nút đổi vai cho môi trường dev để duyệt nhanh 13 vai? | **Có, chỉ ở `/dev/`**, gate `NODE_ENV !== "production"` | P2 |
+| **Q4** | Khối ghi chú trích BRD trong mockup — bỏ hết hay giữ thu gọn? | **Bỏ khỏi màn thao tác**, phần cần lúc thao tác rút thành một dòng microcopy | P2 |
+| §11.1 | FE và BE **cùng site** qua reverse proxy? | quyết `samesite` và có cần CSRF không | P0 (login) |
+| §11.3 | Bảng treo tường **chạy không cần đăng nhập**? | nếu có thì cần vai chỉ-xem, backend chưa có | P5 |
+| §11.4 | Xưởng có **wifi chập chờn**? | nếu có thì `/scan` cần hàng đợi offline — việc lớn | P2 |
 
-Và **bốn câu §11 của FE-PLAN vẫn chưa ai trả lời** — chúng thuộc loại *trả lời sai thì
-phải viết lại nhiều màn*:
 
-1. FE và BE **cùng site** qua reverse proxy? → quyết `samesite` và có cần CSRF không.
-2. Máy tính bảng ở trạm dùng **tài khoản chung** hay mỗi người một tài khoản? → nếu
-   chung thì cần màn "chọn người" mỗi thao tác để `closed_by` còn đúng.
-3. Bảng treo tường có **chạy không cần đăng nhập** không? → cần vai chỉ-xem, backend chưa có.
-4. Xưởng có **wifi chập chờn** không? → nếu có thì `/scan` cần hàng đợi offline, việc lớn.
+---
 
-Câu **2** ảnh hưởng ngay từ P0 (màn `/login`). Ba câu còn lại chậm nhất phải chốt
-trước P5.
+## 9. Đổi mô hình: trạm suy từ VAI, không từ THIẾT BỊ
+
+**Chốt ngày làm việc này, thay cho FE-PLAN §7.3 R22.**
+
+FE-PLAN giả định mỗi trạm có một máy tính bảng bắt cố định, và `/scan` lấy trạm từ
+`X-Station-Token` của thiết bị. Thực tế xưởng: **người vận hành cầm điện thoại của
+mình đi theo hàng** — tới Setup mở app quét, tới QC lại quét, cùng một máy. Token gắn
+với máy là vô nghĩa.
+
+Trạm giờ suy từ **vai người đăng nhập**:
+
+| Vai | Trạm FULL | Quét ra trạm nào |
+| --- | --- | --- |
+| 10 vai một phòng ban | đúng 1 | **tự suy**, không hỏi gì |
+| `WAITING_*` | 3 và 4 | trang đang mở là lời khai |
+| `PLANNER` | cả 6 | trang đang mở là lời khai |
+
+**Trang là lời khai, không bấm thêm nút nào.** Mở `/warehouse-out` tức là đang ở Kho
+xuất, nên `ScanBar` gửi luôn `station` của trang đó. Bắt bấm "Tôi đang ở Kho xuất"
+trong khi tiêu đề trang đã ghi vậy là thừa một chạm — §1b chốt quét là một thao tác.
+
+### Backend — ba chỗ, không migration
+
+- `permissions.py` — thêm `full_stations(roles)`.
+- `scan/schemas.py` — `ScanIn` thêm `station: StationNo | None`.
+- `actor.py` — thêm `scan_station(asked)`; `scan/router.py` bỏ `StationDep`.
+- `error_codes.py` — thêm `SCAN_STATION` cho trường hợp đa trạm chưa khai.
+
+**Không nới lỏng bảo mật.** `require_station` vẫn là nơi chặn, chỉ đổi chỗ lấy con số
+trạm. Đã thử bốn đường bằng curl:
+
+| | Kết quả |
+| --- | --- |
+| Kho xuất quét, không header nào | `200` — Kho xuất đã nhận |
+| Planner quét, không khai trạm | `422 SCAN_STATION` |
+| Planner khai `station: 0` | `200`, `duplicate: true` |
+| QC khai `station: 0` | `403` — không thuộc phòng ban Kho xuất |
+
+`172 passed` sau thay đổi.
+
+### Frontend — chủ yếu là gỡ bớt
+
+Bỏ `X-Station-Token`, bỏ `/station-setup`, bỏ `useStationSwitch`, bỏ mọi nhánh
+"máy này đang gán cho…". `useStationStore` không giữ token thiết bị nữa, chỉ giữ
+trạm đang chọn để `/scan` biết đưa vai đa trạm về trang nào.
+
+`/auth/station-token` ở backend giờ không ai gọi. Để lại chứ không xoá — chưa chắc
+sau này không có màn hình treo tường cần định danh thiết bị.

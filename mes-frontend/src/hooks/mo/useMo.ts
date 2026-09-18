@@ -1,18 +1,32 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { PAGE_SIZE } from "@/constants/pagination";
 import { boardKeys, catalogKeys, moKeys } from "@/constants/queryKeys";
-import { catalogService, moService, type MoCreatePayload } from "@/services/mo.service";
+import {
+  catalogService,
+  moService,
+  type MoExcelRow,
+  type MoCreatePayload,
+  type MoListQuery,
+} from "@/services/mo.service";
 import { useUiStore } from "@/stores/useUiStore";
 import type { ApiError } from "@/types/api";
-import type { MoStatus } from "@/types/mo";
 
-export const useMoList = (status?: MoStatus) =>
-  useQuery({
-    queryKey: [...moKeys.all, "list", status ?? "all"],
-    queryFn: () => moService.list(status),
+/** Một TRANG sổ lệnh. `total` để biết còn trang sau không — trước đây repository có
+ *  `limit=200` viết cứng, tới lệnh thứ 201 là màn hình mất lệnh mà không báo gì. */
+export const useMoList = (loc: MoListQuery = {}, offset = 0, limit = PAGE_SIZE) => {
+  const q = useQuery({
+    queryKey: [
+      ...moKeys.all, "list",
+      loc.status ?? "all", loc.dateFrom ?? "", loc.dateTo ?? "",
+      limit, offset,
+    ],
+    queryFn: () => moService.list(loc, limit, offset),
     staleTime: 10_000,
   });
+  return { ...q, items: q.data?.items ?? [], total: q.data?.total ?? 0, limit, offset };
+};
 
 export const useTraceMo = (code: string | null) =>
   useQuery({
@@ -42,9 +56,20 @@ export function useMoActions() {
     onSuccess: (r) => ok(`Đã tạo ${r[0]?.code ?? "lệnh"} — trạng thái Nháp`),
     onError: err,
   });
-  const importCsv = useMutation({
-    mutationFn: (csv: string) => moService.importCsv(csv),
-    onSuccess: (r) => ok(`Đã nhập ${r.length} lệnh từ CSV`),
+  const importExcel = useMutation({
+    mutationFn: (rows: MoExcelRow[]) => moService.importExcel(rows),
+    onSuccess: (r) => ok(`Đã nhập ${r.length} lệnh từ tệp Excel`),
+    onError: err,
+  });
+  const submitBatch = useMutation({
+    mutationFn: (codes: string[]) => moService.submitBatch(codes),
+    onSuccess: (r) => ok(r.message),
+    onError: err,
+  });
+  const cancelBatch = useMutation({
+    mutationFn: (v: { codes: string[]; reason: string }) =>
+      moService.cancelBatch(v.codes, v.reason),
+    onSuccess: (r) => ok(r.message),
     onError: err,
   });
   const submit = useMutation({
@@ -58,7 +83,7 @@ export function useMoActions() {
     onError: err,
   });
 
-  return { create, importCsv, submit, cancel };
+  return { create, importExcel, submit, submitBatch, cancel, cancelBatch };
 }
 
 export const useCatalogLines = () =>

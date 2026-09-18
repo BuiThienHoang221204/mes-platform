@@ -12,7 +12,9 @@ export type QueueRow = {
   round_no: number;
   target_qty?: number;
   waiting_sec?: number;
-  qty_packed?: number;       // riêng hàng đợi trạm 5
+  /** Riêng hàng đợi trạm 5 — hai số này đi cùng nhau để quy pcs ra THÙNG. */
+  qty_packed?: number;
+  pcs_per_box?: number;
 };
 
 /** `/board/at/{station}` — lệnh ĐANG trong tay trạm, khác hẳn hàng đợi. */
@@ -31,19 +33,56 @@ export type AtStationRow = {
   /** Trạm 5 — đã đóng được bao nhiêu, xong lúc nào. */
   qty_packed: number | null;
   packing_done_at: string | null;
+  /**
+   * Trạm 2 — đã kết luận chưa. QC vẫn giữ lệnh SAU KHI ra kết quả, vì bước chỉ
+   * đóng khi Bàn team leader quét nhận. Nên "còn trong tay QC" không có nghĩa là
+   * "chưa có kết quả", và chỉ trường này phân biệt được.
+   */
+  qc_result: "PASS" | "FAIL" | null;
+  qc_checked_at: string | null;
+};
+
+export type BoardLine = {
+  line_code: string;
+  current_kind: "WAIT" | "RUN" | null;
+  hold_reason: string | null;
+  wait_sec: number;
+  run_sec: number;
 };
 
 export type RunningRow = {
   code: string;
   product_name: string;
+  quantity: number;
   round_no: number;
   target_qty: number;
-  lines?: string[];
-  qty_ok?: number | null;
-  qty_packed?: number | null;
-  actual_sec?: number | null;
-  required_sec?: number | null;
-  on_time?: boolean | null;
+  required_sec: number;
+  actual_sec: number | null;
+  on_time: boolean | null;
+  late_sec: number | null;
+  qty_ok: number | null;
+  qty_ng: number | null;
+  qty_short: number | null;
+  production_closed_at: string | null;
+  qty_packed: number | null;
+  packing_done_at: string | null;
+  handed_over_at: string | null;
+  /**
+   * Bước cao nhất đã quét nhận trong vòng. `null` = chưa bước nào nhận, lệnh vừa
+   * chốt và còn nằm ở hàng chờ Kho xuất. Bảng đang chạy hiện lệnh ở MỌI bước
+   * (BRD §9b.5) nên đây là cột duy nhất nói được hàng đang ở đâu — thiếu nó thì
+   * lệnh chưa ra khỏi kho trông giống hệt lệnh đang lắp ráp dở.
+   */
+  current_step: number | null;
+  lines: BoardLine[];
 };
 
-export type StationCounts = { counts: Record<string, number> };
+/**
+ * Hai con số mỗi trạm, không phải một. `counts` là việc CHƯA AI NHẬN — có người
+ * phải đi quét. `holding` là việc ĐANG trong tay trạm — đang chạy, không ai cần
+ * làm gì thêm. Gộp lại thì xưởng chạy ba lệnh ở Sản xuất mà màn hình hiện 0.
+ */
+export type StationCounts = {
+  counts: Record<string, number>;
+  holding: Record<string, number>;
+};

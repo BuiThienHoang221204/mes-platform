@@ -39,8 +39,15 @@ const config: Config = {
         ok: { DEFAULT: "var(--color-ok)", on: "var(--color-ok-on)", soft: "var(--color-ok-soft)" },
         warn: { DEFAULT: "var(--color-warn)", on: "var(--color-warn-on)", soft: "var(--color-warn-soft)" },
         danger: { DEFAULT: "var(--color-danger)", on: "var(--color-danger-on)", soft: "var(--color-danger-soft)" },
-        brand: "var(--color-brand)",
+        brand: { DEFAULT: "var(--color-brand)", on: "var(--color-brand-on)" },
         overlay: "var(--color-overlay)",
+        series: {
+          1: "var(--color-series-1)", 2: "var(--color-series-2)", 3: "var(--color-series-3)",
+        },
+        tier: {
+          low: "var(--color-tier-low)", mid: "var(--color-tier-mid)",
+          high: "var(--color-tier-high)",
+        },
       },
       // Đọc TỪ token, không gõ lại số: đổi bo góc ở `globals.css` là cả app theo.
       borderRadius: {

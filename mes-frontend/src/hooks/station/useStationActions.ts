@@ -18,12 +18,26 @@ export function useHandover() {
   });
 }
 
+export function useHandoverBatch() {
+  const invalidate = useInvalidateStation();
+  const toast = useUiStore((s) => s.toast);
+  return useMutation({
+    mutationFn: (codes: string[]) => stationService.handoverBatch(codes),
+    onSuccess: (r) => { invalidate(); toast(r.message); },
+    onError: (e: ApiError) => toast(e.message, "danger"),
+  });
+}
+
 export function useQcDecide() {
   const invalidate = useInvalidateStation();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
-    mutationFn: (v: { code: string; result: QcResultValue; reason?: string }) =>
-      stationService.qc(v.code, v.result, v.reason),
+    mutationFn: (v: {
+      code: string;
+      result: QcResultValue;
+      reasonCodeId?: number | null;
+      reasonText?: string | null;
+    }) => stationService.qc(v.code, v.result, { codeId: v.reasonCodeId, text: v.reasonText }),
     onSuccess: (r, v) => { invalidate(v.code); toast(r.message, r.result === QC_RESULT.PASS ? "ok" : "warn"); },
     onError: (e: ApiError) => toast(e.message, "danger"),
   });
@@ -33,7 +47,7 @@ export function useWarehouseIn() {
   const invalidate = useInvalidateStation();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
-    mutationFn: (v: { code: string; qty?: number | null }) => stationService.warehouseIn(v.code, v.qty),
+    mutationFn: (v: { code: string }) => stationService.warehouseIn(v.code),
     onSuccess: (r, v) => {
       invalidate(v.code);
       toast(r.message, r.outcome === WI_OUTCOME.COMPLETED ? "ok" : "warn");

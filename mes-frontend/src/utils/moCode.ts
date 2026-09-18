@@ -1,6 +1,11 @@
 /** Mã lệnh: chữ M kèm đúng 6 chữ số — khớp CHECK `mo_code_format` của CSDL. */
 export const MO_CODE_RE = /M\d{6}/;
 
+/** Khớp CẢ chuỗi — dùng khi ô nhập phải là đúng một mã, như một ô trong tệp Excel.
+ *  `MO_CODE_RE` cố ý không neo để lôi mã ra khỏi chuỗi QR dài, nên nó nhận cả
+ *  `M1234567` lẫn `XX M123456` — hai thứ CSDL sẽ chặn. */
+export const MO_CODE_EXACT = /^M\d{6}$/;
+
 /**
  * Lôi mã MO ra khỏi chuỗi QR đọc được.
  *

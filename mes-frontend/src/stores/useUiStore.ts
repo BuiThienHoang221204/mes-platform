@@ -39,6 +39,9 @@ export const useUiStore = create<UiState>()(
       increaseFont: () => get().setFontStep(get().fontStep + 1),
       decreaseFont: () => get().setFontStep(get().fontStep - 1),
       toast: (text, kind = "ok") => {
+        // Bấm lại một thao tác đang lỗi thì chồng hai dải chữ y hệt nhau, che mất
+        // đúng phần màn hình người ta cần đọc để sửa. Cùng câu đang hiện thì thôi.
+        if (get().toasts.some((t) => t.text === text)) return;
         const id = seq++;
         set({ toasts: [...get().toasts, { id, text, kind }] });
         // Lỗi để lâu hơn báo thành công: người ở trạm đang đeo găng, đọc không kịp 3 giây.

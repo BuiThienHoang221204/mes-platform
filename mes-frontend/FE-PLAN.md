@@ -125,7 +125,7 @@ và nó **trượt im lặng**, không báo lỗi gì.
 | --- | --- |
 | `POST /scan` | `boardKeys.all` · `moKeys.trace(code)` |
 | Mọi thao tác trạm (handover · qc · line · production · packing · warehouse-in) | `boardKeys.all` · `moKeys.detail(code)` · `moKeys.trace(code)` |
-| `POST /mos`, `/mos/import`, `/mos/{code}/submit`, `/cancel` | `boardKeys.all` · `moKeys.all` |
+| `POST /mos`, `/mos/bulk`, `/mos/{code}/submit`, `/cancel` | `boardKeys.all` · `moKeys.all` |
 | `POST /lines` · `DELETE /lines/{code}` | `catalogKeys.lines()` |
 
 > Viết một helper `invalidateStation(qc, code)` dùng chung cho mọi mutation trạm. Đừng chép 3 dòng
@@ -713,7 +713,7 @@ vẫn cần thiết — người ở Setup phải thấy lệnh nào đang chờ
 | Đăng nhập | POST | `/auth/login` · `/auth/refresh` · `/auth/logout` |
 | Cấu hình thiết bị | POST | `/auth/station-token?station=<n>` — **`station` là QUERY param, không phải body**, và endpoint chỉ mở cho `PLANNER` |
 | Tài khoản · giao diện · cỡ chữ | — | không gọi API. Tên và quyền lấy từ `useSessionStore`; theme/cỡ chữ ở `useUiStore` (R32) |
-| Kế hoạch — tạo/nhập/chốt/huỷ | POST | `/mos` · `/mos/import` · `/mos/{code}/submit` · `/mos/{code}/cancel` |
+| Kế hoạch — tạo/nhập/chốt/huỷ | POST | `/mos` · `/mos/bulk` · `/mos/{code}/submit` · `/mos/{code}/cancel` |
 | Chi tiết MO | GET | `/mos/{code}` |
 | Bảng đang chạy *(treo tường)* | GET | `/board/running` · `/board/counts` |
 | Truy vết MO | GET | `/mos/{code}/trace` |
