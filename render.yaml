@@ -61,10 +61,13 @@ services:
       - key: MES_DATABASE_MAX_OVERFLOW
         value: "2"
 
-      # Chỉ cần khi có trình duyệt gọi THẲNG vào BE (không qua proxy của FE).
-      # Đi đúng đường proxy thì để trống — CORS không áp cho gọi máy-sang-máy.
-      - key: MES_CORS_ORIGINS
-        sync: false
+      # KHÔNG khai MES_CORS_ORIGINS ở đây. Khai với `sync: false` thì Render hỏi
+      # lúc tạo Blueprint, và bỏ trống ô đó là nó đặt CHUỖI RỖNG — pydantic không
+      # phân tích được chuỗi rỗng thành danh sách nên backend chết ngay lúc khởi
+      # động. Không khai thì app dùng mặc định trong config.py, vô hại: trình duyệt
+      # không bao giờ gọi thẳng vào BE trong sơ đồ này (CORS không áp cho gọi
+      # máy-sang-máy). Cần thật thì thêm tay trong bảng điều khiển, dạng JSON:
+      #     ["https://mes-frontend-xxxx.onrender.com"]
 
   # ══ Frontend ═════════════════════════════════════════════════════════════
   - type: web

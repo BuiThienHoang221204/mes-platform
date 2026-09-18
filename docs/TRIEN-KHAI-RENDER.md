@@ -98,18 +98,34 @@ Trong lúc chỉ đang thử thì không sao. Trước khi xưởng dùng thật
 
 ## 4. Danh sách biến môi trường
 
-`render.yaml` lo gần hết. Chỉ hai dòng cần người:
+`render.yaml` lo gần hết. **Chỉ một dòng cần người:**
 
 | Biến | Service | Ai đặt |
 | --- | --- | --- |
 | `BACKEND_ORIGIN` | mes-frontend | **Bạn**, ở bước 3 |
-| `MES_CORS_ORIGINS` | mes-backend | Bỏ trống — xem dưới |
 | `MES_DATABASE_URL` | mes-backend | Render tự nối từ `mes-db` |
 | `MES_JWT_SECRET` | mes-backend | Render tự sinh, giữ nguyên mãi |
 
-`MES_CORS_ORIGINS` để trống là đúng: CORS chỉ áp cho trình duyệt, mà trình duyệt
-không bao giờ gọi thẳng vào backend trong sơ đồ này. Chỉ điền nếu bạn cố ý mở cho
-một trang khác gọi vào.
+### Vì sao KHÔNG khai `MES_CORS_ORIGINS`
+
+Màn tạo Blueprint hỏi giá trị cho mọi biến đánh `sync: false`. Bỏ trống ô đó thì
+Render **không bỏ qua biến — nó đặt biến bằng CHUỖI RỖNG**. Hai thứ đó khác hẳn nhau:
+
+```
+không đặt    -> OK    ['http://localhost:3000']
+chuỗi rỗng   -> GÃY   SettingsError: error parsing value for field "origins"
+```
+
+Pydantic không phân tích được chuỗi rỗng thành danh sách, nên backend chết ngay lúc
+khởi động — và thông báo lỗi không hề nhắc tới Render hay ô nhập nào.
+
+Nên biến này đã được gỡ khỏi `render.yaml`. App dùng mặc định trong `config.py`, vô
+hại vì trình duyệt không bao giờ gọi thẳng vào backend ở sơ đồ này. Cần thật thì thêm
+tay trong bảng điều khiển, dạng JSON: `["https://mes-frontend-xxxx.onrender.com"]`.
+
+Cùng lý do đó, `next.config.ts` đọc `BACKEND_ORIGIN` bằng `||` chứ không `??` — `??`
+chỉ rơi về mặc định khi biến là null, nên chuỗi rỗng lọt qua và đích proxy thành
+`/v1/:path*`, tức trang tự chuyển tiếp vào chính nó mà không in ra lỗi nào.
 
 ---
 
