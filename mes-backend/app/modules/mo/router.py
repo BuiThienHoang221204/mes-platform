@@ -71,7 +71,7 @@ def submit_batch(body: MoBatchIn, db: DbDep, actor: ActorDep) -> OkOut:
     Một mã hỏng thì cả lô không lệnh nào được chốt."""
     actor.require_role(PLANNER)
     n = mo_service.submit_batch(db, codes=body.codes, actor_id=uuid.UUID(actor.user_id))
-    return OkOut(message=f"Đã chốt {n} lệnh — khoá cứng mã/SL/thời gian (§4A)")
+    return OkOut(message=f"Đã chốt {n} lệnh — khoá cứng mã/SL/thời gian")
 
 
 @router.post("/mos/cancel-batch", response_model=OkOut)
@@ -89,7 +89,7 @@ def submit_mo(code: str, db: DbDep, actor: ActorDep) -> OkOut:
     Sau bước này mã / SL / thời gian khoá cứng (§4A)."""
     actor.require_role(PLANNER)
     mo_service.submit(db, code, uuid.UUID(actor.user_id))
-    return OkOut(message=f"{code} đã Submit — khoá cứng mã/SL/thời gian (§4A)")
+    return OkOut(message=f"{code} đã Submit — khoá cứng mã/SL/thời gian")
 
 
 @router.post("/mos/{code}/cancel", response_model=OkOut)
@@ -97,7 +97,7 @@ def cancel_mo(code: str, body: MoCancelIn, db: DbDep, actor: ActorDep) -> OkOut:
     """Huỷ lệnh kèm lý do. Bản ghi vẫn giữ — muốn sửa thì tạo lệnh mới."""
     actor.require_role(PLANNER)
     mo_service.cancel(db, code, body.reason, uuid.UUID(actor.user_id))
-    return OkOut(message=f"{code} đã huỷ. Bản ghi vẫn giữ — tạo lệnh mới để thay (§4A)")
+    return OkOut(message=f"{code} đã huỷ. Bản ghi vẫn giữ — tạo lệnh mới để thay")
 
 
 @router.get("/mos", response_model=Page[MoOut])

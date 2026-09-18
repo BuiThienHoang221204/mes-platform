@@ -9,17 +9,28 @@ import { CaretLeft, Copy, ImageSquare, Minus, Plus } from "@/components/common/P
 const BOX_ID = "mes-camera-scan";
 const FILE_BOX_ID = "mes-camera-file";
 
-/* Thử lần lượt cho tới khi mở được. `facingMode: "environment"` trần là ràng buộc
-   MỀM — máy nào không khớp thì trình duyệt tự rơi về camera trước mà không báo lỗi,
-   nên điện thoại quét QR lại soi vào mặt người dùng. `exact` mới ép được.
-
-   Nới dần chứ không chỉ dùng `exact`: `exact` ném `OverconstrainedError` ở máy chỉ
-   có webcam trước, và ở đó mở camera trước vẫn tốt hơn là không mở được gì. */
 const CAMERA_TRIES: MediaTrackConstraints[] = [
   { facingMode: { exact: "environment" } },
   { facingMode: "environment" },
   { facingMode: "user" },
 ];
+
+function cameraFailureMessage(err: unknown): string {
+  const text = String((err as Error)?.message ?? err ?? "");
+  if (text.includes("NotAllowedError") || text.includes("PermissionDenied"))
+    return "Trình duyệt đang CHẶN camera ở trang này. Bấm biểu tượng ổ khoá cạnh thanh địa chỉ → bật Camera → tải lại trang.";
+  if (
+    text.includes("NotFoundError") ||
+    text.includes("DevicesNotFound") ||
+    text.includes("OverconstrainedError")
+  )
+    return "Máy này không có camera nào dùng được. Cắm webcam, hoặc mở trang bằng điện thoại.";
+  if (text.includes("NotReadableError") || text.includes("TrackStartError"))
+    return "Camera đang bị ứng dụng khác chiếm (Zoom, Teams, Camera…). Đóng ứng dụng đó rồi mở lại.";
+  if (text.includes("SecurityError"))
+    return "Trang phải chạy qua HTTPS mới mở được camera.";
+  return `Không mở được camera — ${text || "không rõ lý do"}`;
+}
 
 const CORNER = "absolute h-9 w-9 border-white";
 const PILL_BTN =
@@ -106,10 +117,7 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
 
         const config = {
           fps: 10,
-          qrbox: (w: number, h: number) => {
-            const side = Math.floor(Math.min(w, h) * 0.7);
-            return { width: side, height: side };
-          },
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
         };
         const onDecoded = (text: string) => {
           onReadRef.current(text);
@@ -153,8 +161,8 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
         }
 
         if (!alive) await stop();
-      } catch {
-        if (alive) setProblem("Không mở được camera. Kiểm tra quyền truy cập của trình duyệt.");
+      } catch (e) {
+        if (alive) setProblem(cameraFailureMessage(e));
       }
     })();
 
@@ -214,28 +222,29 @@ export function CameraScanModal({ open, onClose, onRead }: Props) {
       aria-label="Quét bằng camera"
       className="fixed inset-0 z-[60] bg-black"
     >
-      <div
-        id={BOX_ID}
-        className="!absolute !inset-0 [&_#qr-shaded-region]:!hidden [&_video]:!h-full [&_video]:!w-full [&_video]:!object-cover"
-      />
-      <div id={FILE_BOX_ID} className="hidden" />
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="relative w-full max-w-[860px]">
+          <div id={BOX_ID} className="w-full" />
 
-      {problem ? null : (
-        <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div className="relative h-[min(70vw,70vh,360px)] w-[min(70vw,70vh,360px)] shadow-[0_0_0_100vmax_rgba(0,0,0,0.62)]">
-            <span className={`${CORNER} -left-1 -top-1 rounded-tl-lg border-l-4 border-t-4`} />
-            <span className={`${CORNER} -right-1 -top-1 rounded-tr-lg border-r-4 border-t-4`} />
-            <span className={`${CORNER} -bottom-1 -left-1 rounded-bl-lg border-b-4 border-l-4`} />
-            <span className={`${CORNER} -bottom-1 -right-1 rounded-br-lg border-b-4 border-r-4`} />
-            <span className="absolute inset-0 overflow-hidden rounded-md">
-              <span className="scan-sweep absolute inset-x-0 -translate-y-full">
-                <span className="block h-24 w-full bg-gradient-to-t from-white/30 via-white/10 to-transparent blur-[2px]" />
-                <span className="block h-[2px] w-full bg-white shadow-[0_0_20px_6px_rgba(255,255,255,0.6)]" />
-              </span>
-            </span>
-          </div>
+          {problem ? null : (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+              <div className="relative h-[min(62%,62vw,320px)] w-[min(62%,62vw,320px)]">
+                <span className={`${CORNER} -left-1 -top-1 rounded-tl-lg border-l-4 border-t-4`} />
+                <span className={`${CORNER} -right-1 -top-1 rounded-tr-lg border-r-4 border-t-4`} />
+                <span className={`${CORNER} -bottom-1 -left-1 rounded-bl-lg border-b-4 border-l-4`} />
+                <span className={`${CORNER} -bottom-1 -right-1 rounded-br-lg border-b-4 border-r-4`} />
+                <span className="absolute inset-0 overflow-hidden rounded-md">
+                  <span className="scan-sweep absolute inset-x-0 -translate-y-full">
+                    <span className="block h-24 w-full bg-gradient-to-t from-white/25 via-white/10 to-transparent blur-[2px]" />
+                    <span className="block h-[2px] w-full bg-white shadow-[0_0_20px_6px_rgba(255,255,255,0.6)]" />
+                  </span>
+                </span>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </div>
+      <div id={FILE_BOX_ID} className="hidden" />
 
       <div className="absolute inset-x-0 top-0 px-3 pt-[calc(1.25rem+env(safe-area-inset-top))]">
         <button

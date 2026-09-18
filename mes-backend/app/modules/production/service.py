@@ -79,7 +79,7 @@ def line_hold(db: Session, *, code: str, line_code: str, reason_code_id: int | N
     ăn gian được giờ.
     """
     if not reason_code_id and not (reason_text or "").strip():
-        raise Invalid("Dừng máy bắt buộc ghi lý do (§17)", code=Err.HOLD_REASON)
+        raise Invalid("Dừng máy bắt buộc ghi lý do", code=Err.HOLD_REASON)
     _, rnd = round_service.lock_round(db, code)
     line = catalog_repo.get_line(db, line_code)
     cur = production_repo.open_segment_of(db, rnd.id, line.id)
@@ -126,7 +126,8 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
     never_ran = {s.line_id for s in segs} - {s.line_id for s in segs if s.kind == SegmentKind.RUN}
     if never_ran:
         raise DomainError(
-            "Còn chuyền chưa vào Đang lắp ráp — §16 yêu cầu đóng đồng bộ", code=Err.LINE_NOT_RUN
+            "Còn chuyền chưa vào Đang lắp ráp — mọi chuyền phải đóng cùng một mốc",
+            code=Err.LINE_NOT_RUN,
         )
 
     # §16 chặn HAI trường hợp, không phải một: chuyền chưa chạy lần nào, VÀ chuyền

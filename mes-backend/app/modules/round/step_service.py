@@ -34,7 +34,7 @@ def guard_can_accept(db: Session, rnd: MoRound, step_no: int) -> None:
     if step_no == 1:
         # §3.2 — chưa bàn giao thì Setup không nhận được
         if warehouse_out_repo.get_warehouse_out(db, rnd.id) is None:
-            raise DomainError("Chưa bàn giao — Setup không nhận được (§3.2)", code=Err.NO_HANDOVER)
+            raise DomainError("Chưa bàn giao — Setup không nhận được", code=Err.NO_HANDOVER)
     elif step_no == 3:
         qc = qc_repo.get_qc(db, rnd.id)
         if qc is None:

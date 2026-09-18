@@ -43,7 +43,7 @@ def open_book(db: Session, rnd, actor_id: uuid.UUID) -> Packing:
     if row is not None:
         return row
     if not any(s.kind == SegmentKind.RUN for s in production_repo.segments_of(db, rnd.id)):
-        raise DomainError("Chưa chuyền nào chạy — chưa đóng thùng được (§7b)", code=Err.NO_RUN)
+        raise DomainError("Chưa chuyền nào chạy — chưa đóng thùng được", code=Err.NO_RUN)
 
     row = packing_repo.save_packing(db, rnd.id, actor_id)
     db.flush()

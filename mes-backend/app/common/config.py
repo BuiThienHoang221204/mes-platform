@@ -59,7 +59,7 @@ class DatabaseSettings(BaseSettings):
 
     @field_validator("url", mode="before")
     @classmethod
-    def _ep_dung_driver(cls, v: object) -> object:
+    def _force_psycopg_driver(cls, v: object) -> object:
         """Chuẩn hoá lược đồ về `postgresql+psycopg://` — driver DUY NHẤT app này cài.
 
         Nhà cung cấp CSDL có quản (Render, Heroku, Fly…) phát chuỗi `postgres://…`.

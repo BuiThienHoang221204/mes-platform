@@ -225,6 +225,60 @@ Chỉ khi cả ba nấc hỏng mới báo lỗi quyền truy cập.
 Thanh phóng to chỉ dựng khi `track.getCapabilities().zoom` có thật. Webcam máy bàn hầu
 hết không có — vẽ ra một thanh trượt kéo không ăn thua còn tệ hơn là không có.
 
+## 6c. Đừng ép CSS lên thẻ video của máy quét
+
+`html5-qrcode` quy đổi toạ độ vùng quét bằng **hai phép chia riêng biệt**:
+
+```js
+widthRatio  = video.videoWidth  / video.clientWidth
+heightRatio = video.videoHeight / video.clientHeight
+drawImage(video, x*widthRatio, y*heightRatio, w*widthRatio, h*heightRatio, …)
+```
+
+Nó TIN rằng khung video cùng tỷ lệ với luồng camera, để hai tỷ lệ đó bằng nhau.
+
+Bản toàn màn đầu tiên ép `!h-full !w-full !object-cover` lên thẻ video cho đẹp. Trên
+điện thoại dựng đứng, luồng 640×480 nằm trong khung 390×844 nên hai tỷ lệ là **1,64
+và 0,57** — lệch 65%. Thư viện cắt một dải ngang rồi nhồi vào khung vuông, mã QR méo
+đi và **không bao giờ giải ra**. Camera lên hình, tia quét chạy, mọi thứ trông đúng —
+chỉ là quét mãi không ăn, không một dòng lỗi nào.
+
+Nên: **không đặt kích thước hay `object-fit` lên thẻ video.** Để thư viện tự dựng,
+video giữ đúng tỷ lệ luồng và nằm giữa nền đen. Đo lại sau khi sửa:
+
+| khổ màn | widthRatio | heightRatio | lệch |
+| --- | --- | --- | --- |
+| 390×844 | 1,641 | 1,638 | 0,2% |
+| 844×390 | 0,758 | 0,758 | 0% |
+| 1440×900 | 0,744 | 0,744 | 0% |
+
+Hai thứ đi kèm, cùng mục đích "quét cho dễ ăn":
+
+- **Bỏ `qrbox`.** Có `qrbox` là chỉ giải mã một ô giữa khung, người dùng phải ngắm
+  trúng. Bỏ đi thì cả khung hình đều được giải (`canvas` bằng đúng khung video, và
+  `#qr-shaded-region` không còn được dựng). Bốn góc chỉ còn là gợi ý ngắm.
+- **`useBarCodeDetectorIfSupported`** — dùng bộ giải mã có sẵn của trình duyệt khi có.
+
+Một cái bẫy nữa ở cùng chỗ: `Html5Qrcode.start()` **chỉ nhận `facingMode` hoặc
+`deviceId`** ở tham số đầu và ném lỗi với mọi khoá khác. Thêm `width`/`aspectRatio`
+vào đó là cả ba nấc camera đều hỏng, người dùng thấy "không mở được camera". Muốn xin
+độ phân giải thì phải đi qua `config.videoConstraints`, không phải tham số đầu.
+
+## 6d. Báo đúng LÝ DO camera không mở được
+
+`getUserMedia` hỏng vì bốn lý do, mỗi lý do cần một hành động khác nhau của người
+dùng. Gộp thành một câu "kiểm tra quyền truy cập" là bắt họ đoán — mà ba trong bốn
+trường hợp thì quyền truy cập không liên quan gì:
+
+| Lỗi | Câu báo |
+| --- | --- |
+| `NotAllowedError` | trình duyệt đang chặn — bấm ổ khoá cạnh thanh địa chỉ, bật Camera, tải lại |
+| `NotFoundError` · `OverconstrainedError` | máy không có camera nào dùng được |
+| `NotReadableError` | camera đang bị ứng dụng khác chiếm — đóng Zoom/Teams rồi mở lại |
+| `SecurityError` | trang phải chạy HTTPS |
+
+Thư viện gói lỗi gốc vào chuỗi nên phải dò tên lỗi trong câu, `e.name` không đọc được.
+
 ## 7. Biểu đồ
 
 - `BarRow`: dưới `sm` xếp hai dòng — nhãn và con số cùng hàng, thanh trải hết bề

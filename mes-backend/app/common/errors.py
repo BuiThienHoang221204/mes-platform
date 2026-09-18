@@ -62,12 +62,12 @@ class Unauthenticated(DomainError):
 CONSTRAINT_MESSAGES: dict[str, tuple[str, int, str]] = {
     "mo_code_format": (Err.MO_CODE, 422, "Mã MO phải là chữ M kèm đúng 6 chữ số, ví dụ M068820"),
     "manufacturing_order_code_key": (Err.MO_DUPLICATE, 409, "Mã MO này đã có trong hệ thống"),
-    "mo_cancel_needs_reason": (Err.CANCEL_REASON, 422, "Huỷ lệnh bắt buộc ghi lý do (§2.3)"),
+    "mo_cancel_needs_reason": (Err.CANCEL_REASON, 422, "Huỷ lệnh bắt buộc ghi lý do"),
     "mo_round_one_open": (Err.ROUND_OPEN, 409, "MO này đã có một vòng đang chạy"),
     "mo_round_mo_id_round_no_key": (Err.ROUND_DUP, 409, "Vòng này đã tồn tại"),
     "mo_step_round_id_step_no_key": (Err.STEP_DUP, 409, "Bước này đã được nhận ở vòng hiện tại"),
     "step_closed_after_accept": (Err.STEP_TIME, 422, "Mốc đóng bước không được sớm hơn mốc nhận"),
-    "qc_fail_needs_reason": (Err.QC_REASON, 422, "QC không đạt — bắt buộc ghi lý do (§5)"),
+    "qc_fail_needs_reason": (Err.QC_REASON, 422, "QC không đạt — bắt buộc ghi lý do"),
     "prod_has_output": (Err.PROD_EMPTY, 422,
                         "Vòng này chưa làm ra PCS nào — không có gì để chốt sổ"),
     "ng_needs_reason": (Err.NG_REASON, 422, "Có hàng hỏng — bắt buộc ghi LÝ DO HỎNG"),
@@ -83,13 +83,13 @@ CONSTRAINT_MESSAGES: dict[str, tuple[str, int, str]] = {
     "hourly_output_round_id_work_date_slot_hour_key": (
         Err.HOURLY_DUP,
         409,
-        "Khung giờ này của ngày đó đã ghi rồi — mỗi khung mỗi ngày chỉ ghi một lần (§7.2b)",
+        "Khung giờ này của ngày đó đã ghi rồi — mỗi khung mỗi ngày chỉ ghi một lần",
     ),
     "hourly_output_qty_check": (Err.HOURLY_QTY, 422, "Sản lượng giờ phải lớn hơn 0"),
     "packing_hourly_round_id_work_date_slot_hour_key": (
         Err.BOX_DUP,
         409,
-        "Khung giờ này của ngày đó đã ghi thùng rồi — mỗi khung mỗi ngày một lần (§7b.2)",
+        "Khung giờ này của ngày đó đã ghi thùng rồi — mỗi khung mỗi ngày một lần",
     ),
     "line_code_key": (Err.LINE_DUPLICATE, 409, "Mã chuyền này đã có trong hệ thống"),
     "line_segment_line_id_fkey": (

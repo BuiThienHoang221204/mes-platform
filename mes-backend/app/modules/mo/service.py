@@ -129,7 +129,7 @@ def cancel(db: Session, code: str, reason: str, actor_id: uuid.UUID) -> None:
     """Huỷ lệnh kèm lý do bắt buộc. Bản ghi giữ nguyên, không xoá (§2.3, §4A)."""
     mo = mo_repo.get_mo(db, code)
     if not (reason or "").strip():
-        raise Invalid("Huỷ lệnh bắt buộc ghi lý do (§2.3)")
+        raise Invalid("Huỷ lệnh bắt buộc ghi lý do")
     if mo.status == MoStatus.COMPLETED:
         raise DomainError("Đơn đã hoàn thành — không huỷ được")
     before = mo.status
