@@ -139,46 +139,77 @@ class Seeder:
     def hourly(self, code: str, target: int, days: int = 3, fill: float = 0.8) -> int:
         """Ghi sổ sản lượng giờ nhiều ngày — nguồn của biểu đồ Năng suất theo giờ.
 
+        **Ngày cuối LUÔN là HÔM NAY.** Trước đây hàm này đổ đầy từ ngày xa nhất rồi
+        dừng ngay khi đủ số, nên phần lớn lệnh không có dòng nào của hôm nay — màn
+        báo cáo mặc định xem hôm nay thì trắng trơn. Giờ chia hạn mức cho từng ngày
+        trước, nên ngày nào cũng có số và hôm nay chắc chắn có.
+
         Giờ tăng ca (6, 7, 17, 18) cố ý có mặt: đó là thứ làm khung gom hiện dòng
         "n dòng ghi ngoài giờ đi làm". Không có nó thì nhánh ấy không bao giờ chạy.
-
-        `fill = 1.0` là vòng phải chạy ĐỦ để đơn xong — lúc đó không bỏ giờ nào, và nếu
-        số ngày định trước không đủ chỗ thì lùi tiếp về trước. Đơn 15.000 cái không
-        chạy xong trong một ca, và giả vờ rằng nó chạy xong thì số trên màn hình thành vô lý.
         """
         room = int(target * fill)
-        made, day, guard = 0, days, 0
+        if room <= 0:
+            return 0
+
+        span = max(1, days)
+        dates = [date.today() - timedelta(days=span - 1 - i) for i in range(span)]
+        share = [room // span] * span
+        share[-1] += room - sum(share)
+
         hours = [8, 9, 10, 11, 13, 14, 15, 16]
         strict = fill >= 1.0
+        made = 0
 
-        while made < room and guard < 12:
-            guard += 1
-            work_date = date.today() - timedelta(days=day - 1)
+        for work_date, quota in zip(dates, share, strict=True):
+            left = quota
             slots = list(hours)
             if self.rng.random() < 0.45:
                 slots += self.rng.sample([6, 7, 17, 18], k=self.rng.randint(1, 2))
-            for slot in sorted(slots):
-                if made >= room:
+            slots = sorted(slots)
+            used: set[int] = set()
+            for i, slot in enumerate(slots):
+                if left <= 0:
                     break
-                if not strict and self.rng.random() < 0.15:
+                if not strict and i and self.rng.random() < 0.15:
                     continue
                 people = self.rng.randint(6, 14)
                 want = people * self.rng.randint(45, 70)
-                got = int(want * self.rng.uniform(0.55, 1.15))
-                got = max(1, min(got, room - made))
+                # Ba mức để biểu đồ có đủ đỏ / xanh dương / xanh lá, không phải một màu.
+                ratio = self.rng.choice([
+                    self.rng.uniform(0.55, 0.84),
+                    self.rng.uniform(0.86, 0.99),
+                    self.rng.uniform(1.01, 1.25),
+                ])
+                got = max(1, min(int(want * ratio), left))
                 hourly_service.add_hourly(
                     self.db, code=code, work_date=work_date, slot_hour=slot,
                     headcount=people, target_qty=want, qty=got,
                     note=self.rng.choice(HOLD_REASONS) if got < want * 0.85 else None,
                     actor_id=self.who("NV050"),
                 )
+                used.add(slot)
+                left -= got
                 made += got
-            day -= 1
-            if day < 1:
-                if not strict:
-                    break
-                day = days + guard      # chưa đủ chỗ thì lùi về những ngày xa hơn
+            if strict and left > 0:
+                made += self._top_up(code, work_date, left, used)
         return made
+
+    def _top_up(self, code: str, work_date: date, left: int, used: set[int]) -> int:
+        """Đổ nốt phần còn thiếu vào một khung CHƯA DÙNG của chính ngày đó.
+
+        `UNIQUE (round_id, work_date, slot_hour)` cấm hai dòng cùng một khung, nên
+        phải chọn khung trống chứ không cộng thêm vào khung đã ghi.
+        """
+        for slot in (19, 20, 21, 5, 22):
+            if slot in used:
+                continue
+            hourly_service.add_hourly(
+                self.db, code=code, work_date=work_date, slot_hour=slot,
+                headcount=self.rng.randint(6, 12), target_qty=max(1, left), qty=left,
+                note="Bù cuối ca", actor_id=self.who("NV050"),
+            )
+            return left
+        return 0
 
     def close_book(self, code: str, target: int, made: int) -> int:
         """Ba số phải cộng đúng bằng mục tiêu vòng (§7.5) — trigger kiểm lại."""
@@ -196,19 +227,23 @@ class Seeder:
         )
         return ok
 
-    def pack_boxes(self, code: str, box: int, ok: int) -> None:
+    def pack_boxes(self, code: str, box: int, ok: int, days: int = 2) -> None:
+        """Đếm thùng theo giờ — ngày cuối luôn là hôm nay, cùng lý do với `hourly`."""
         packing_service.packing_start(self.db, code=code, actor_id=self.who("NV060"))
         if not box:
             return
         left = ok // box
-        for slot in (9, 11, 14, 16):
-            if left <= 0:
-                break
-            n = min(left, self.rng.randint(1, 4))
-            pack_hourly_service.add_packing_hourly(
-                self.db, code=code, work_date=date.today(), slot_hour=slot,
-                boxes=n, note=None, actor_id=self.who("NV060"))
-            left -= n
+        span = max(1, days)
+        for i in range(span):
+            work_date = date.today() - timedelta(days=span - 1 - i)
+            for slot in (9, 11, 14, 16):
+                if left <= 0:
+                    return
+                n = min(left, self.rng.randint(1, 4))
+                pack_hourly_service.add_packing_hourly(
+                    self.db, code=code, work_date=work_date, slot_hour=slot,
+                    boxes=n, note=None, actor_id=self.who("NV060"))
+                left -= n
 
     def pack_finish(self, code: str, ok: int) -> None:
         packing_service.packing_finish(
@@ -231,6 +266,29 @@ class Seeder:
         self.start(code, line)
         target = self.round_target(code)
         made = self.hourly(code, target, days=days, fill=1.0)
+        ok = self.close_book(code, target, made)
+        self.pack_boxes(code, box, ok)
+        self.pack_finish(code, ok)
+        self.accept(code, 5, "NV070")
+        self.warehouse_in(code)
+        return ok
+
+    def next_round_from(self, code: str, step: int, emp: str) -> None:
+        """Vòng mới đã tự mở khi chốt vòng trước — chỉ cần nhận ở bước nó quay về.
+
+        QC không đạt thì vòng sau bắt đầu từ bước 0 (§6b.1); thiếu số ở Kho nhập
+        thì bắt đầu từ bước 3 (§6b.2). Hai đường về khác nhau, nên phải nói rõ bước.
+        """
+        if step == 0:
+            self.ready_for(code, 4)
+        self.accept(code, step, emp)
+
+    def part_round(self, code: str, line: str, box: int, fill: float, days: int = 2) -> int:
+        """Một vòng chạy KHÔNG ĐỦ — đi trọn tới Kho nhập để vòng sau tự mở."""
+        self.assign(code, line)
+        self.start(code, line)
+        target = self.round_target(code)
+        made = self.hourly(code, target, days=days, fill=fill)
         ok = self.close_book(code, target, made)
         self.pack_boxes(code, box, ok)
         self.pack_finish(code, ok)
@@ -486,6 +544,83 @@ def build(s: Seeder) -> dict[str, int]:
         s.warehouse_in(code)
         ran.append(code)
         tally("Thiếu, đang chờ chạy vòng 2")
+
+    for i in range(3):
+        code, _, box = s.new_mo()
+        s.submit(code)
+        s.ready_for(code, 4)
+        s.accept(code, 4, "NV050")
+        line = LINES[(i + 4) % len(LINES)]
+        s.part_round(code, line, box, fill=0.35)
+        s.next_round_from(code, 3, "NV040")
+        s.accept(code, 4, "NV050")
+        s.part_round(code, LINES[(i + 8) % len(LINES)], box, fill=0.5)
+        s.next_round_from(code, 3, "NV040")
+        s.accept(code, 4, "NV050")
+        s.full_round(code, LINES[(i + 1) % len(LINES)], box, days=2)
+        ran.append(code)
+        tally("Phải chạy tới VÒNG 3 mới đủ")
+
+    for i in range(3):
+        code, _, box = s.new_mo()
+        s.submit(code)
+        s.ready_for(code, 2)
+        s.accept(code, 2, "NV030")
+        s.qc(code, ok=False)
+        s.next_round_from(code, 0, "NV010")
+        s.accept(code, 4, "NV050")
+        s.full_round(code, LINES[(i + 10) % len(LINES)], box, days=2)
+        ran.append(code)
+        tally("QC trả về, vòng 2 chạy xong")
+
+    for i in range(3):
+        code, _, box = s.new_mo()
+        s.submit(code)
+        s.ready_for(code, 4)
+        s.accept(code, 4, "NV050")
+        s.part_round(code, LINES[(i + 13) % len(LINES)], box, fill=0.45)
+        s.next_round_from(code, 3, "NV040")
+        ran.append(code)
+        tally("Kho nhập trả lại, đang ở Bàn team leader")
+
+    for i in range(3):
+        code, qty, _ = s.new_mo()
+        s.submit(code)
+        s.ready_for(code, 4)
+        s.accept(code, 4, "NV050")
+        for k in range(3):
+            line = LINES[(i * 3 + k) % len(LINES)]
+            s.assign(code, line)
+            s.start(code, line)
+        s.hourly(code, qty, days=2, fill=0.5)
+        ran.append(code)
+        tally("Ba chuyền chạy song song")
+
+    for i in range(2):
+        code, qty, _ = s.new_mo()
+        s.submit(code)
+        s.ready_for(code, 4)
+        s.accept(code, 4, "NV050")
+        line = LINES[(i + 6) % len(LINES)]
+        s.assign(code, line)
+        s.start(code, line)
+        s.hourly(code, qty, days=1, fill=0.3)
+        ran.append(code)
+        tally("Mới ghi sổ giờ HÔM NAY")
+
+    for i in range(2):
+        code, qty, box = s.new_mo()
+        s.submit(code)
+        s.ready_for(code, 4)
+        s.accept(code, 4, "NV050")
+        line = LINES[(i + 2) % len(LINES)]
+        s.assign(code, line)
+        s.start(code, line)
+        made = s.hourly(code, qty, days=1, fill=0.9)
+        ok = s.close_book(code, qty, made)
+        s.pack_boxes(code, box, ok, days=1)
+        ran.append(code)
+        tally("Đóng thùng theo giờ HÔM NAY")
 
     for _ in range(2):
         code, _, _ = s.new_mo()

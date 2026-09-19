@@ -10,7 +10,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "MES | Amphenol RF",
-  description: "Hệ điều hành sản xuất — quét QR, theo dõi chuyền, chốt sổ từng vòng.",
+  description: "Hệ thống điều hành sản xuất — quét QR, theo dõi chuyền, chốt sổ từng vòng.",
   manifest: "/manifest.json",
   appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "MES" },
   icons: {

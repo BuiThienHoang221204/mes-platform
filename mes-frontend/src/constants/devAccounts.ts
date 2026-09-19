@@ -26,4 +26,5 @@ export const DEV_PLANNER: DevAccount = {
   station: null,
 };
 
-export const IS_DEV = process.env.NODE_ENV !== "production";
+export const IS_DEV = true
+// process.env.NODE_ENV !== "production";
