@@ -129,10 +129,11 @@ def count_queue(db: Session, station: int) -> int:
 AT_STATION_SQL = """
     SELECT m.code, m.product_name, m.quantity, m.pcs_per_box,
            r.round_no, r.target_qty,
-           s.accepted_at, u.full_name AS accepted_by,
+           timezone(:tz, s.accepted_at) AS accepted_at, u.full_name AS accepted_by,
            EXTRACT(EPOCH FROM (now() - s.accepted_at))::int AS holding_sec,
-           w.handed_over_at, pk.qty_packed, pk.completed_at AS packing_done_at,
-           q.result::text AS qc_result, q.checked_at AS qc_checked_at
+           timezone(:tz, w.handed_over_at) AS handed_over_at, pk.qty_packed,
+           timezone(:tz, pk.completed_at) AS packing_done_at,
+           q.result::text AS qc_result, timezone(:tz, q.checked_at) AS qc_checked_at
     FROM mo_step s
     JOIN mo_round r ON r.id = s.round_id
     JOIN manufacturing_order m ON m.id = r.mo_id
@@ -166,11 +167,12 @@ def at_station_rows(db: Session, station: int, *,
     chỉ `qc_result` phân biệt được.
     """
     rows = db.execute(text(AT_STATION_SQL + _PAGE),
-                      {"station": station, "limit": limit, "offset": offset}).mappings()
+                      {"station": station, "tz": settings.tz,
+                       "limit": limit, "offset": offset}).mappings()
     return [dict(r) for r in rows]
 
 def count_at_station(db: Session, station: int) -> int:
-    return _count_of(db, AT_STATION_SQL, {"station": station})
+    return _count_of(db, AT_STATION_SQL, {"station": station, "tz": settings.tz})
 
 def queue_counts(db: Session, *, date_from: date | None = None,
                  date_to: date | None = None) -> tuple[dict[int, int], dict[int, int]]:

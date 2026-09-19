@@ -15,10 +15,12 @@ SQL; nay còn 10 câu bất kể bao nhiêu vòng.
 
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime
 
 from sqlalchemy.orm import Session
 
+from app.common.clock import local_dt
+from app.common.config import settings
 from app.common.deps import PAGE_SIZE
 from app.common.errors import NotFound
 from app.common.event_log import repository as event_repo
@@ -33,8 +35,14 @@ from app.modules.round import repository as round_repo
 
 def running_board(db: Session, *, limit: int, offset: int = 0) -> dict:
     """MỘT TRANG bảng lệnh đang chạy — mỗi vòng đang mở một dòng, kèm KPI thời gian."""
-    return {"items": board_repo.running_rows(db, limit=limit, offset=offset),
-            "total": board_repo.count_running(db)}
+    result = {"items": board_repo.running_rows(db, limit=limit, offset=offset),
+              "total": board_repo.count_running(db)}
+    for item in result["items"]:
+        for key in ("production_closed_at", "packing_done_at", "handed_over_at"):
+            v = item.get(key)
+            if isinstance(v, datetime):
+                item[key] = local_dt(v)
+    return result
 
 def queue(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
     """MỘT TRANG hàng đợi: vòng đang mở, đã qua bước trước, chưa nhận bước này."""
@@ -142,7 +150,7 @@ def _hourly_out(h) -> dict:
     return {
         "work_date": h.work_date, "slot_hour": h.slot_hour,
         "headcount": h.headcount, "target_qty": h.target_qty,
-        "qty": h.qty, "note": h.note, "recorded_at": h.recorded_at,
+        "qty": h.qty, "note": h.note, "recorded_at": local_dt(h.recorded_at),
     }
 
 def _box_out(b) -> dict:
@@ -151,7 +159,7 @@ def _box_out(b) -> dict:
     return {
         "work_date": b.work_date, "slot_hour": b.slot_hour,
         "boxes": b.boxes, "pcs_per_box": b.pcs_per_box,
-        "note": b.note, "recorded_at": b.recorded_at,
+        "note": b.note, "recorded_at": local_dt(b.recorded_at),
     }
 
 def _round_of(db: Session, mo_code: str, round_no: int):
@@ -223,8 +231,8 @@ def trace(db: Session, mo_code: str) -> dict:
             {
                 "round_no": rnd.round_no,
                 "started_from": rnd.returned_to_step,   # 0 Kho · 3 Bàn team leader — GHI, không suy
-                "opened_at": rnd.opened_at,
-                "closed_at": rnd.closed_at,
+                "opened_at": local_dt(rnd.opened_at),
+                "closed_at": local_dt(rnd.closed_at),
                 "target_qty": rnd.target_qty,
                 "required_sec": rnd.required_sec,
                 "return_reason_text": rnd.return_reason_text,
@@ -232,9 +240,9 @@ def trace(db: Session, mo_code: str) -> dict:
                     {
                         "step_no": s.step_no,
                         "name": STEP_NAMES[s.step_no],
-                        "accepted_at": s.accepted_at,
+                        "accepted_at": local_dt(s.accepted_at),
                         "accepted_by": user_names.get(s.accepted_by),
-                        "closed_at": s.closed_at,
+                        "closed_at": local_dt(s.closed_at),
                         "closed_by": user_names.get(s.closed_by) if s.closed_by else None,
                     }
                     for s in steps.get(rnd.id, [])
@@ -271,7 +279,7 @@ def events_page(db: Session, mo_id, *, limit: int, offset: int) -> list[dict]:
     """Một trang nhật ký đã dịch sang hình dạng màn hình cần."""
     return [
         {
-            "at": e.occurred_at, "action": e.action, "step_no": e.step_no,
+            "at": local_dt(e.occurred_at), "action": e.action, "step_no": e.step_no,
             "from": e.from_state, "to": e.to_state, "reason": e.reason_text,
         }
         for e in event_repo.events_of(db, mo_id, limit=limit, offset=offset)
@@ -304,4 +312,8 @@ def _box_summary(boxes, prod, hours) -> dict:
 def _row_or_none(row, fields: tuple[str, ...]) -> dict | None:
     if row is None:
         return None
-    return {f: getattr(row, f) for f in fields}
+    result = {}
+    for f in fields:
+        v = getattr(row, f)
+        result[f] = local_dt(v) if isinstance(v, datetime) else v
+    return result

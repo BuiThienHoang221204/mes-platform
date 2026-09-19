@@ -21,10 +21,25 @@ dùng `db_now`.
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timezone
+from typing import Optional
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
+
+from app.common.config import settings
+
+factory_tz = ZoneInfo(settings.tz)
+
+
+def local_dt(dt: Optional[datetime]) -> Optional[datetime]:
+    """Chuyển UTC datetime sang giờ xưởng, giữ tzinfo."""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    return dt.astimezone(factory_tz)
 
 
 def now() -> datetime:

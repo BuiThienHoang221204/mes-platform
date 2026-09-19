@@ -15,6 +15,7 @@ from datetime import date, datetime, timedelta
 
 from sqlalchemy.orm import Session
 
+from app.common.clock import factory_tz
 from app.common.config import settings
 from app.common.errors import Invalid
 from app.modules.reports import repository as reports_repo
@@ -110,6 +111,8 @@ def hourly(
         if r["code"] is None:
             continue
         at: datetime = r["at"]
+        if at.tzinfo is None:
+            at = at.replace(tzinfo=factory_tz)
         diem.setdefault(r["code"], []).append(
             HourlyPoint(
                 at=at,
