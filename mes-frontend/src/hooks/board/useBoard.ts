@@ -6,7 +6,7 @@ import { PAGE_SIZE } from "@/constants/pagination";
 import { boardService } from "@/services/board.service";
 import type { Page } from "@/types/api";
 
-/** R4/R5 — bảng sống thì `refetchInterval`, KHÔNG `setInterval` thủ công.
+/** R4/R5 — bảng sống.
  *
  *  Hai mức, chia theo "ai đang chờ con số này":
  *
@@ -15,10 +15,22 @@ import type { Page } from "@/types/api";
  *    SLOW 30s  badge số trên sidebar — không ai đứng nhìn nó
  *
  *  `staleTime` không để 0: toàn cục bật `refetchOnWindowFocus`, mà `staleTime: 0`
- *  nghĩa là LUÔN cũ — mỗi lần cửa sổ lấy lại focus là cả nhóm gọi lại ngay, cộng
- *  thêm vào nhịp định kỳ. Cái giữ bảng sống là `refetchInterval`, không phải nó.
+ *  nghĩa là LUÔN cũ — mỗi lần cửa sổ lấy lại focus là cả nhóm gọi lại ngay.
+ *
+ *  useQueue / useAtStation: SSE push thay polling → chỉ cần staleTime làm fallback.
+ *  useRunning / useOverview: giữ refetchInterval vì chưa có SSE.
  */
 const LIVE = { staleTime: 5_000, refetchInterval: 10_000 } as const;
+/** SSE đã thay polling cho queue + atStation.
+ *
+ *  `staleTime: Infinity` — data KHÔNG bao giờ tự cũ. Fetch lần đầu khi mount,
+ *  sau đó chỉ refetch khi:
+ *    1. SSE push "queue:changed" → invalidateQueries
+ *    2. Mutation (scan, handover, ...) → invalidateQueries
+ *    3. refetch() thủ công từ component
+ *
+ *  Quay lại trang thì dùng cache, không gọi lại API. */
+const SSE_LIVE = { staleTime: Infinity } as const;
 
 /** Mở sẵn `items` và `total` — nơi gọi không phải viết `data?.items ?? []` mười hai lần.
  *
@@ -38,7 +50,7 @@ export const useQueue = (station: number | null, limit = PAGE_SIZE) =>
     queryKey: [...boardKeys.queue(station ?? -1), limit],
     queryFn: () => boardService.queue(station as number, limit),
     enabled: station !== null,
-    ...LIVE,
+    ...SSE_LIVE,
   }), limit);
 
 /** Lệnh đang nằm trong tay trạm — quét xong thì nó rơi vào đây, không biến mất. */
@@ -47,7 +59,7 @@ export const useAtStation = (station: number | null) =>
     queryKey: boardKeys.atStation(station ?? -1),
     queryFn: () => boardService.atStation(station as number),
     enabled: station !== null,
-    ...LIVE,
+    ...SSE_LIVE,
   }));
 
 export const useOverview = () =>

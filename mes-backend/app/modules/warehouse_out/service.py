@@ -22,6 +22,7 @@ from app.modules.round import repository as round_repo
 from app.modules.round import service as round_service
 from app.modules.warehouse_out import repository as warehouse_out_repo
 from app.modules.warehouse_out.models import WarehouseOut
+from app.common.event_bus import mark_affected
 
 
 @transactional
@@ -38,6 +39,8 @@ def handover(db: Session, *, code: str, actor_id: uuid.UUID) -> WarehouseOut:
     db.flush()
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=0, action=Act.KHO_HANDOVER,
              from_state=STEP_NAMES[0], to_state=STEP_NAMES[1], actor_id=actor_id)
+    # Bàn giao: station 0 (atStation thay đổi), station 1 (queue hiện lệnh này)
+    mark_affected(0, 1)
     return row
 
 

@@ -24,6 +24,7 @@ from app.modules.round import repository as round_repo
 from app.modules.round import step_service as step_service
 from app.modules.scan import repository as scan_repo
 from app.modules.scan.mocode import read_mo_code
+from app.common.event_bus import mark_affected
 
 
 @dataclass(frozen=True)
@@ -62,6 +63,10 @@ def scan(db: Session, *, raw: str, station: int, actor_id: uuid.UUID) -> ScanRes
     step_service.accept(db, rnd=rnd, step_no=station, actor_id=actor_id)
     msg = f"{mo.code} — {STEP_NAMES[station]} đã nhận (vòng {rnd.round_no})"
     _remember(db, mo.id, station, msg)
+    # Đánh dấu trạm bị ảnh hưởng để SSE push đến client
+    mark_affected(station)
+    if station >= 1:
+        mark_affected(station - 1)
     return ScanResult(True, mo.code, station, msg, rnd.round_no)
 
 

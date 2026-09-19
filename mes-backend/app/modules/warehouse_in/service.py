@@ -27,6 +27,7 @@ from app.modules.round import repository as round_repo
 from app.modules.round import service as round_service
 from app.modules.warehouse_in import repository as warehouse_in_repo
 from app.modules.warehouse_in.schemas import Outcome
+from app.common.event_bus import mark_affected
 
 
 @dataclass(frozen=True)
@@ -72,6 +73,7 @@ def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
     p = round_service.progress(db, mo.id)
     if p.qty_done >= p.quantity:
         round_service.close_round_completed(db, mo=mo, current=rnd, actor_id=actor_id)
+        mark_affected(5)
         return CompleteOutcome("COMPLETED", p.qty_done, 0, None)
 
     nxt = round_service.open_next_round(
@@ -82,4 +84,6 @@ def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
     event_repo.log(db, mo_id=mo.id, round_id=rnd.id, step_no=5, action=Act.MO_PARTIAL,
              from_state=STEP_NAMES[5], to_state=State.NEW_ROUND_AT_WAITING_DESK,
              reason=f"cộng dồn {p.qty_done}/{p.quantity}", actor_id=actor_id)
+    # ROUND_OPENED: station 5 (atStation), station 3 (queue vòng mới)
+    mark_affected(5, 3)
     return CompleteOutcome("ROUND_OPENED", p.qty_done, p.qty_remain, nxt.round_no)

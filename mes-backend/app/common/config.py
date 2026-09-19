@@ -180,6 +180,20 @@ class CorsSettings(BaseSettings):
     origins: list[str] = Field(default=["http://localhost:3000"])
 
 
+# ══ Nhóm SSE ══════════════════════════════════════════════════════════════
+class SseSettings(BaseSettings):
+    """Cấu hình SSE — khoảng cách giữa các lần keepalive.
+
+    Proxy/load balancer thường timeout kết nối idle sau 60s.
+    Keepalive mỗi 15s giữ kết nối sống mà không tốn nhiều bandwidth.
+    """
+
+    model_config = _config("MES_SSE_")
+
+    keepalive: int = Field(default=15, ge=5, le=60,
+                           description="Giây giữa hai lần keepalive SSE")
+
+
 # ══ Gốc ═════════════════════════════════════════════════════════════════════
 class Settings(BaseSettings):
     model_config = _config("MES_")
@@ -196,6 +210,7 @@ class Settings(BaseSettings):
     cookie: CookieSettings = Field(default_factory=CookieSettings)
     cors: CorsSettings = Field(default_factory=CorsSettings)
     report: ReportSettings = Field(default_factory=ReportSettings)
+    sse: SseSettings = Field(default_factory=SseSettings)
 
 
 # (tên thuộc tính, tiền tố biến môi trường, lớp) — thêm nhóm mới thì thêm một dòng.
@@ -206,6 +221,7 @@ GROUPS = (
     ("cookie", "MES_COOKIE_", CookieSettings),
     ("cors", "MES_CORS_", CorsSettings),
     ("report", "MES_REPORT_", ReportSettings),
+    ("sse", "MES_SSE_", SseSettings),
 )
 
 

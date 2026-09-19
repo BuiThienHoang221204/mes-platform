@@ -29,6 +29,7 @@ from app.modules.mo.models import ManufacturingOrder
 from app.modules.round import repository as round_repo
 from app.modules.round import service as round_service
 from app.modules.scan.mocode import MO_STRICT, normalize
+from app.common.event_bus import mark_affected
 
 
 @dataclass(frozen=True)
@@ -90,6 +91,8 @@ def submit(db: Session, code: str, actor_id: uuid.UUID) -> None:
     round_service.open_first_round(db, mo, actor_id)
     event_repo.log(db, mo_id=mo.id, action=Act.MO_SUBMIT,
              from_state=MoStatus.DRAFT, to_state=MoStatus.PROCESSING, actor_id=actor_id)
+    # Submit: mở vòng mới → station 0 (queue)
+    mark_affected(0)
 
 
 @transactional
@@ -144,3 +147,5 @@ def cancel(db: Session, code: str, reason: str, actor_id: uuid.UUID) -> None:
     db.flush()
     event_repo.log(db, mo_id=mo.id, action=Act.MO_CANCEL, from_state=before,
                    to_state=MoStatus.CANCELLED, reason=reason, actor_id=actor_id)
+    # Huỷ: lệnh biến mất khỏi mọi trạm — push tất cả 6 trạm
+    mark_affected(0, 1, 2, 3, 4, 5)

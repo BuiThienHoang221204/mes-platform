@@ -7,6 +7,7 @@ import { StepFlow } from "@/components/common/StepFlow";
 import { StationHeader } from "@/components/station/StationHeader";
 import { resolveStep } from "@/constants/stationSteps";
 import { stationRoute } from "@/constants/stations";
+import { useSSE } from "@/hooks/board/useSSE";
 
 type Props = {
   station: number;
@@ -21,6 +22,9 @@ export function StationPage({ station, title, fill = true, children }: Props) {
   const params = useSearchParams();
   const router = useRouter();
   const step = resolveStep(station, params.get("step"));
+
+  // SSE: push thay đổi từ server thay polling 10s
+  useSSE(station);
 
   // Giữ nguyên mọi tham số khác khi đổi bước — trạm 4 mang `?mo=` để biết đang mở
   // lệnh nào, bấm sang bước khác mà mất nó thì người dùng phải chọn lại lệnh.

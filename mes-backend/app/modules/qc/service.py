@@ -24,6 +24,7 @@ from app.common.vocab.state_names import State
 from app.modules.qc import repository as qc_repo
 from app.modules.round import repository as round_repo
 from app.modules.round import service as round_service
+from app.common.event_bus import mark_affected
 
 
 @dataclass(frozen=True)
@@ -51,6 +52,8 @@ def qc_decide(db: Session, *, code: str, result: QcVerdict,
     if result == QcVerdict.PASS:
         event_repo.log(db, mo_id=mo.id, round_id=rnd.id, step_no=2, action=Act.QC_PASS,
                  to_state=State.AWAITING_WAITING_DESK, actor_id=actor_id)
+        # PASS: station 2 (atStation), station 3 (queue hiện lệnh này)
+        mark_affected(2, 3)
         return QcOutcome(result, None)
 
     # FAIL → về KHO, không về Bàn team leader. Cho về Bàn team leader thì MO nhảy qua luôn Setup
@@ -66,4 +69,6 @@ def qc_decide(db: Session, *, code: str, result: QcVerdict,
     event_repo.log(db, mo_id=mo.id, round_id=rnd.id, step_no=2, action=Act.QC_FAIL,
              from_state=STEP_NAMES[2], to_state=State.NEW_ROUND_AT_WAREHOUSE,
              reason=why, actor_id=actor_id)
+    # FAIL: station 2 (atStation), station 0 (queue vòng mới)
+    mark_affected(2, 0)
     return QcOutcome(result, nxt.round_no)

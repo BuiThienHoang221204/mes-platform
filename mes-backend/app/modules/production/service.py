@@ -28,6 +28,7 @@ from app.modules.production import repository as production_repo
 from app.modules.production.models import LineSegment, Production
 from app.modules.round import repository as round_repo
 from app.modules.round import service as round_service
+from app.common.event_bus import mark_affected
 
 
 @transactional
@@ -45,6 +46,7 @@ def assign_line(db: Session, *, code: str, line_code: str, actor_id: uuid.UUID) 
     db.flush()
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.RUN_ADD,
              to_state=State.WAITING, reason=f"Chuyền {line_code}", actor_id=actor_id)
+    mark_affected(4)
     return seg
 
 @transactional
@@ -68,6 +70,7 @@ def line_start(db: Session, *, code: str, line_code: str,
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.RUN_START,
              from_state=State.WAITING, to_state=State.ASSEMBLING,
              reason=f"Chuyền {line_code}", actor_id=actor_id)
+    mark_affected(4)
     return seg
 
 @transactional
@@ -97,6 +100,7 @@ def line_hold(db: Session, *, code: str, line_code: str, reason_code_id: int | N
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.RUN_HOLD,
              from_state=State.ASSEMBLING, to_state=State.WAITING,
              reason=f"Chuyền {line_code}: {reason_text or ''}", actor_id=actor_id)
+    mark_affected(4)
     return seg
 
 @transactional
@@ -158,4 +162,5 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.STEP4_FINISH_ALL,
              from_state=State.ASSEMBLING, to_state=State.FINISHED,
              reason=f"đạt {qty_ok} · hỏng {qty_ng} · thiếu {qty_short}", actor_id=actor_id)
+    mark_affected(4)
     return row

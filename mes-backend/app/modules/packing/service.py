@@ -25,6 +25,7 @@ from app.modules.packing import repository as packing_repo
 from app.modules.packing.models import Packing
 from app.modules.production import repository as production_repo
 from app.modules.round import service as round_service
+from app.common.event_bus import mark_affected
 
 
 def open_book(db: Session, rnd, actor_id: uuid.UUID) -> Packing:
@@ -49,6 +50,7 @@ def open_book(db: Session, rnd, actor_id: uuid.UUID) -> Packing:
     db.flush()
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.PACK_START,
              to_state=State.PACKING, actor_id=actor_id)
+    mark_affected(4)
     return row
 
 
@@ -88,4 +90,6 @@ def packing_finish(db: Session, *, code: str, qty_packed: int, note_text: str | 
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.PACK_COMPLETE,
              to_state=State.FINISHED, reason=f"đóng {qty_packed} — {note_text or ''}",
              actor_id=actor_id)
+    # Packing xong: station 4 (atStation), station 5 (queue hiện lệnh này)
+    mark_affected(4, 5)
     return row
