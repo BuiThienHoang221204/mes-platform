@@ -30,9 +30,7 @@ let seq = 1;
 export const useUiStore = create<UiState>()(
   persist(
     (set, get) => ({
-      // Mặc định TỐI chứ không phải "system": màn này treo ở xưởng sáng chói cả ca,
-      // mà máy tính bảng mới bóc hộp thì đang để chế độ sáng.
-      theme: "dark",
+      theme: "light",
       fontStep: FS_DEFAULT,
       navCollapsed: false,
       toasts: [],

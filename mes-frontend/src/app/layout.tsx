@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D0F12",
+  themeColor: "#F8F9FA",
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
@@ -28,14 +28,14 @@ export const viewport: Viewport = {
 
 const FOUC_GUARD = `(function(){try{
 var s=(JSON.parse(localStorage.getItem('mes-ui')||'{}').state)||{};
-var t=s.theme||'dark';
+var t=s.theme||'light';
 var st=[0.9,1,1.15,1.3,1.5];
 var fs=st[s.fontStep]!=null?st[s.fontStep]:st[2];
 var m=window.matchMedia('(prefers-color-scheme: dark)').matches;
 var d=document.documentElement;
 d.classList.toggle('dark',t==='dark'||(t==='system'&&m));
 d.style.setProperty('--fs',String(fs));
-}catch(e){document.documentElement.classList.add('dark');}})();`;
+}catch(e){}})();`;
 
 const SW_REGISTER = `if('serviceWorker' in navigator){
 window.addEventListener('load',function(){navigator.serviceWorker.register('/sw.js').catch(function(){});});
