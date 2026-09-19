@@ -38,7 +38,6 @@ export function RunningActions({ row }: { row: RunningRow }) {
       <AppButton
         size="sm"
         variant="primary"
-        compact
         onClick={openWork}
         icon={<Factory size={18} />}
       >
