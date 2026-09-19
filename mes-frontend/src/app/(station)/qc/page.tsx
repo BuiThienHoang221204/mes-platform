@@ -45,7 +45,7 @@ function QcBody() {
                       title={`Đã kết luận lúc ${r.qc_checked_at?.slice(11, 16) ?? "—"} — chờ Bàn team leader quét nhận`}
                       icon={<SealCheck size={24} weight="fill" />}
                     >
-                      {r.qc_result === "PASS" ? "Đã đạt" : "Đã không đạt"}
+                      <span className="max-sm:hidden">{r.qc_result === "PASS" ? "Đã đạt" : "Đã không đạt"}</span>
                     </AppButton>
                   );
                 }
@@ -56,7 +56,7 @@ function QcBody() {
                     onClick={() => setPicked(r.code)}
                     icon={<SealCheck size={24} />}
                   >
-                    Ra kết quả
+                    <span className="max-sm:hidden">Ra kết quả</span>
                   </AppButton>
                 );
               }}

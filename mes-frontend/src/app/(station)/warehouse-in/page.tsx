@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 
-import { Warehouse } from "@/components/common/PhosphorIcons";
+import { FileMagnifyingGlass } from "@/components/common/PhosphorIcons";
 import { QueueList } from "@/components/scan/QueueList";
 import { AtStationTable } from "@/components/station/AtStationTable";
 import { StationPage } from "@/components/station/StationPage";
@@ -41,9 +41,9 @@ function WarehouseInBody() {
                     size="md"
                     variant="primary"
                     onClick={() => setPicked(r)}
-                    icon={<Warehouse size={24} />}
+                    icon={<FileMagnifyingGlass size={24} />}
                   >
-                    Đối chiếu
+                    <span className="max-sm:hidden">Đối chiếu</span>
                   </AppButton>
                 )
               }

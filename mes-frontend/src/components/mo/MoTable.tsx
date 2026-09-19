@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { AppButton } from "@/components/ui/AppButton";
 import { AppCard } from "@/components/ui/AppCard";
-import { CheckSquare, SealCheck, XCircle } from "@/components/common/PhosphorIcons";
+import { CheckSquare, PaperPlaneRight, Trash } from "@/components/common/PhosphorIcons";
 import { AppDropdown, type DropdownOption } from "@/components/ui/AppDropdown";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { DateRangePicker } from "@/components/ui/DateRangePicker";
@@ -125,27 +125,25 @@ export function MoTable({ status, onStatus }: Props) {
               size="sm"
               variant="primary"
               compact
-              icon={<SealCheck size={18} />}
+              icon={<PaperPlaneRight size={18} className="-rotate-45" />}
               disabled={submit.isPending}
               onClick={() => submit.mutate(m.code)}
-            >
-              Chốt lệnh
-            </AppButton>
+              aria-label="Chốt lệnh"
+            />
           ) : null}
           {m.status === MO_STATUS.DRAFT || m.status === MO_STATUS.SUBMITTED ? (
             <AppButton
               size="sm"
               variant="danger"
               compact
-              icon={<XCircle size={18} />}
+              icon={<Trash size={18} />}
               disabled={cancel.isPending}
               onClick={() => {
                 const reason = window.prompt("Lý do huỷ lệnh?");
                 if (reason?.trim()) cancel.mutate({ code: m.code, reason: reason.trim() });
               }}
-            >
-              Huỷ
-            </AppButton>
+              aria-label="Huỷ lệnh"
+            />
           ) : null}
         </div>,
       ],
@@ -202,21 +200,21 @@ export function MoTable({ status, onStatus }: Props) {
               <AppButton
                 size="sm"
                 variant="primary"
+              icon={<PaperPlaneRight size={18} className="-rotate-45" />}
                 disabled={!submitable.length || busy}
                 onClick={() =>
                   submitBatch.mutate(submitable, { onSuccess: () => setPicked([]) })
                 }
-              >
-                Chốt {submitable.length} lệnh
-              </AppButton>
+                aria-label={`Chốt ${submitable.length} lệnh`}
+              />
               <AppButton
                 size="sm"
                 variant="danger"
+                icon={<Trash size={18} />}
                 disabled={!cancellable.length || busy}
                 onClick={() => askCancel(cancellable)}
-              >
-                Huỷ {cancellable.length} lệnh
-              </AppButton>
+                aria-label={`Huỷ ${cancellable.length} lệnh`}
+              />
               <AppButton size="sm" variant="ghost" onClick={() => setPicked([])}>
                 Bỏ chọn
               </AppButton>

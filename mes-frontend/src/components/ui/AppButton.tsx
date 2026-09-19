@@ -49,10 +49,10 @@ export function AppButton({
       title={title ?? (iconOnly ? asText : undefined)}
       aria-label={ariaLabel ?? (iconOnly ? asText : undefined)}
       className={[
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-field border font-medium transition-colors",
+        "items-center justify-center gap-2 whitespace-nowrap rounded-field border font-medium transition-colors",
         VARIANT[variant],
         SIZE[size],
-        iconOnly ? "max-sm:gap-0 max-sm:px-2.5" : "",
+        iconOnly ? "max-sm:gap-0 max-sm:px-2 sm:!px-2.5" : "inline-flex",
         block ? "w-full" : "",
         disabled ? "cursor-not-allowed opacity-45" : "",
         className,

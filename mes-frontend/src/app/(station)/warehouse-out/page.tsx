@@ -36,12 +36,12 @@ function WarehouseOutBody() {
       <AppButton
         size="md"
         variant="primary"
-        compact
         disabled={handover.isPending}
         onClick={() => handover.mutate(r.code)}
         icon={<Truck size={24} />}
+        aria-label="Bàn giao"
       >
-        Bàn giao
+        <span className="max-sm:hidden">Bàn giao</span>
       </AppButton>
     );
 

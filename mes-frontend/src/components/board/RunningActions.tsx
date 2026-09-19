@@ -84,7 +84,6 @@ export function RunningActions({ row }: { row: RunningRow }) {
           <AppButton
             size="sm"
             compact
-            className="sm:min-w-32"
             disabled={busy}
             onClick={() => idle.forEach((l) => a.start.mutate(l.line_code))}
             icon={<Play size={18} weight="fill" />}
@@ -96,25 +95,21 @@ export function RunningActions({ row }: { row: RunningRow }) {
           size="sm"
           variant="danger"
           compact
-          className="sm:min-w-32"
           disabled={busy}
           onClick={() => setHoldOpen(true)}
           icon={<Pause size={18} weight="fill" />}
-        >
-          Dừng
-        </AppButton>
+          aria-label="Dừng"
+        />
         <AppButton
           size="sm"
           variant="primary"
           compact
-          className="sm:min-w-32"
           disabled={idle.length > 0}
           title={idle.length ? "Còn chuyền chưa vào Đang lắp ráp" : undefined}
           onClick={openWork}
           icon={<SealCheck size={18} weight="fill" />}
-        >
-          Hoàn thành
-        </AppButton>
+          aria-label="Hoàn thành"
+        />
       </div>
 
       <HoldLineModal

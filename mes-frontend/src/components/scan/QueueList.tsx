@@ -70,7 +70,7 @@ export function QueueList({ station, title = "Hàng đợi", fill = true, action
                     <RoundBadge round={r.round_no} target={r.target_qty} quantity={r.quantity} />
                   </span>
 
-                  <span className="w-28 shrink-0 text-right">
+                  <span className="w-36 shrink-0 text-right">
                     {station === 5 ? (
                       <>
                         <span className="block text-body tnum text-fg">

@@ -6,9 +6,9 @@ import type { ReactNode } from "react";
 export {
   QrCode, Scan, Camera, Barcode,
   Package, Truck, Warehouse, Stack, Cube,
-  Wrench, MagnifyingGlass, ClipboardText, Gear, Factory,
+  Wrench, MagnifyingGlass, FileMagnifyingGlass, ClipboardText, Gear, Factory,
   Check, CheckCircle, CheckSquare, XCircle, Warning, WarningCircle, Info, SealCheck,
-  Play, Pause, StopCircle, ArrowsClockwise,
+  Play, Pause, StopCircle, ArrowsClockwise, PaperPlaneRight,
   Clock, Timer, CalendarBlank, ChartBar, ListNumbers, Table,
   ArrowLeft, ArrowRight, CaretDown, CaretLeft, CaretRight, CaretUp, List, SidebarSimple, X,
   User, UserSwitch, SignOut, SignIn, Lock, DeviceTablet,
