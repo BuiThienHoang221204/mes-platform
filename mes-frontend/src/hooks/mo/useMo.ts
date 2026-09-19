@@ -86,9 +86,6 @@ export function useMoActions() {
   return { create, importExcel, submit, submitBatch, cancel, cancelBatch };
 }
 
-export const useCatalogLines = () =>
-  useQuery({ queryKey: catalogKeys.lines(), queryFn: catalogService.lines, staleTime: Infinity });
-
 export function useLineActions() {
   const qc = useQueryClient();
   const toast = useUiStore((s) => s.toast);

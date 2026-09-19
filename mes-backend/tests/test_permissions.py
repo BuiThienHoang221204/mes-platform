@@ -259,6 +259,8 @@ def test_MOI_endpoint_deu_khai_bao_quyen():
         "/board/queue/{station}": "nt",
         "/board/at/{station}": "nt — cùng dữ liệu, chỉ khác lát cắt đã nhận hay chưa",
         "/board/counts": "nt",
+        "/board/overview": "nt — chỉ là /board/running + /board/counts gộp sẵn, "
+                           "không lộ thêm gì so với hai endpoint nó thay thế",
         "/reports/mo-progress": "báo cáo tổng — §9b.5 như /board/*, chỉ có số cộng dồn cả xưởng",
         "/reports/hourly": "nt — không có hàng đợi hay danh sách lệnh của riêng trạm nào",
         "/healthz": "thăm dò sống chết",

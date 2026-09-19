@@ -10,6 +10,7 @@ export const boardKeys = {
     [...boardKeys.all, "running", limit, offset] as const,
   queue: (station: number) => [...boardKeys.all, "queue", station] as const,
   atStation: (station: number) => [...boardKeys.all, "at", station] as const,
+  overview: () => [...boardKeys.all, "overview"] as const,
   counts: (dateFrom = "", dateTo = "") =>
     [...boardKeys.all, "counts", dateFrom, dateTo] as const,
 };

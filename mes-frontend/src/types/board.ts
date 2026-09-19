@@ -86,3 +86,28 @@ export type StationCounts = {
   counts: Record<string, number>;
   holding: Record<string, number>;
 };
+
+/** Một việc cần chú ý, dạng DỮ LIỆU. Câu tiếng Việt dựng ở `Overview`, không ở máy chủ. */
+export type OverviewAlert = {
+  kind: "HOLD" | "LATE" | "REWORK" | "RE_ROUND";
+  code: string;
+  round_no: number;
+  lines?: string[];
+  reason?: string | null;
+  late_sec?: number | null;
+  required_sec?: number | null;
+  target_qty?: number | null;
+  quantity?: number | null;
+};
+
+export type BoardOverview = {
+  running_rounds: number;
+  lines_total: number;
+  lines_busy: number;
+  lines_held: number;
+  rework: number;
+  re_round: number;
+  completed: number;
+  alerts: OverviewAlert[];
+  alerts_total: number;
+};

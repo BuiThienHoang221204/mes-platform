@@ -250,8 +250,8 @@ class Seeder:
             self.db, code=code, qty_packed=ok, note_text="Đủ", actor_id=self.who("NV060"))
 
     def warehouse_in(self, code: str) -> None:
-        warehouse_in_service.complete(
-            self.db, code=code, qty_received=None, actor_id=self.who("NV070"))
+        """Kho nhập không khai số: số nhập kho LÀ số đã đóng thùng (§8), service tự lấy."""
+        warehouse_in_service.complete(self.db, code=code, actor_id=self.who("NV070"))
 
     def round_target(self, code: str) -> int:
         """Mục tiêu của VÒNG ĐANG MỞ — vòng hai chỉ còn phần thiếu, không phải cả đơn."""
@@ -273,15 +273,18 @@ class Seeder:
         self.warehouse_in(code)
         return ok
 
-    def next_round_from(self, code: str, step: int, emp: str) -> None:
-        """Vòng mới đã tự mở khi chốt vòng trước — chỉ cần nhận ở bước nó quay về.
+    def resume_after_return(self, code: str, from_step: int) -> None:
+        """Đưa lệnh về đúng chỗ để chạy tiếp VÒNG MỚI vừa mở.
 
-        QC không đạt thì vòng sau bắt đầu từ bước 0 (§6b.1); thiếu số ở Kho nhập
-        thì bắt đầu từ bước 3 (§6b.2). Hai đường về khác nhau, nên phải nói rõ bước.
+        Hai đường quay lại KHÁC NHAU, và đây là chỗ dễ sai nhất:
+
+        * **QC không đạt** (§6b.1) — vòng sau bắt đầu từ bước 0, phải đi lại cả chặng.
+        * **Thiếu số ở Kho nhập** (§6b.2) — vòng sau bắt đầu từ bước 3, và bước 3
+          ĐÃ ĐƯỢC MỞ SẮN ngay lúc mở vòng. Gọi `accept(3)` thêm lần nữa thì
+          `guard_can_accept` ném "MO đã nhận ở trạm Bàn team leader rồi".
         """
-        if step == 0:
+        if from_step == 0:
             self.ready_for(code, 4)
-        self.accept(code, step, emp)
 
     def part_round(self, code: str, line: str, box: int, fill: float, days: int = 2) -> int:
         """Một vòng chạy KHÔNG ĐỦ — đi trọn tới Kho nhập để vòng sau tự mở."""
@@ -552,10 +555,10 @@ def build(s: Seeder) -> dict[str, int]:
         s.accept(code, 4, "NV050")
         line = LINES[(i + 4) % len(LINES)]
         s.part_round(code, line, box, fill=0.35)
-        s.next_round_from(code, 3, "NV040")
+        s.resume_after_return(code, 3)
         s.accept(code, 4, "NV050")
         s.part_round(code, LINES[(i + 8) % len(LINES)], box, fill=0.5)
-        s.next_round_from(code, 3, "NV040")
+        s.resume_after_return(code, 3)
         s.accept(code, 4, "NV050")
         s.full_round(code, LINES[(i + 1) % len(LINES)], box, days=2)
         ran.append(code)
@@ -567,7 +570,7 @@ def build(s: Seeder) -> dict[str, int]:
         s.ready_for(code, 2)
         s.accept(code, 2, "NV030")
         s.qc(code, ok=False)
-        s.next_round_from(code, 0, "NV010")
+        s.resume_after_return(code, 0)
         s.accept(code, 4, "NV050")
         s.full_round(code, LINES[(i + 10) % len(LINES)], box, days=2)
         ran.append(code)
@@ -579,7 +582,7 @@ def build(s: Seeder) -> dict[str, int]:
         s.ready_for(code, 4)
         s.accept(code, 4, "NV050")
         s.part_round(code, LINES[(i + 13) % len(LINES)], box, fill=0.45)
-        s.next_round_from(code, 3, "NV040")
+        s.resume_after_return(code, 3)
         ran.append(code)
         tally("Kho nhập trả lại, đang ở Bàn team leader")
 
@@ -649,6 +652,12 @@ def main() -> None:
 
     s = Seeder(db, random.Random(args.seed))
     done = build(s)
+    # Phải commit Ở ĐÂY. `Seeder.__init__` đọc bảng `app_user`, mà một lượt đọc cũng
+    # mở giao dịch — nên `@transactional` thấy `db.in_transaction()` là True và dùng
+    # SAVEPOINT cho mọi lời gọi sau đó, không tự commit lần nào. Trước đây cả lô chỉ
+    # được ghi nhờ `legacy_hourly_rows` tình cờ commit ở cuối — bỏ hàm đó đi là mất sạch
+    # dữ liệu mà không báo gì.
+    db.commit()
     ran = getattr(s, "ran", [])
     legacy = legacy_hourly_rows(db, ran[:3])
 

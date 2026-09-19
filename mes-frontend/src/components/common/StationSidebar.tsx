@@ -24,7 +24,6 @@ import { PLANNER, roleLabel } from "@/constants/roles";
 import { stepsOf } from "@/constants/stationSteps";
 import { stationRoute } from "@/constants/stations";
 import { useLogout } from "@/hooks/auth/useSession";
-import { useCounts } from "@/hooks/board/useBoard";
 import { useMyStation } from "@/hooks/useStationPerm";
 import { useSessionStore } from "@/stores/useSessionStore";
 
@@ -63,7 +62,6 @@ export function StationSidebar({
   const roles = useSessionStore((s) => s.roles);
   const logout = useLogout();
   const [swapOpen, setSwapOpen] = useState(false);
-  const { data: counts } = useCounts();
   const pathname = usePathname();
   const params = useSearchParams();
 
@@ -82,12 +80,6 @@ export function StationSidebar({
 
   const isPlanner = roles.includes(PLANNER);
   const { station: mine } = useMyStation();
-  const at = (n: number) => {
-    if (!counts) return null;
-    const k = String(n);
-    return (counts.counts?.[k] ?? 0) + (counts.holding?.[k] ?? 0) || null;
-  };
-
   const main: NavItem[] = isPlanner
     ? PLANNER_STEPS.map((s, i) => ({
         href: stepHref(PLANNER_ROUTE, s.id, i === 0),
@@ -100,7 +92,6 @@ export function StationSidebar({
           href: stepHref(stationRoute(mine), s.id, i === 0),
           label: s.name,
           index: i + 1,
-          count: i === 0 ? at(mine) : null,
         }));
 
   const mainTitle = isPlanner

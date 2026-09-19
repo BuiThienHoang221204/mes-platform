@@ -22,8 +22,9 @@ from sqlalchemy.orm import Session
 from app.common.deps import PAGE_SIZE
 from app.common.errors import NotFound
 from app.common.event_log import repository as event_repo
-from app.common.vocab.enums import STEP_NAMES
+from app.common.vocab.enums import STEP_NAMES, MoStatus
 from app.modules.board import repository as board_repo
+from app.modules.catalog import repository as catalog_repo
 from app.modules.mo import repository as mo_repo
 from app.modules.packing import repository as packing_repo
 from app.modules.production import repository as production_repo
@@ -39,6 +40,87 @@ def queue(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
     """MỘT TRANG hàng đợi: vòng đang mở, đã qua bước trước, chưa nhận bước này."""
     return {"items": board_repo.queue_rows(db, station, limit=limit, offset=offset),
             "total": board_repo.count_queue(db, station)}
+
+OVERVIEW_SCAN = 200
+"""Số vòng đang chạy soi tới để dựng cảnh báo.
+
+Năm con số ở đầu màn là `COUNT(*)` nên luôn đúng với toàn xưởng. Riêng cảnh báo
+phải mở từng dòng ra xem, nên có trần. Xưởng 14 chuyền không bao giờ có 200 vòng
+mở cùng lúc; nếu có thì `alerts_total` nói rõ còn bao nhiêu chưa soi.
+"""
+
+WAREHOUSE_OUT = 0
+
+
+def overview(db: Session, *, alert_limit: int = 50) -> dict:
+    """Gom cả màn Tổng quan vào MỘT lời gọi.
+
+    Thứ tự cảnh báo là thứ tự KHẨN: chuyền đang dừng (xưởng đứng im) → quá giờ →
+    QC trả về → đang làm bù. Một lệnh vừa quá giờ vừa ở vòng 2+ chỉ hiện MỘT lần,
+    ở mục nặng hơn — hiện hai lần là người đọc tưởng có hai việc phải xử.
+    """
+    rows = board_repo.running_rows(db, limit=OVERVIEW_SCAN, offset=0)
+    kho_queue = board_repo.queue_rows(db, WAREHOUSE_OUT, limit=OVERVIEW_SCAN, offset=0)
+
+    busy: set[str] = set()
+    held_alerts: list[dict] = []
+    late_alerts: list[dict] = []
+    re_round_rows: list[dict] = []
+    lines_held = 0
+
+    for r in rows:
+        held_here: list[str] = []
+        for ln in r.get("lines") or []:
+            if ln.get("current_kind"):
+                busy.add(ln["line_code"])
+            if ln.get("current_kind") == "WAIT" and ln.get("hold_reason"):
+                held_here.append(ln["line_code"])
+        lines_held += len(held_here)
+
+        if held_here:
+            held_alerts.append({
+                "kind": "HOLD", "code": r["code"], "round_no": r["round_no"],
+                "lines": held_here,
+                "reason": next(
+                    (ln.get("hold_reason") for ln in (r.get("lines") or [])
+                     if ln.get("hold_reason")), None),
+            })
+        if r.get("on_time") is False:
+            late_alerts.append({
+                "kind": "LATE", "code": r["code"], "round_no": r["round_no"],
+                "late_sec": r.get("late_sec"), "required_sec": r.get("required_sec"),
+                "target_qty": r.get("target_qty"),
+            })
+        if r["round_no"] > 1:
+            re_round_rows.append(r)
+
+    rework_rows = [q for q in kho_queue if q["round_no"] > 1]
+    rework_alerts = [
+        {"kind": "REWORK", "code": q["code"], "round_no": q["round_no"]}
+        for q in rework_rows
+    ]
+
+    late_codes = {a["code"] for a in late_alerts}
+    re_round_alerts = [
+        {"kind": "RE_ROUND", "code": r["code"], "round_no": r["round_no"],
+         "target_qty": r.get("target_qty"), "quantity": r.get("quantity")}
+        for r in re_round_rows if r["code"] not in late_codes
+    ]
+
+    alerts = held_alerts + late_alerts + rework_alerts + re_round_alerts
+
+    return {
+        "running_rounds": board_repo.count_running(db),
+        "lines_total": len(catalog_repo.list_lines(db)),
+        "lines_busy": len(busy),
+        "lines_held": lines_held,
+        "rework": len(rework_rows),
+        "re_round": len(re_round_rows),
+        "completed": mo_repo.count_mos(db, status=MoStatus.COMPLETED),
+        "alerts": alerts[:alert_limit],
+        "alerts_total": len(alerts),
+    }
+
 
 def at_station(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
     """MỘT TRANG lệnh đang nằm trong tay trạm — đã nhận, chưa trạm sau lấy đi."""

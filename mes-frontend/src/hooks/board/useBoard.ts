@@ -50,6 +50,9 @@ export const useAtStation = (station: number | null) =>
     ...LIVE,
   }));
 
+export const useOverview = () =>
+  useQuery({ queryKey: boardKeys.overview(), queryFn: boardService.overview, ...LIVE });
+
 export const useCounts = (range?: { from: string; to: string }) =>
   useQuery({
     queryKey: boardKeys.counts(range?.from, range?.to),

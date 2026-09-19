@@ -22,7 +22,7 @@ from app.common import read_cache
 from app.common.deps import ActorDep, DbDep, PageDep
 from app.common.security.permissions import VIEW
 from app.modules.board import service as board_service
-from app.modules.board.schemas import StationCounts
+from app.modules.board.schemas import BoardOverview, StationCounts
 
 router = APIRouter(tags=["board"])
 
@@ -56,6 +56,11 @@ def board_at_station(station: int, db: DbDep, actor: ActorDep, page: PageDep) ->
     return read_cache.cached(
         f"board:at:{station}:{limit}:{offset}",
         lambda: board_service.at_station(db, station, limit=limit, offset=offset))
+
+@router.get("/board/overview", response_model=BoardOverview, response_model_exclude_none=True)
+def board_overview(db: DbDep, actor: ActorDep) -> dict:
+    """Cả màn Tổng quan trong một lời gọi — năm con số + danh sách cần chú ý."""
+    return read_cache.cached("board:overview", lambda: board_service.overview(db))
 
 @router.get("/board/counts", response_model=StationCounts)
 def board_counts(db: DbDep, actor: ActorDep,

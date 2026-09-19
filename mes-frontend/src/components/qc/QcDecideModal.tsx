@@ -19,7 +19,7 @@ type Props = {
 
 export function QcDecideModal({ code, onClose }: Props) {
   const decide = useQcDecide();
-  const { data: reasons } = useReasons(REASON_GROUP.QC);
+  const { data: reasons } = useReasons(REASON_GROUP.QC, code != null);
   const [reasonId, setReasonId] = useState("");
   const [note, setNote] = useState("");
 

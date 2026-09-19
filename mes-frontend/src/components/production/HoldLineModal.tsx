@@ -20,7 +20,7 @@ type Props = {
 };
 
 export function HoldLineModal({ open, code, running, busy, onClose, onHold }: Props) {
-  const { data: reasons } = useReasons(REASON_GROUP.HOLD);
+  const { data: reasons } = useReasons(REASON_GROUP.HOLD, open);
   const [picked, setPicked] = useState<string[]>([]);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
