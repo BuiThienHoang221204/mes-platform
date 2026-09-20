@@ -1,9 +1,10 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 
-import { Printer, Truck } from "@/components/common/PhosphorIcons";
+import { CaretDown, Truck } from "@/components/common/PhosphorIcons";
 import { QueueList } from "@/components/scan/QueueList";
+import { MoSlipDetail } from "@/components/station/MoSlipDetail";
 import { AtStationTable } from "@/components/station/AtStationTable";
 import { StationPage } from "@/components/station/StationPage";
 import { StationScanArea } from "@/components/station/StationScanArea";
@@ -24,6 +25,7 @@ function WarehouseOutBody() {
   const { items: at, total: atTotal } = useAtStation(STATION);
   const { items: queue, total: queueTotal } = useQueue(STATION);
   const canWrite = useStationPerm(STATION) === FULL;
+  const [expanded, setExpanded] = useState<string | null>(null);
 
   const pending = at.filter((r) => !r.handed_over_at);
   const handed = atTotal - pending.length;
@@ -109,26 +111,36 @@ function WarehouseOutBody() {
                 không có đồng hồ nào chạy.
               </p>
               {at.length ? (
-                <div className="space-y-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
-                  {at.map((r) => (
-                    <div
-                      key={r.code}
-                      className="flex flex-wrap items-center gap-2 rounded-field border border-line px-3 py-3 sm:gap-3 sm:px-4"
-                    >
-                      <span className="font-mono text-body-lg">{r.code}</span>
-                      <span className="min-w-0 flex-1 truncate text-body text-fg-muted">
-                        {r.product_name}
-                      </span>
-                      <AppButton
-                        size="sm"
-                        className="w-full sm:w-auto"
-                        onClick={() => window.print()}
-                        icon={<Printer size={20} />}
+                <div className="flex flex-col gap-2 lg:min-h-0 lg:flex-1 lg:overflow-y-auto lg:pr-1">
+                  {at.map((r) => {
+                    const isOpen = expanded === r.code;
+                    return (
+                      <div
+                        key={r.code}
+                        className="rounded-field border border-line bg-surface"
                       >
-                        In bằng trình duyệt
-                      </AppButton>
-                    </div>
-                  ))}
+                        <div
+                          className="flex flex-wrap items-center gap-2 px-3 py-3 hover:cursor-pointer hover:bg-accent/5 sm:gap-3 sm:px-4"
+                          onClick={() => setExpanded(isOpen ? null : r.code)}
+                        >
+                          <CaretDown
+                            size={16}
+                            className={`shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+                          />
+                          <span className="font-mono text-body-lg">{r.code}</span>
+                          <span className="min-w-0 flex-1 truncate text-body text-fg-muted">
+                            {r.product_name}
+                          </span>
+                          {r.round_no > 1 ? (
+                            <span className="shrink-0 rounded-full bg-danger/10 px-2 py-0.5 text-caption font-medium text-danger">
+                              Trả về ×{r.round_no - 1}
+                            </span>
+                          ) : null}
+                        </div>
+                        {isOpen ? <MoSlipDetail row={r} /> : null}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : (
                 <p className="text-body-sm text-fg-subtle">Chưa nhận lệnh nào để xem phiếu.</p>

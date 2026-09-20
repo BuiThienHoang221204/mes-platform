@@ -25,6 +25,7 @@ export type AtStationRow = {
   pcs_per_box: number;
   round_no: number;
   target_qty: number;
+  required_sec: number;
   accepted_at: string;
   accepted_by: string;
   holding_sec: number;

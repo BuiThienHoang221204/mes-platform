@@ -128,7 +128,7 @@ def count_queue(db: Session, station: int) -> int:
 
 AT_STATION_SQL = """
     SELECT m.code, m.product_name, m.quantity, m.pcs_per_box,
-           r.round_no, r.target_qty,
+           r.round_no, r.target_qty, r.required_sec,
            timezone(:tz, s.accepted_at) AS accepted_at, u.full_name AS accepted_by,
            EXTRACT(EPOCH FROM (now() - s.accepted_at))::int AS holding_sec,
            timezone(:tz, w.handed_over_at) AS handed_over_at, pk.qty_packed,
