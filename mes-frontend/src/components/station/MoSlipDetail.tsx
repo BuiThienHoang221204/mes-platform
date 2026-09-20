@@ -59,27 +59,17 @@ function MoSlipDetailInner({ row: r }: Props, ref: React.Ref<HTMLDivElement>) {
   };
 
   return (
-    <div ref={innerRef} className="flex gap-4 border-t border-line px-4 py-5 sm:px-5">
-      <QRCodeSVG value={r.code} size={160} level="M" className="h-full shrink-0" />
-      <div className="flex flex-1 flex-col gap-1 text-body-sm">
-        <span className="font-mono text-title-lg">{r.code}</span>
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-          <span className="text-fg-muted">Tên con hàng</span>
-          <span className="text-right font-medium">{r.product_name}</span>
-          <span className="text-fg-muted">Số lượng</span>
-          <span className="text-right font-medium">
-            {r.quantity.toLocaleString("vi-VN")} pcs
-          </span>
-          <span className="text-fg-muted">TG yêu cầu Step4</span>
-          <span className="text-right font-medium">{qty} phút</span>
-          <span className="text-fg-muted">Quy cách</span>
-          <span className="text-right font-medium">{packing}</span>
-          <span className="text-fg-muted">SL còn thiếu</span>
-          <span className="text-right font-medium">
-            {r.target_qty.toLocaleString("vi-VN")}
-          </span>
-          <span className="text-fg-muted">Số lần trả lại</span>
-          <span className="text-right font-medium">{returns}</span>
+    <div ref={innerRef} className="flex flex-col items-center gap-3 border-t border-line px-4 py-5 sm:flex-row sm:items-start sm:gap-4 sm:px-5">
+      <QRCodeSVG value={r.code} size={120} level="M" className="shrink-0 sm:h-full sm:w-auto" />
+      <div className="flex w-full flex-col gap-1 text-body-sm">
+        <span className="font-mono text-title-lg text-center sm:text-left">{r.code}</span>
+        <div className="flex flex-col gap-1 sm:grid sm:grid-cols-2 sm:gap-x-4 sm:gap-y-1">
+          <div className="flex justify-between"><span className="text-fg-muted">Tên con hàng</span><span className="font-medium">{r.product_name}</span></div>
+          <div className="flex justify-between"><span className="text-fg-muted">Số lượng</span><span className="font-medium">{r.quantity.toLocaleString("vi-VN")} pcs</span></div>
+          <div className="flex justify-between"><span className="text-fg-muted">TG yêu cầu Step4</span><span className="font-medium">{qty} phút</span></div>
+          <div className="flex justify-between"><span className="text-fg-muted">Quy cách</span><span className="font-medium">{packing}</span></div>
+          <div className="flex justify-between"><span className="text-fg-muted">SL còn thiếu</span><span className="font-medium">{r.target_qty.toLocaleString("vi-VN")}</span></div>
+          <div className="flex justify-between"><span className="text-fg-muted">Số lần trả lại</span><span className="font-medium">{returns}</span></div>
         </div>
         <AppButton
           size="sm"
