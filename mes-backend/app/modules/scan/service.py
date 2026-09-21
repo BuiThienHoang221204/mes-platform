@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from app.common.config import settings
 from app.common.errors import Invalid, NotFound
 from app.common.uow import transactional
-from app.common.vocab.enums import STEP_NAMES
+from app.common.vocab.enums import QUEUE_WAITS_ON_PREV_STEP, STEP_NAMES
 from app.common.vocab.error_codes import Err
 from app.modules.mo import repository as mo_repo
 from app.modules.round import repository as round_repo
@@ -63,10 +63,11 @@ def scan(db: Session, *, raw: str, station: int, actor_id: uuid.UUID) -> ScanRes
     step_service.accept(db, rnd=rnd, step_no=station, actor_id=actor_id)
     msg = f"{mo.code} — {STEP_NAMES[station]} đã nhận (vòng {rnd.round_no})"
     _remember(db, mo.id, station, msg)
-    # Đánh dấu trạm bị ảnh hưởng để SSE push đến client
     mark_affected(station)
     if station >= 1:
         mark_affected(station - 1)
+    if station + 1 in QUEUE_WAITS_ON_PREV_STEP:
+        mark_affected(station + 1)
     return ScanResult(True, mo.code, station, msg, rnd.round_no)
 
 

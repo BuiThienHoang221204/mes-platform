@@ -19,6 +19,7 @@ from datetime import date, datetime
 
 from sqlalchemy.orm import Session
 
+from app.common import read_cache
 from app.common.clock import local_dt
 from app.common.config import settings
 from app.common.deps import PAGE_SIZE
@@ -32,23 +33,6 @@ from app.modules.packing import repository as packing_repo
 from app.modules.production import repository as production_repo
 from app.modules.round import repository as round_repo
 
-
-def running_board(db: Session, *, limit: int, offset: int = 0) -> dict:
-    """MỘT TRANG bảng lệnh đang chạy — mỗi vòng đang mở một dòng, kèm KPI thời gian."""
-    result = {"items": board_repo.running_rows(db, limit=limit, offset=offset),
-              "total": board_repo.count_running(db)}
-    for item in result["items"]:
-        for key in ("production_closed_at", "packing_done_at", "handed_over_at"):
-            v = item.get(key)
-            if isinstance(v, datetime):
-                item[key] = local_dt(v)
-    return result
-
-def queue(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
-    """MỘT TRANG hàng đợi: vòng đang mở, đã qua bước trước, chưa nhận bước này."""
-    return {"items": board_repo.queue_rows(db, station, limit=limit, offset=offset),
-            "total": board_repo.count_queue(db, station)}
-
 OVERVIEW_SCAN = 200
 """Số vòng đang chạy soi tới để dựng cảnh báo.
 
@@ -56,6 +40,50 @@ Năm con số ở đầu màn là `COUNT(*)` nên luôn đúng với toàn xư�
 phải mở từng dòng ra xem, nên có trần. Xưởng 14 chuyền không bao giờ có 200 vòng
 mở cùng lúc; nếu có thì `alerts_total` nói rõ còn bao nhiêu chưa soi.
 """
+
+RUNNING_SCAN_KEY = "board:running-scan"
+
+
+def _to_local_times(rows: list[dict]) -> list[dict]:
+    for item in rows:
+        for key in ("production_closed_at", "packing_done_at", "handed_over_at"):
+            v = item.get(key)
+            if isinstance(v, datetime):
+                item[key] = local_dt(v)
+    return rows
+
+
+def _running_scan(db: Session) -> list[dict]:
+    """MỘT lượt quét dùng chung cho cả Bảng đang chạy lẫn Tổng quan.
+
+    Hai màn hình đọc CÙNG dữ liệu và cùng bị hỏi 10 giây một lần. Quét riêng là trả
+    giá hai lần cho một câu trả lời — xem `docs/RA-SOAT-POLLING.md` §5.1.
+
+    Đổi giờ NGAY TẠI ĐÂY, không để nơi gọi tự đổi: dict trong này dùng chung, sửa tại
+    chỗ ở nơi gọi là lần hỏi sau đổi giờ thêm một lần nữa.
+    """
+    return read_cache.cached(
+        RUNNING_SCAN_KEY,
+        lambda: _to_local_times(board_repo.running_rows(db, limit=OVERVIEW_SCAN, offset=0)),
+    )
+
+
+def running_board(db: Session, *, limit: int, offset: int = 0) -> dict:
+    """MỘT TRANG bảng lệnh đang chạy — mỗi vòng đang mở một dòng, kèm KPI thời gian.
+
+    Trang nằm gọn trong lượt quét chung thì cắt ra từ đó; xa hơn mới hỏi CSDL. Cắt
+    được vì cả hai đường đều `ORDER BY code`, nên n dòng đầu của lượt quét đúng bằng
+    n dòng đầu mà SQL trả về.
+    """
+    end = offset + limit
+    items = (_running_scan(db)[offset:end] if end <= OVERVIEW_SCAN
+             else _to_local_times(board_repo.running_rows(db, limit=limit, offset=offset)))
+    return {"items": items, "total": board_repo.count_running(db)}
+
+def queue(db: Session, station: int, *, limit: int, offset: int = 0) -> dict:
+    """MỘT TRANG hàng đợi: vòng đang mở, đã qua bước trước, chưa nhận bước này."""
+    return {"items": board_repo.queue_rows(db, station, limit=limit, offset=offset),
+            "total": board_repo.count_queue(db, station)}
 
 WAREHOUSE_OUT = 0
 
@@ -67,7 +95,7 @@ def overview(db: Session, *, alert_limit: int = 50) -> dict:
     QC trả về → đang làm bù. Một lệnh vừa quá giờ vừa ở vòng 2+ chỉ hiện MỘT lần,
     ở mục nặng hơn — hiện hai lần là người đọc tưởng có hai việc phải xử.
     """
-    rows = board_repo.running_rows(db, limit=OVERVIEW_SCAN, offset=0)
+    rows = _running_scan(db)
     kho_queue = board_repo.queue_rows(db, WAREHOUSE_OUT, limit=OVERVIEW_SCAN, offset=0)
 
     busy: set[str] = set()

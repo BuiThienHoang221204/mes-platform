@@ -13,7 +13,8 @@ import { createStationSSE } from "@/services/sse";
  * cho cả `queue` và `atStation` của trạm đó. React Query sẽ refetch
  * nếu có component đang mount và dùng dữ liệu đó.
  *
- * Fallback: nếu SSE mất kết nối, EventSource tự reconnect.
+ * Fallback: nếu SSE mất kết nối, EventSource tự reconnect — và mỗi lần nối lại
+ * hook nạp lại dữ liệu, vì những event bay qua lúc đứt là mất hẳn.
  * Nếu cần fallback mạnh hơn, giữ refetchInterval nhỏ trong useQueue/useAtStation.
  *
  * @example
@@ -28,12 +29,14 @@ export function useSSE(station: number | null) {
   useEffect(() => {
     if (station == null) return;
 
+    const reload = () => {
+      qc.invalidateQueries({ queryKey: boardKeys.queue(station) });
+      qc.invalidateQueries({ queryKey: boardKeys.atStation(station) });
+    };
+
     return createStationSSE(station, {
-      onQueueChanged: () => {
-        // Invalidate cả hai query vì chúng dùng chung event
-        qc.invalidateQueries({ queryKey: boardKeys.queue(station) });
-        qc.invalidateQueries({ queryKey: boardKeys.atStation(station) });
-      },
+      onQueueChanged: reload,
+      onReconnect: reload,
     });
   }, [station, qc]);
 }

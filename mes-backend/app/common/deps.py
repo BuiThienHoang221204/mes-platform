@@ -14,12 +14,15 @@ dùng cookie, còn /docs, curl và máy quét thì gửi header.
 
 from __future__ import annotations
 
+import threading
+import time
 from typing import Annotated
 
 from fastapi import Depends
 from fastapi.security import APIKeyCookie, APIKeyHeader, HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
+from app.common.config import settings
 from app.common.errors import NotFound, Unauthenticated
 from app.common.security.actor import Actor
 from app.common.security.cookies import COOKIE_ACCESS
@@ -41,6 +44,46 @@ def page_params(limit: int = PAGE_SIZE, offset: int = 0) -> tuple[int, int]:
     return max(1, min(limit, PAGE_MAX)), max(0, offset)
 
 PageDep = Annotated[tuple[int, int], Depends(page_params)]
+
+_ACTOR_MAX = 512
+_actor_lock = threading.Lock()
+_actor_cache: dict[str, tuple[float, Actor]] = {}
+
+
+def forget_actor(user_id: str | None = None) -> None:
+    """Quên ngay một người, hoặc quên tất cả khi không nói ai.
+
+    Đường thoát cho lúc khoá tài khoản: không gọi thì phải đợi hết
+    `MES_AUTH_ACTOR_CACHE_TTL`. Test dùng bản không tham số.
+    """
+    with _actor_lock:
+        if user_id is None:
+            _actor_cache.clear()
+        else:
+            _actor_cache.pop(str(user_id), None)
+
+
+def _actor_from_cache(sub: str) -> Actor | None:
+    hit = _actor_cache.get(sub)
+    if hit is None or hit[0] <= time.monotonic():
+        return None
+    return hit[1]
+
+
+def _remember_actor(sub: str, actor: Actor) -> None:
+    ttl = settings.auth.actor_cache_ttl
+    if ttl <= 0:
+        return
+    now = time.monotonic()
+    with _actor_lock:
+        _actor_cache[sub] = (now + ttl, actor)
+        if len(_actor_cache) <= _ACTOR_MAX:
+            return
+        for stale in [k for k, v in list(_actor_cache.items()) if v[0] <= now]:
+            _actor_cache.pop(stale, None)
+        if len(_actor_cache) > _ACTOR_MAX:
+            _actor_cache.clear()
+
 
 cookie_scheme = APIKeyCookie(
     name=COOKIE_ACCESS,
@@ -76,10 +119,16 @@ def current_actor(
     if payload.get("typ") != "user":
         raise Unauthenticated("Token này không phải token người dùng")
 
-    user = auth_repo.get_user_by_id(db, payload["sub"])
+    sub = str(payload["sub"])
+    known = _actor_from_cache(sub)
+    if known is not None:
+        return known
+
+    user = auth_repo.get_user_by_id(db, sub)
     if user is None or not user.is_active:
         raise NotFound("Tài khoản không còn hiệu lực")
     actor = Actor(user_id=str(user.id), full_name=user.full_name, roles=tuple(user.roles))
+    _remember_actor(sub, actor)
 
     db.rollback()
     return actor

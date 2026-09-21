@@ -41,6 +41,21 @@ services:
       - key: MES_JWT_SECRET
         generateValue: true
 
+      # ĐỪNG tăng số bản sao (Scaling) và ĐỪNG đặt WEB_CONCURRENCY > 1.
+      #
+      # `event_bus` và `read_cache` giữ trạng thái trong bộ nhớ MỘT tiến trình. Nhiều
+      # tiến trình thì SSE đẩy tới nhầm chỗ (màn hình trạm đứng im) và cache mỗi tiến
+      # trình một bản (quét xong vẫn thấy số cũ) — cả hai đều KHÔNG báo lỗi.
+      #
+      # `app/common/single_process.py` và `docker-entrypoint.sh` chặn sẵn WEB_CONCURRENCY.
+      # Số BẢN SAO thì không chặn được từ trong máy chủ — đó là thanh trượt Scaling ở
+      # bảng điều khiển, và nó vẫn hỏng y hệt.
+      #
+      # Muốn tăng thật thì làm docs/RA-SOAT-POLLING.md §5.4 trước (đưa event_bus +
+      # read_cache ra chỗ dùng chung), rồi đặt MES_ALLOW_MULTI_PROCESS=true.
+      #
+      # Riêng migration thì đã an toàn: `migrations/env.py` ôm khoá tư vấn của Postgres,
+      # hai tiến trình cùng `alembic upgrade` sẽ xếp hàng chứ không giành nhau.
       - key: MES_ENV
         value: prod
       - key: MES_TZ

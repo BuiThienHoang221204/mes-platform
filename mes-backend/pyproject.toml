@@ -33,7 +33,12 @@ include = ["app*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-q"
+# `mo_phong` chạy vài phút đồng hồ thật — không để nó nằm trong lượt test thường.
+# Chạy riêng:  pytest -m mo_phong -s
+addopts = "-q -m 'not mo_phong'"
+markers = [
+    "mo_phong: mô phỏng một ca để ĐO tải thật, không phải test đúng/sai",
+]
 
 [tool.ruff]
 line-length = 100

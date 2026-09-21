@@ -13,8 +13,13 @@ Protocol:
   data: {}
   \n\n
 
-Auth: cookie httpOnly (`mes_access`) hoặc Bearer token.
-EventSource API không set custom headers được, nên cookie là primary method.
+Auth: đi qua `ActorDep` như mọi endpoint khác, rồi `require_step(station, VIEW)` —
+§12.4 áp cho đường này y hệt `GET /board/queue/{station}`. Trước đây file này tự viết
+lấy phần xác thực, nên nằm ngoài ma trận phân quyền và mở CSDL ngay trong `async def`,
+chặn cả event loop mỗi lần có máy nối vào.
+
+`ActorDep` đọc cookie trước rồi mới xét header, nên EventSource — vốn không set được
+custom header — vẫn dùng được.
 """
 
 from __future__ import annotations
@@ -28,11 +33,10 @@ from fastapi.responses import StreamingResponse
 
 from app.common import event_bus
 from app.common.config import settings
-from app.db.session import SessionLocal
-from app.common.errors import Unauthenticated
-from app.common.security.cookies import COOKIE_ACCESS
-from app.common.security.tokens import decode
-from app.modules.auth import repository as auth_repo
+from app.common.deps import ActorDep
+from app.common.errors import Invalid
+from app.common.security.permissions import VIEW
+from app.common.vocab.enums import STEP_NAMES
 
 router = APIRouter(tags=["sse"])
 log = logging.getLogger("mes.sse")
@@ -40,46 +44,20 @@ log = logging.getLogger("mes.sse")
 KEEPALIVE = settings.sse.keepalive
 
 
-def _authenticate(request: Request) -> None:
-    """Xác thực từ cookie hoặc Authorization header. Ném Unauthenticated nếu sai."""
-    token = request.cookies.get(COOKIE_ACCESS)
-    if not token:
-        auth_header = request.headers.get("authorization", "")
-        if auth_header.startswith("Bearer "):
-            token = auth_header[7:]
-    if not token:
-        raise Unauthenticated("Thiếu token — đăng nhập lại")
-
-    payload = decode(token)
-    if payload.get("typ") != "user":
-        raise Unauthenticated("Token này không phải token người dùng")
-
-    db = SessionLocal()
-    try:
-        user = auth_repo.get_user_by_id(db, payload["sub"])
-        if user is None or not user.is_active:
-            raise Unauthenticated("Tài khoản không còn hiệu lực")
-    finally:
-        db.close()
-
-
 @router.get("/sse/{station}")
-async def sse_stream(station: int, request: Request):
+async def sse_stream(station: int, request: Request, actor: ActorDep):
     """SSE stream cho một trạm. Push khi hàng đợi hoặc lệnh tại trạm thay đổi.
 
     Kết nối sẽ giữ cho đến khi client ngắt hoặc server shutdown.
     Mỗi 15s gửi keepalive để proxy/load balancer không timeout.
-    """
-    if station < 0 or station > 5:
-        from fastapi.responses import JSONResponse
-        return JSONResponse(status_code=400, content={"message": "Trạm không hợp lệ"})
 
-    # Xác thực ngay, không giữ DB session
-    try:
-        _authenticate(request)
-    except Unauthenticated as e:
-        from fastapi.responses import JSONResponse
-        return JSONResponse(status_code=401, content={"message": str(e)})
+    Phiên CSDL mà `ActorDep` mượn được trả lại pool ngay sau khi đọc xong
+    (`deps.current_actor` tự đóng giao dịch chỉ-đọc), nên một kết nối mở cả ca không
+    giữ kết nối CSDL nào.
+    """
+    if station not in STEP_NAMES:
+        raise Invalid(f"Trạm {station} không hợp lệ")
+    actor.require_step(station, VIEW)
 
     topic = f"station:{station}"
     queue: asyncio.Queue = asyncio.Queue(maxsize=64)

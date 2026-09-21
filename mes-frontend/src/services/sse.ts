@@ -15,6 +15,7 @@ const MAX_RECONNECT_DELAY = 30_000;
 
 type StationSSEOptions = {
   onQueueChanged: () => void;
+  onReconnect?: () => void;
   onError?: (event: Event) => void;
 };
 
@@ -33,6 +34,7 @@ export function createStationSSE(
 ): () => void {
   let es: EventSource | null = null;
   let stopped = false;
+  let opened = false;
   let reconnectDelay = RECONNECT_DELAY;
   let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -42,6 +44,12 @@ export function createStationSSE(
     es = new EventSource(`/v1/sse/${station}`, {
       withCredentials: true,
     });
+
+    es.onopen = () => {
+      reconnectDelay = RECONNECT_DELAY;
+      if (opened) options.onReconnect?.();
+      opened = true;
+    };
 
     es.addEventListener("queue:changed", () => {
       options.onQueueChanged();

@@ -24,6 +24,23 @@ os.environ.setdefault("MES_JWT_SECRET", "khoa-chi-dung-cho-test-" + "0" * 16)
 os.environ.setdefault("MES_DATABASE_URL", "postgresql+psycopg://mes:mes@localhost:5432/mes")
 
 
+@pytest.fixture(autouse=True)
+def _bo_nho_tam_sach() -> Iterator[None]:
+    """Cache đọc và cache người dùng sống theo tiến trình, không theo giao dịch.
+
+    Không dọn thì test sau đọc trúng số của test trước — mà test trước đã rollback,
+    nên số đó không còn tồn tại trong CSDL nữa.
+    """
+    from app.common import read_cache
+    from app.common.deps import forget_actor
+
+    read_cache.clear()
+    forget_actor()
+    yield
+    read_cache.clear()
+    forget_actor()
+
+
 @pytest.fixture(scope="session")
 def db_url() -> Iterator[str]:
     url = os.getenv("MES_TEST_DATABASE_URL")

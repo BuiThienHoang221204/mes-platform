@@ -29,7 +29,7 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.common.config import settings
-from app.common.vocab.enums import STEP_NAMES
+from app.common.vocab.enums import QUEUE_WAITS_ON_PREV_STEP, STEP_NAMES
 
 _CHUNG = """
     SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
@@ -75,7 +75,7 @@ QUEUE_SQL: dict[int, str] = {
         LEFT JOIN mo_step s ON s.round_id = r.id AND s.step_no = 3
         WHERE r.closed_at IS NULL AND s.id IS NULL
     """,
-    **{n: _CHUNG.format(prev=n - 1, step=n) for n in (2, 4)},
+    **{n: _CHUNG.format(prev=n - 1, step=n) for n in QUEUE_WAITS_ON_PREV_STEP},
 }
 
 HOLDING_SQL = """

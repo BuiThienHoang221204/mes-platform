@@ -41,6 +41,13 @@ STEP_NAMES = {
     5: "Kho nhập",      # kho thành phẩm — nhận hàng TỪ xưởng lên
 }
 
+# Trạm có hàng chờ dựng TRỰC TIẾP từ bước của trạm liền trước: lệnh rơi vào hàng chờ
+# của chúng ngay lúc trạm trước quét nhận, nên trạm trước phải báo cho chúng.
+#
+# Ba trạm còn lại vào hàng chờ theo điều kiện khác — Setup máy đợi Kho bàn giao,
+# Bàn team leader đợi QC kết luận PASS, Kho nhập đợi đóng thùng xong.
+QUEUE_WAITS_ON_PREV_STEP = frozenset({2, 4})
+
 # Vòng mới quay về đâu — chỉ có đúng hai đích (BRD §6b.1)
 RETURN_TO_KHO = 0       # QC FAIL: setup sai, phải làm lại từ gốc
 RETURN_TO_BANCHO = 3    # thiếu SL / dừng quá lâu: máy vẫn đúng, chỉ chưa đủ số

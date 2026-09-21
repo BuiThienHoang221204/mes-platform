@@ -11,9 +11,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import DBAPIError, InterfaceError, OperationalError, SQLAlchemyError
 
+from app.common import read_cache
 from app.common.config import settings
+from app.common.deps import ActorDep
 from app.common.errors import DomainError, translate_db_error
 from app.common.logging import new_request_id, request_id_var, setup_logging
+from app.common.security.permissions import PLANNER
+from app.common.single_process import assert_single_process
 from app.common.vocab.error_codes import Err
 from app.db.session import db_target, log_db_status, probe_db
 from app.router import router
@@ -24,6 +28,7 @@ log = logging.getLogger("mes")
 
 @asynccontextmanager
 async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    assert_single_process()
     log_db_status()
     yield
 
@@ -118,6 +123,18 @@ async def db_error_handler(request: Request, exc: SQLAlchemyError) -> JSONRespon
 @app.get("/healthz", tags=["ops"])
 def healthz() -> dict:
     return {"ok": True}
+
+
+@app.get("/ops/cache-stats", tags=["ops"])
+def cache_stats(actor: ActorDep) -> dict:
+    """Cache đọc có đỡ được gì không — `hits`, `misses`, `waits`.
+
+    Chỉ số đếm, không có dữ liệu nghiệp vụ. Cách đọc: `docs/RA-SOAT-POLLING.md`.
+
+    Dành cho điều độ: đây là số liệu vận hành cả xưởng, không gắn trạm nào.
+    """
+    actor.require_role(PLANNER)
+    return read_cache.stats()
 
 
 @app.get("/readyz", tags=["ops"])

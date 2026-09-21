@@ -180,9 +180,15 @@ Gọi trần thì build ghi một chỗ, start tìm một chỗ khác, và lỗi
 Backend chạy **một tiến trình uvicorn**, không phải `gunicorn -w 4` như
 `docker-compose.yml`. Hai thứ phụ thuộc vào điều đó:
 
-**Migration chạy trong entrypoint.** An toàn vì chỉ một tiến trình gọi
-`alembic upgrade head`. Nhiều worker cùng gọi là giành nhau bảng `alembic_version` —
-BE-PLAN §10 cấm.
+**Migration chạy trong entrypoint — nay an toàn kể cả khi nhiều tiến trình.**
+`app/db/migrations/env.py` ôm khoá tư vấn của Postgres quanh cả loạt migration, nên hai
+tiến trình cùng `alembic upgrade head` sẽ **xếp hàng** chứ không giành `alembic_version`.
+Cái cấm của BE-PLAN §10 đã được thay bằng cơ chế, không cần kỷ luật nữa.
+
+**Đường ĐẨY (SSE) chỉ đúng với một tiến trình.** `app/common/event_bus.py` giữ danh
+sách người nghe trong bộ nhớ của tiến trình. Tablet nối vào tiến trình B mà cú quét rơi
+vào tiến trình A thì **tin không bao giờ tới** — màn hình trạm đứng im, không lỗi, không
+log. Với bốn tiến trình thì xác suất tới đúng người khoảng 1/4.
 
 **Bộ nhớ đệm đọc đúng tuyệt đối.** `app/common/read_cache.py` giữ đệm **trong bộ nhớ
 của tiến trình**. Ghi xong thì nó nâng số phiên bản để đệm cũ hết hiệu lực ngay. Một
@@ -196,14 +202,24 @@ quét vẫn nằm trong hàng đợi và sẽ quét lại lần hai.
 Một tiến trình vẫn chịu được tải của xưởng: endpoint đồng bộ của FastAPI chạy trong
 một bể luồng, và `read_cache` đã cắt phần lớn truy vấn `/board/*` rồi.
 
-**Nếu thật sự cần tăng worker hoặc tăng số bản sao**, phải làm đủ ba việc, không được
-làm nửa vời:
+**Hệ tự chặn.** `docker-entrypoint.sh` và `app/common/single_process.py` đều từ chối
+khởi động nếu `WEB_CONCURRENCY` / `UVICORN_WORKERS` / `GUNICORN_WORKERS` lớn hơn 1. Thà
+gãy lúc triển khai còn hơn chạy sai mà không ai biết.
 
-1. Bỏ dòng `alembic upgrade head` khỏi `docker-entrypoint.sh`, đưa migration ra một
-   bước chạy trước khi triển khai.
+Cái **không** chặn được là **số BẢN SAO** — đó là thanh trượt Scaling ở bảng điều khiển
+Render, và mỗi bản sao là một máy chủ riêng không đọc được biến môi trường của nhau.
+Tăng nó là hỏng y hệt, im lặng y hệt.
+
+**Nếu thật sự cần tăng worker hoặc số bản sao**, phải làm đủ ba việc, không được nửa vời:
+
+1. Chuyển `event_bus` **và** `read_cache` sang chỗ dùng chung — Postgres `LISTEN/NOTIFY`
+   hoặc Redis Pub/Sub. Giữ nguyên chữ ký `subscribe`/`emit` thì service không phải sửa.
+   Chi tiết: `docs/RA-SOAT-POLLING.md` §5.4.
 2. Nâng `MES_DATABASE_POOL_SIZE` / `MES_DATABASE_MAX_OVERFLOW` cho khớp trần kết nối
    của Postgres — nhớ nhân với số worker.
-3. Chuyển `read_cache` sang chỗ dùng chung (Redis), hoặc chấp nhận 5 giây lệch.
+3. Đặt `MES_ALLOW_MULTI_PROCESS=true` để mở cổng chặn ở việc trên.
+
+Migration thì **không** còn nằm trong danh sách này nữa — khoá tư vấn đã lo.
 
 ---
 

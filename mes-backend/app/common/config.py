@@ -194,11 +194,31 @@ class SseSettings(BaseSettings):
                            description="Giây giữa hai lần keepalive SSE")
 
 
+# ══ Nhóm AUTH ══════════════════════════════════════════════════════════════
+class AuthSettings(BaseSettings):
+    """Thời gian nhớ tạm kết quả tra người dùng.
+
+    Đặt 0 là tắt hẳn, quay về tra CSDL mỗi request. Đánh đổi của số dương nằm
+    trong `docs/RA-SOAT-POLLING.md`.
+    """
+
+    model_config = _config("MES_AUTH_")
+
+    actor_cache_ttl: int = Field(default=30, ge=0, le=300,
+                                 description="Giây nhớ tạm một người dùng đã tra")
+
+
 # ══ Gốc ═════════════════════════════════════════════════════════════════════
 class Settings(BaseSettings):
     model_config = _config("MES_")
 
     env: str = Field(default="dev", description="dev | staging | prod")
+
+    allow_multi_process: bool = Field(
+        default=False,
+        description="Chỉ bật SAU khi event_bus + read_cache đã ra chỗ dùng chung "
+                    "(docs/RA-SOAT-POLLING.md §5.4). Xem app/common/single_process.py",
+    )
 
     tz: str = Field(
         default="Asia/Ho_Chi_Minh",
@@ -211,6 +231,7 @@ class Settings(BaseSettings):
     cors: CorsSettings = Field(default_factory=CorsSettings)
     report: ReportSettings = Field(default_factory=ReportSettings)
     sse: SseSettings = Field(default_factory=SseSettings)
+    auth: AuthSettings = Field(default_factory=AuthSettings)
 
 
 # (tên thuộc tính, tiền tố biến môi trường, lớp) — thêm nhóm mới thì thêm một dòng.
@@ -222,6 +243,7 @@ GROUPS = (
     ("cors", "MES_CORS_", CorsSettings),
     ("report", "MES_REPORT_", ReportSettings),
     ("sse", "MES_SSE_", SseSettings),
+    ("auth", "MES_AUTH_", AuthSettings),
 )
 
 

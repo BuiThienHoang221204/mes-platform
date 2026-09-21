@@ -44,3 +44,35 @@ def test_station_song_dung_so_NGAY_da_cau_hinh():
 def test_access_phai_NGAN_HON_refresh():
     """Access dài hơn refresh thì cả cơ chế refresh mất ý nghĩa."""
     assert settings.jwt.access_ttl_minutes * 60 < settings.jwt.refresh_ttl_days * 86400
+
+
+def test_moi_nhom_cau_hinh_deu_co_trong_GROUPS():
+    """`GROUPS` là thứ gom mọi cấu hình thiếu vào MỘT thông báo.
+
+    Thêm nhóm vào `Settings` mà quên thêm dòng ở đây thì nhóm đó vẫn chạy — nhưng
+    biến gõ sai của nó ném lỗi pydantic thô giữa lúc khởi động, thay vì nằm chung
+    bảng "thiếu cái này, sai cái kia" mà người vận hành đọc được.
+
+    Đây chính là chỗ tôi đã lọt khi thêm nhóm AUTH.
+    """
+    from pydantic_settings import BaseSettings
+
+    from app.common.config import GROUPS, Settings
+
+    trong_settings = {
+        ten for ten, f in Settings.model_fields.items()
+        if isinstance(f.annotation, type) and issubclass(f.annotation, BaseSettings)
+    }
+    da_dang_ky = {ten for ten, _, _ in GROUPS}
+    assert trong_settings == da_dang_ky, (
+        f"lệch — chỉ có ở Settings: {trong_settings - da_dang_ky}, "
+        f"chỉ có ở GROUPS: {da_dang_ky - trong_settings}"
+    )
+
+
+def test_tien_to_trong_GROUPS_khop_voi_lop():
+    """Tiền tố ghi sai thì thông báo lỗi chỉ người ta sửa nhầm biến môi trường."""
+    from app.common.config import GROUPS
+
+    for ten, prefix, Lop in GROUPS:
+        assert Lop.model_config.get("env_prefix") == prefix, ten

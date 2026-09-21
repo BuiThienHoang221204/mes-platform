@@ -71,72 +71,61 @@ def emit(topic: str, data: dict[str, Any]) -> None:
 # Mỗi service gọi `mark_affected(station)` để đánh dấu trạm bị ảnh hưởng
 # bởi giao dịch đang chạy. Sau commit, `flush_affected()` push event.
 
-_pending: ContextVar[set[int]] = ContextVar("pending_stations", default=set())
+_pending: ContextVar[frozenset[int] | None] = ContextVar("pending_stations", default=None)
+"""Mặc định là None, KHÔNG phải một `set()`.
+
+Mặc định của `ContextVar` là MỘT vật thể dùng chung cho mọi context. Để `set()` ở đó
+thì một giao dịch lỗi giữa chừng — đánh dấu xong nhưng chưa kịp đẩy — làm bẩn vật thể
+ấy vĩnh viễn, và mọi request sau đó khởi đầu với trạm thừa trong tay.
+"""
 
 
 def mark_affected(*stations: int) -> None:
     """Đánh dấu trạm bị ảnh hưởng bởi giao dịch hiện tại."""
-    current = _pending.get()
-    for s in stations:
-        if s >= 0:
-            current.add(s)
-    _pending.set(current)
+    _pending.set(frozenset(_pending.get() or ()) | {s for s in stations if s >= 0})
 
 
 def flush_affected() -> None:
     """Push event đến tất cả trạm bị ảnh hưởng. Gọi SAU commit + cache bump."""
-    pending = _pending.get()
-    _pending.set(set())
-    for station in pending:
+    pending = _pending.get() or frozenset()
+    _pending.set(None)
+    for station in sorted(pending):
         emit(f"station:{station}", {"type": "changed", "station": station})
 
 
-# ══ Async bridge ═══════════════════════════════════════════════════════════
+# ══ Cầu sang event loop ════════════════════════════════════════════════════
 
-# SSE endpoint chạy trong async context, nhưng EventBus emit từ sync context.
-# Dùng asyncio.Queue để bridge.
-
-_async_queues: dict[str, list[asyncio.Queue]] = defaultdict(list)
-_async_lock = asyncio.Lock()
-
-
-def _sync_to_async_bridge(topic: str, data: dict[str, Any]) -> None:
-    """Gọi từ sync emit — đẩy data vào asyncio queues của topic."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        return
-    if loop.is_closed():
-        return
-
-    async def _push() -> None:
-        async with _async_lock:
-            queues = list(_async_queues.get(topic, []))
-        for q in queues:
-            try:
-                q.put_nowait(data)
-            except asyncio.QueueFull:
-                pass
-
-    loop.call_soon_threadsafe(asyncio.ensure_future, _push())
+# Endpoint SSE là `async def` nên chạy TRÊN event loop; endpoint ghi là `def`
+# thường nên FastAPI chạy chúng trong threadpool, NGOÀI event loop.
 
 
 def subscribe_async(topic: str, queue: asyncio.Queue) -> Callable[[], None]:
-    """Đăng ký async listener. Trả về hàm unsubscribe."""
-    async def _bridge(data: dict[str, Any]) -> None:
-        try:
-            queue.put_nowait(data)
-        except asyncio.QueueFull:
-            pass
+    """Đăng ký một hàng đợi asyncio. Trả về hàm thôi nghe.
 
-    # Wrap async callback into sync for EventBus
-    def _sync_bridge(data: dict[str, Any]) -> None:
-        try:
-            loop = asyncio.get_running_loop()
-        except RuntimeError:
-            return
+    Vòng lặp phải bắt NGAY ĐÂY, lúc đăng ký. Tra nó lúc phát thì hỏng: `emit` gọi
+    từ luồng threadpool của endpoint ghi, ở đó `get_running_loop()` ném lỗi và mọi
+    event rơi vào im lặng. Xem `docs/RA-SOAT-POLLING.md` §2/A5.
+    """
+    loop = asyncio.get_running_loop()
+
+    def _bridge(data: dict[str, Any]) -> None:
         if loop.is_closed():
             return
-        loop.call_soon_threadsafe(queue.put_nowait, data)
+        try:
+            loop.call_soon_threadsafe(_enqueue, queue, data)
+        except RuntimeError:
+            pass
 
-    return subscribe(topic, _sync_bridge)
+    return subscribe(topic, _bridge)
+
+
+def _enqueue(queue: asyncio.Queue, data: dict[str, Any]) -> None:
+    """Hàng đầy thì BỎ event, không chặn.
+
+    Chặn ở đây là chặn event loop vì một client đọc chậm. Client đó nối lại sẽ nạp
+    lại toàn bộ (`useSSE.onReconnect`), nên mất một event không để lại hậu quả lâu dài.
+    """
+    try:
+        queue.put_nowait(data)
+    except asyncio.QueueFull:
+        pass
