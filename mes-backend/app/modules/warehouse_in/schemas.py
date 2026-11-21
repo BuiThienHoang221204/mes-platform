@@ -1,4 +1,4 @@
-"""Màn hình Kho nhập — trạm 5, nơi MO đóng lại hoặc mở vòng mới."""
+"""Màn hình Kho nhập — trạm 4, nơi MO đóng lại hoặc mở vòng mới."""
 
 from __future__ import annotations
 

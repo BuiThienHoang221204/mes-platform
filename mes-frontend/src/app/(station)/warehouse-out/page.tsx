@@ -55,7 +55,7 @@ function WarehouseOutBody() {
             <QtyStat label="Chờ nhận" value={queueTotal} hint="lệnh mới + trả về" tone="accent" />
             <QtyStat label="Đã nhận, chưa giao" value={pending.length} hint="còn nằm ở kho" tone="warn" />
             <QtyStat label="Đã giao" value={handed} hint="xuống Setup" tone="ok" />
-            <QtyStat label="Trong đó làm lại" value={rework} hint="QC trả về" tone="danger" />
+            <QtyStat label="Trong đó làm lại" value={rework} hint="Làm lại" tone="danger" />
           </div>
 
           {step === "scan" ? (

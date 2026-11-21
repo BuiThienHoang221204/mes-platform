@@ -1,8 +1,10 @@
 """Nạp dữ liệu mẫu cho máy phát triển — đủ mọi tình huống của quy trình.
 
-    ./run.sh seed-demo              nạp thêm
-    ./run.sh seed-demo --wipe       xoá lệnh mẫu cũ rồi nạp lại
-    ./run.sh seed-demo --wipe-only  chỉ dọn, không nạp
+    ./run.sh seed-demo                nạp thêm
+    ./run.sh seed-demo --wipe         xoá lệnh mẫu cũ rồi nạp lại
+    ./run.sh seed-demo --wipe-only    chỉ dọn, không nạp
+    ./run.sh seed-demo --master-only  chỉ nạp danh mục (tài khoản, chuyền, lý do),
+                                        không sinh lệnh mẫu
 
 **Đi qua SERVICE chứ không INSERT thẳng.** Mọi ràng buộc, trigger và bản ghi nhật ký
 đều chạy y như lúc người thật bấm nút, nên dữ liệu ra KHÔNG thể ở trạng thái mà ứng
@@ -39,13 +41,12 @@ from sqlalchemy import create_engine, text  # noqa: E402
 from sqlalchemy.orm import Session, sessionmaker  # noqa: E402
 
 from app.common.config import settings  # noqa: E402
-from app.common.vocab.enums import QcVerdict  # noqa: E402
+from app.common.security.tokens import hash_pin  # noqa: E402
 from app.modules.mo import service as mo_service  # noqa: E402
 from app.modules.packing import hourly_service as pack_hourly_service  # noqa: E402
 from app.modules.packing import service as packing_service  # noqa: E402
 from app.modules.production import hourly_service  # noqa: E402
 from app.modules.production import service as production_service  # noqa: E402
-from app.modules.qc import service as qc_service  # noqa: E402
 from app.modules.round import service as round_service  # noqa: E402
 from app.modules.round import step_service  # noqa: E402
 from app.modules.warehouse_in import service as warehouse_in_service  # noqa: E402
@@ -68,7 +69,48 @@ PRODUCTS = [
 HOLD_REASONS = ["Hỏng khuôn", "Chờ vật tư", "Máy dừng bảo trì", "Kẹt phôi", "Mất điện"]
 NG_REASONS = ["Lỗi kích thước", "Xước bề mặt", "Sai vật liệu"]
 SHORT_REASONS = ["Thiếu vật tư", "Hết ca chưa xong", "Máy hỏng giữa chừng"]
-QC_FAIL_REASONS = ["Sai dung sai", "Bavia chưa gọt", "Lệch tâm"]
+
+# Tám tài khoản trạm — trùng đúng kết quả của migration `0002` + `0004` + `0005`.
+#
+# KHÔNG import từ `0002_seed.py`: đó là migration đã chạy, sửa tay nó không có tác
+# dụng gì với máy đã nâng cấp. Ở đây là ảnh chụp TÂM TRẠNG SAU CÙNG, và tên đã qua
+# `0005` đổi ("Bàn team leader", "Đóng thùng") chứ không phải tên gốc.
+USERS = [
+    ("Planner A", "NV001", ["PLANNER"]),
+    ("Kho xuất A", "NV010", ["WAREHOUSE_OUT_MEMBER"]),
+    ("Setup A", "NV020", ["SETUP_MEMBER"]),
+    ("Bàn team leader", "NV040", ["WAITING_MEMBER"]),
+    ("Leader L1", "NV050", ["PRODUCTION_LEADER"]),
+    ("Đóng thùng", "NV060", ["PRODUCTION_MEMBER"]),
+    ("Kho nhập A", "NV070", ["WAREHOUSE_IN_MEMBER"]),
+]
+PIN_MAC_DINH = "1234"
+
+# 14 chuyền + danh mục lý do — ảnh chụp sau cùng của migration `0002`, giống lý do
+# không import ở trên. `line` có `id smallint` khoá chính nên phải nạp đúng số thứ tự
+# 1…14; `reason_code` tự sinh `id` (GENERATED ALWAYS AS IDENTITY) nên không khai.
+#
+# `0007` bổ sung cột hiện trạng chuyền — không đụng danh mục này.
+MASTER_LINES = [(i, f"L{i:02d}", f"Chuyền {i:02d}") for i in range(1, 15)]
+
+MASTER_REASONS = [
+    ("HOLD", "Hư máy"),
+    ("HOLD", "Kẹt cữ đẩy"),
+    ("HOLD", "Hết liệu"),
+    ("HOLD", "Đổi ca"),
+    ("HOLD", "Mất điện"),
+    ("NG", "Lỗi ép nhựa"),
+    ("NG", "Lỗi khuôn/gá"),
+    ("NG", "Lỗi lắp ráp"),
+    ("NG", "Lỗi vật tư đầu vào"),
+    ("SHORT", "Chờ bù liệu"),
+    ("SHORT", "Hết ca"),
+    ("SHORT", "Máy chậm"),
+    ("PACKING", "Đủ"),
+    ("PACKING", "Thiếu thùng"),
+    ("PACKING", "Chờ tem"),
+]
+
 
 class Seeder:
     """Đi lại đúng các bước mà người ở xưởng bấm, theo thứ tự."""
@@ -314,10 +356,60 @@ class Seeder:
         if step >= 2:
             self.accept(code, 1, "NV020")
         if step >= 3:
-            self.accept(code, 2, "NV030")
-            self.qc(code, ok=True)
-        if step >= 4:
-            self.accept(code, 3, "NV040")
+            self.accept(code, 2, "NV040")
+
+def seed_master(db: Session) -> dict[str, int]:
+    """Nạp ba bảng danh mục: tài khoản trạm, 14 chuyền, danh mục lý do.
+
+    Mọi câu đều `ON CONFLICT DO NOTHING`, nên chạy lại bao nhiêu lần cũng không sinh
+    thêm dòng và KHÔNG đụng dữ liệu đã có: tài khoản đã sửa mật khẩu thì giữ mật
+    khẩu, lý do đã đổi tên thì giữ tên.
+
+    `line` khai đúng `id` 1…14 vì cột đó là `smallint` khoá chính do `0002` gán tay,
+    còn `reason_code` tự sinh `id` (GENERATED ALWAYS AS IDENTITY) nên không khai.
+
+    `reason_code` đổi chỗ trùng là `UNIQUE (group_code, name)`, còn `line` trùng
+    theo `id` **hoặc** `code` — nên `DO NOTHING` không khai đích, để Postgres tự
+    chặn mọi kiểu vi phạm thay vì đoán sai chỉ nào.
+    """
+    made = {"user": 0, "line": 0, "reason": 0}
+
+    for full_name, emp_code, roles in USERS:
+        r = db.execute(
+            text(
+                "INSERT INTO app_user (full_name, emp_code, pin_hash, roles)"
+                " VALUES (:n, :e, :p, CAST(:r AS text[]))"
+                " ON CONFLICT (emp_code) DO NOTHING"
+                " RETURNING emp_code"
+            ),
+            {"n": full_name, "e": emp_code, "p": hash_pin(PIN_MAC_DINH), "r": roles},
+        ).first()
+        made["user"] += 1 if r else 0
+
+    for line_id, code, name in MASTER_LINES:
+        r = db.execute(
+            text(
+                "INSERT INTO line (id, code, name) VALUES (:i, :c, :n)"
+                " ON CONFLICT DO NOTHING RETURNING id"
+            ),
+            {"i": line_id, "c": code, "n": name},
+        ).first()
+        made["line"] += 1 if r else 0
+
+    for group_code, name in MASTER_REASONS:
+        r = db.execute(
+            text(
+                "INSERT INTO reason_code (group_code, name)"
+                " VALUES (CAST(:g AS reason_group), :n)"
+                " ON CONFLICT (group_code, name) DO NOTHING RETURNING id"
+            ),
+            {"g": group_code, "n": name},
+        ).first()
+        made["reason"] += 1 if r else 0
+
+    db.commit()
+    return made
+
 
 def wipe(db: Session) -> int:
     """Xoá lệnh mẫu — và phải tự tắt lá chắn của nhật ký mới xoá được.
@@ -387,8 +479,8 @@ def build(s: Seeder) -> dict[str, int]:
         tally("Nháp, chưa Submit")
 
     for step, n_queue, n_at, emp in (
-        (0, 6, 4, "NV010"), (1, 4, 4, "NV020"), (2, 4, 4, "NV030"),
-        (3, 4, 3, "NV040"), (4, 3, 0, "NV050"),
+        (0, 6, 4, "NV010"), (1, 4, 4, "NV020"),
+        (2, 4, 3, "NV040"), (3, 3, 0, "NV050"),
     ):
         for _ in range(n_queue):
             code, _, _ = s.new_mo()
@@ -400,31 +492,21 @@ def build(s: Seeder) -> dict[str, int]:
             s.submit(code)
             s.ready_for(code, step)
             s.accept(code, step, emp)
-            if step == 2:
-                pass  # QC đã nhận nhưng CHƯA ra kết quả — nút Ra kết quả còn bật
             tally(f"Đang ở bước {step}")
-
-    for _ in range(3):
-        code, _, _ = s.new_mo()
-        s.submit(code)
-        s.ready_for(code, 2)
-        s.accept(code, 2, "NV030")
-        s.qc(code, ok=False)
-        tally("QC Không đạt, sang vòng 2")
 
     for i in range(4):
         code, _, _ = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         s.assign(code, LINES[i % len(LINES)])
         tally("Đã chia chuyền, chưa chạy")
 
     for i in range(10):
         code, qty, _ = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[i % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -435,8 +517,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(3):
         code, qty, _ = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 5) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -448,8 +530,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(4):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 2) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -461,8 +543,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(3):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 7) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -475,8 +557,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(3):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 9) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -490,8 +572,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(3):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 11) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -506,8 +588,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(6):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         s.full_round(code, LINES[(i + 3) % len(LINES)], box, days=3)
         ran.append(code)
         tally("Xong đơn ngay vòng 1")
@@ -515,8 +597,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(4):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 6) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -534,8 +616,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(4):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 12) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -551,46 +633,36 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(3):
         code, _, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 4) % len(LINES)]
         s.part_round(code, line, box, fill=0.35)
-        s.resume_after_return(code, 3)
-        s.accept(code, 4, "NV050")
+        s.resume_after_return(code, 2)
+        s.accept(code, 3, "NV050")
         s.part_round(code, LINES[(i + 8) % len(LINES)], box, fill=0.5)
-        s.resume_after_return(code, 3)
-        s.accept(code, 4, "NV050")
+        s.resume_after_return(code, 2)
+        s.accept(code, 3, "NV050")
         s.full_round(code, LINES[(i + 1) % len(LINES)], box, days=2)
         ran.append(code)
         tally("Phải chạy tới VÒNG 3 mới đủ")
 
-    for i in range(3):
-        code, _, box = s.new_mo()
-        s.submit(code)
-        s.ready_for(code, 2)
-        s.accept(code, 2, "NV030")
-        s.qc(code, ok=False)
-        s.resume_after_return(code, 0)
-        s.accept(code, 4, "NV050")
-        s.full_round(code, LINES[(i + 10) % len(LINES)], box, days=2)
-        ran.append(code)
-        tally("QC trả về, vòng 2 chạy xong")
+
 
     for i in range(3):
         code, _, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         s.part_round(code, LINES[(i + 13) % len(LINES)], box, fill=0.45)
-        s.resume_after_return(code, 3)
+        s.resume_after_return(code, 2)
         ran.append(code)
         tally("Kho nhập trả lại, đang ở Bàn team leader")
 
     for i in range(3):
         code, qty, _ = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         for k in range(3):
             line = LINES[(i * 3 + k) % len(LINES)]
             s.assign(code, line)
@@ -602,8 +674,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(2):
         code, qty, _ = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 6) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -614,8 +686,8 @@ def build(s: Seeder) -> dict[str, int]:
     for i in range(2):
         code, qty, box = s.new_mo()
         s.submit(code)
-        s.ready_for(code, 4)
-        s.accept(code, 4, "NV050")
+        s.ready_for(code, 3)
+        s.accept(code, 3, "NV050")
         line = LINES[(i + 2) % len(LINES)]
         s.assign(code, line)
         s.start(code, line)
@@ -639,11 +711,26 @@ def main() -> None:
     ap = argparse.ArgumentParser(description="Nạp dữ liệu mẫu cho máy phát triển")
     ap.add_argument("--wipe", action="store_true", help="xoá lệnh mẫu cũ trước khi nạp")
     ap.add_argument("--wipe-only", action="store_true", help="chỉ dọn, không nạp")
+    ap.add_argument(
+        "--master-only", "--users-only", dest="master_only", action="store_true",
+        help="chỉ nạp danh mục (tài khoản, 14 chuyền, lý do), không sinh lệnh mẫu",
+    )
     ap.add_argument("--seed", type=int, default=20260916, help="hạt ngẫu nhiên")
     args = ap.parse_args()
 
     engine = create_engine(settings.database.url)
     db = sessionmaker(bind=engine)()
+
+    if args.master_only:
+        made = seed_master(db)
+        print(
+            f"\nDanh mục — mới nạp: {made['user']}/{len(USERS)} tài khoản (PIN {PIN_MAC_DINH}),"
+            f" {made['line']}/{len(MASTER_LINES)} chuyền,"
+            f" {made['reason']}/{len(MASTER_REASONS)} lý do"
+        )
+        print("  " + "  ".join(emp for _n, emp, _r in USERS))
+        db.close()
+        return
 
     if args.wipe or args.wipe_only:
         print(f"đã xoá {wipe(db)} lệnh mẫu cũ")

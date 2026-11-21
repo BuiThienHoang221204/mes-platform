@@ -33,9 +33,7 @@ def _toi_chuyen(flow, code: str) -> None:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
 
 def _bao_cao(db, bucket: int = 1, **kw):

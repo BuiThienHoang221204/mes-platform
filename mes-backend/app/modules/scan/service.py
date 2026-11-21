@@ -1,4 +1,4 @@
-"""Quét mã — MỘT cửa vào cho cả sáu trạm.
+"""Quét mã — MỘT cửa vào cho cả năm trạm.
 
     ScanResult                             ok · mo_code · station · round_no · duplicate
     scan(db, raw, station, actor_id)       đọc mã → chống trùng → khoá vòng → mở bước

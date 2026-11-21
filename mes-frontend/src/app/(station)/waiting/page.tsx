@@ -9,7 +9,7 @@ import { StationPage } from "@/components/station/StationPage";
 import { StationScanArea } from "@/components/station/StationScanArea";
 import { AppButton } from "@/components/ui/AppButton";
 
-const STATION = 3;
+const STATION = 2;
 
 function WaitingBody() {
   return (

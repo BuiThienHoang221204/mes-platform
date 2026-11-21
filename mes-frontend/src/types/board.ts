@@ -31,16 +31,9 @@ export type AtStationRow = {
   holding_sec: number;
   /** Trạm 0 — đã bàn giao xuống xưởng chưa. */
   handed_over_at: string | null;
-  /** Trạm 5 — đã đóng được bao nhiêu, xong lúc nào. */
+  /** Trạm 3 — đã đóng được bao nhiêu, xong lúc nào. */
   qty_packed: number | null;
   packing_done_at: string | null;
-  /**
-   * Trạm 2 — đã kết luận chưa. QC vẫn giữ lệnh SAU KHI ra kết quả, vì bước chỉ
-   * đóng khi Bàn team leader quét nhận. Nên "còn trong tay QC" không có nghĩa là
-   * "chưa có kết quả", và chỉ trường này phân biệt được.
-   */
-  qc_result: "PASS" | "FAIL" | null;
-  qc_checked_at: string | null;
 };
 
 export type BoardLine = {

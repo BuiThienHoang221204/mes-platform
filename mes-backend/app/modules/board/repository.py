@@ -3,7 +3,7 @@
     running_rows(db, limit, offset)        MỘT TRANG bảng lệnh đang chạy, đọc view
     queue_rows(db, station)                hàng chờ một trạm
     at_station_rows(db, station)           lệnh ĐANG nằm trong tay một trạm
-    queue_counts(db)                       đếm cả sáu trạm — MỘT câu
+    queue_counts(db)                       đếm cả năm trạm — MỘT câu
     line_rows_of_rounds(db, round_ids)     năng suất chuyền, theo LÔ vòng
     step_totals(db, mo_id)                 cộng dồn thời gian từng bước
     mo_progress(db, mo_id)                 tiến độ một MO
@@ -56,23 +56,14 @@ QUEUE_SQL: dict[int, str] = {
         LEFT JOIN mo_step s ON s.round_id = r.id AND s.step_no = 1
         WHERE r.closed_at IS NULL AND s.id IS NULL
     """,
-    5: """
+    4: """
         SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
                m.pcs_per_box, pk.qty_packed,
                EXTRACT(EPOCH FROM (now() - pk.completed_at))::int AS waiting_sec
         FROM mo_round r JOIN manufacturing_order m ON m.id = r.mo_id
         JOIN production p ON p.round_id = r.id
         JOIN packing   pk ON pk.round_id = r.id AND pk.completed_at IS NOT NULL
-        LEFT JOIN mo_step s ON s.round_id = r.id AND s.step_no = 5
-        WHERE r.closed_at IS NULL AND s.id IS NULL
-    """,
-    3: """
-        SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
-               EXTRACT(EPOCH FROM (now() - q.checked_at))::int AS waiting_sec
-        FROM mo_round r JOIN manufacturing_order m ON m.id = r.mo_id
-        JOIN mo_step prev ON prev.round_id = r.id AND prev.step_no = 2
-        JOIN qc_result q ON q.round_id = r.id AND q.result = 'PASS'
-        LEFT JOIN mo_step s ON s.round_id = r.id AND s.step_no = 3
+        LEFT JOIN mo_step s ON s.round_id = r.id AND s.step_no = 4
         WHERE r.closed_at IS NULL AND s.id IS NULL
     """,
     **{n: _CHUNG.format(prev=n - 1, step=n) for n in QUEUE_WAITS_ON_PREV_STEP},
@@ -132,15 +123,13 @@ AT_STATION_SQL = """
            timezone(:tz, s.accepted_at) AS accepted_at, u.full_name AS accepted_by,
            EXTRACT(EPOCH FROM (now() - s.accepted_at))::int AS holding_sec,
            timezone(:tz, w.handed_over_at) AS handed_over_at, pk.qty_packed,
-           timezone(:tz, pk.completed_at) AS packing_done_at,
-           q.result::text AS qc_result, timezone(:tz, q.checked_at) AS qc_checked_at
+           timezone(:tz, pk.completed_at) AS packing_done_at
     FROM mo_step s
     JOIN mo_round r ON r.id = s.round_id
     JOIN manufacturing_order m ON m.id = r.mo_id
     JOIN app_user u ON u.id = s.accepted_by
     LEFT JOIN warehouse_out w ON w.round_id = r.id
     LEFT JOIN packing      pk ON pk.round_id = r.id
-    LEFT JOIN qc_result    q  ON q.round_id = r.id
     WHERE s.step_no = :station AND s.closed_at IS NULL AND r.closed_at IS NULL
     ORDER BY s.accepted_at, m.code
 """
@@ -158,13 +147,8 @@ def at_station_rows(db: Session, station: int, *,
 
     Kèm luôn các mốc mà THAO TÁC của trạm cần để biết nút nào còn bấm được:
     `handed_over_at` (trạm 0 đã giao chưa), `qty_packed` và `packing_done_at`
-    (trạm 5 nhận bao nhiêu), `qc_result` và `qc_checked_at` (trạm 2 đã kết luận
-    chưa). Không có chúng thì màn hình phải đoán, mà đoán sai là hiện nút cho
-    việc đã làm rồi.
-
-    Trạm 2 giữ lệnh CẢ SAU KHI ra kết quả — bước chỉ đóng khi Bàn team leader quét
-    nhận. Nên "còn trong tay QC" và "chưa có kết quả" là hai chuyện khác nhau, và
-    chỉ `qc_result` phân biệt được.
+    (trạm 3 sản xuất & đóng thùng). Không có chúng thì màn hình phải đoán, mà
+    đoán sai là hiện nút cho việc đã làm rồi.
     """
     rows = db.execute(text(AT_STATION_SQL + _PAGE),
                       {"station": station, "tz": settings.tz,

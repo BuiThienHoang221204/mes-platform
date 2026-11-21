@@ -169,9 +169,7 @@ def _mot_vong_nhieu_gio(db, make_mo, flow, actor, n: int) -> str:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
     for i in range(n):
         hourly_service.add_hourly(

@@ -1,4 +1,4 @@
-"""Ba bảng của trạm 4 — Sản xuất.
+"""Ba bảng của trạm 3 — Sản xuất.
 
 `production` là sổ chốt (1-1 với vòng); `line_segment` và `hourly_output` thì
 nhiều dòng mỗi vòng. Thứ tự class giữ đúng thứ tự bảng trong DB-GON.md.

@@ -16,7 +16,7 @@ import uuid
 from sqlalchemy.dialects.postgresql import ENUM, UUID
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-from app.common.vocab.enums import MoStatus, QcVerdict, ReasonGroup, SegmentKind
+from app.common.vocab.enums import MoStatus, ReasonGroup, SegmentKind
 
 
 class Base(DeclarativeBase):
@@ -29,6 +29,5 @@ def _uuid_pk() -> Mapped[uuid.UUID]:
 
 # create_type=False: kiểu ENUM do migration tạo, model chỉ tham chiếu.
 mo_status_enum = ENUM(MoStatus, name="mo_status", create_type=False)
-qc_verdict_enum = ENUM(QcVerdict, name="qc_verdict", create_type=False)
 segment_kind_enum = ENUM(SegmentKind, name="segment_kind", create_type=False)
 reason_group_enum = ENUM(ReasonGroup, name="reason_group", create_type=False)

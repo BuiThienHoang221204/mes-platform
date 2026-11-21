@@ -23,9 +23,7 @@ def _toi_san_xuat(flow, code: str) -> None:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
 
 
 def test_ket_thuc_duoc_du_chua_ghi_thung_gio_nao(db, make_mo, flow):

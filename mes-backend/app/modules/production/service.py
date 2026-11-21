@@ -1,4 +1,4 @@
-"""Luật của trạm 4 — chuyền và chốt sổ. Phòng Sản xuất.
+"""Luật của trạm 3 — chuyền và chốt sổ. Phòng Sản xuất.
 
     assign_line(db, rnd, line_code…)       mở quãng CHỜ  → TG chờ đếm
     line_start(db, rnd, line_code…)        đóng CHỜ, mở CHẠY → TG thực tế đếm
@@ -35,7 +35,7 @@ from app.common.event_bus import mark_affected
 def assign_line(db: Session, *, code: str, line_code: str, actor_id: uuid.UUID) -> LineSegment:
     """Thêm chuyền vào bảng → mở một đoạn CHỜ. TG chờ bắt đầu chạy từ đây (§11B)."""
     _, rnd = round_service.lock_round(db, code)
-    if round_repo.get_step(db, rnd.id, 4) is None:
+    if round_repo.get_step(db, rnd.id, 3) is None:
         raise DomainError("Sản xuất chưa quét nhận lệnh này", code=Err.NO_PRODUCTION_ACCEPT)
     line = catalog_repo.get_line(db, line_code)
     if production_repo.open_segment_of(db, rnd.id, line.id) is not None:
@@ -44,9 +44,9 @@ def assign_line(db: Session, *, code: str, line_code: str, actor_id: uuid.UUID) 
     seg = production_repo.save_segment(db, rnd.id, line.id,
                                        kind=SegmentKind.WAIT, by=actor_id)
     db.flush()
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.RUN_ADD,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.RUN_ADD,
              to_state=State.WAITING, reason=f"Chuyền {line_code}", actor_id=actor_id)
-    mark_affected(4)
+    mark_affected(3)
     return seg
 
 @transactional
@@ -67,10 +67,10 @@ def line_start(db: Session, *, code: str, line_code: str,
     seg = production_repo.save_segment(db, rnd.id, line.id, kind=SegmentKind.RUN,
                                        started_at=now, by=actor_id)
     db.flush()
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.RUN_START,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.RUN_START,
              from_state=State.WAITING, to_state=State.ASSEMBLING,
              reason=f"Chuyền {line_code}", actor_id=actor_id)
-    mark_affected(4)
+    mark_affected(3)
     return seg
 
 @transactional
@@ -97,10 +97,10 @@ def line_hold(db: Session, *, code: str, line_code: str, reason_code_id: int | N
                                        hold_reason_code_id=reason_code_id,
                                        hold_reason_text=reason_text)
     db.flush()
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.RUN_HOLD,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.RUN_HOLD,
              from_state=State.ASSEMBLING, to_state=State.WAITING,
              reason=f"Chuyền {line_code}: {reason_text or ''}", actor_id=actor_id)
-    mark_affected(4)
+    mark_affected(3)
     return seg
 
 @transactional
@@ -113,15 +113,15 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
     Ba số không kiểm ở đây: trigger `production_balances` lo, và nó đúng cả khi
     có người ghi thẳng vào DB.
 
-    KHÔNG đóng bước 4 ở đây. Bước N đóng khi bước N+1 quét nhận (§9) — với bước 4
-    thì đó là Kho nhập. Chốt sổ SX mới xong NỬA việc của trạm 4: nhánh Đóng thùng
+    KHÔNG đóng bước 3 ở đây. Bước N đóng khi bước N+1 quét nhận (§9) — với bước 3
+    thì đó là Kho nhập. Chốt sổ SX mới xong NỬA việc của trạm 3: nhánh Đóng thùng
     (§7b) chạy song song và BẮT BUỘC kết thúc sau khi chốt sổ. Đóng bước ở đây thì
-    lệnh rơi khỏi danh sách "đang ở trạm 4", không ai mở được màn Kết thúc đóng
+    lệnh rơi khỏi danh sách "đang ở trạm 3", không ai mở được màn Kết thúc đóng
     thùng, `packing.completed_at` mãi NULL, và hàng đợi Kho nhập — vốn đòi đúng cột
     đó — trống vĩnh viễn. Vòng kẹt lại không đường ra.
     """
     _, rnd = round_service.lock_round(db, code)
-    if round_repo.get_step(db, rnd.id, 4) is None:
+    if round_repo.get_step(db, rnd.id, 3) is None:
         raise DomainError("Sản xuất chưa quét nhận lệnh này", code=Err.NO_PRODUCTION_ACCEPT)
 
     segs = production_repo.segments_of(db, rnd.id)
@@ -159,8 +159,8 @@ def close_production(db: Session, *, code: str, qty_ok: int, qty_ng: int, qty_sh
     )
     db.flush()
 
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.STEP4_FINISH_ALL,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.STEP3_FINISH_ALL,
              from_state=State.ASSEMBLING, to_state=State.FINISHED,
              reason=f"đạt {qty_ok} · hỏng {qty_ng} · thiếu {qty_short}", actor_id=actor_id)
-    mark_affected(4)
+    mark_affected(3)
     return row

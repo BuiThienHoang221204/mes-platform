@@ -15,10 +15,7 @@ function MoSlipDetailInner({ row: r }: Props, ref: React.Ref<HTMLDivElement>) {
 
   const qty = Math.round((r.required_sec ?? 0) / 60);
   const packing = r.pcs_per_box > 0 ? `${r.pcs_per_box} pcs/thùng` : "Không đóng thùng";
-  const returns =
-    r.round_no > 1
-      ? `${r.round_no - 1}${r.qc_result ? ` · QC ${r.qc_result}` : ""}`
-      : "0";
+  const returns = r.round_no > 1 ? `${r.round_no - 1}` : "0";
 
   const handlePrint = () => {
     const svg = innerRef.current?.querySelector("svg")?.outerHTML ?? "";

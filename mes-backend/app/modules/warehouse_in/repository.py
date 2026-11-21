@@ -1,4 +1,4 @@
-"""Truy vấn sổ trạm 5 — `warehouse_in`.
+"""Truy vấn sổ trạm 4 — `warehouse_in`.
 
     get_warehouse_in(db, round_id)              None = chưa nhập kho
 

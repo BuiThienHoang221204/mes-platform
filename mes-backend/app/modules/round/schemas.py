@@ -33,8 +33,8 @@ class RoundOut(BaseModel):
     """Một vòng chạy cùng các bước của nó.
 
     `started_from` ĐỌC từ cột `returned_to_step` chứ KHÔNG suy ra từ việc vòng
-    có bước Setup hay không: QC FAIL trả MO về Kho (0), thiếu SL trả về Bàn team leader
-    (3), và suy ngược từ danh sách bước thì hai đường này nhìn giống hệt nhau.
+    có bước Setup hay không: trả MO về Kho (0), thiếu SL trả về Bàn team leader
+    (2), và suy ngược từ danh sách bước thì hai đường này nhìn giống hệt nhau.
     """
 
     round_no: int

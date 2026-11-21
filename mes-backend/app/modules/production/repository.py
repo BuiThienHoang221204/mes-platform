@@ -1,4 +1,4 @@
-"""Truy vấn ba bảng của trạm 4: `production` · `line_segment` · `hourly_output`.
+"""Truy vấn ba bảng của trạm 3: `production` · `line_segment` · `hourly_output`.
 
     get_production(db, round_id)                   sổ chốt, None = chưa chốt
     open_segment_of(db, round_id, line_id)         quãng đang mở của MỘT chuyền

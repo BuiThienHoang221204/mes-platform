@@ -45,7 +45,7 @@ def add_hourly(db: Session, *, code: str, work_date: date, slot_hour: int,
     row = production_repo.add_hourly(
         db, round_id=rnd.id, work_date=work_date, slot_hour=slot_hour,
         headcount=headcount, target_qty=target_qty, qty=qty, note=note, by=actor_id)
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.HOURLY_ADD,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.HOURLY_ADD,
              reason=f"{work_date} {slot_hour:02d}h · thực tế {qty}/{target_qty} · "
                     f"{headcount} người", actor_id=actor_id)
     return row

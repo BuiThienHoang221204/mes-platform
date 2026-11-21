@@ -38,9 +38,9 @@ def board_running(db: DbDep, actor: ActorDep, page: PageDep) -> dict:
 def board_queue(station: int, db: DbDep, actor: ActorDep, page: PageDep) -> dict:
     """Hàng chờ một trạm: lệnh đã qua bước trước, chưa ai nhận ở trạm này.
 
-    §12.4 — ngoài trạm của mình và trạm 4, không thấy gì: QC không mở được màn
-    hình Kho, Kho không mở được màn hình QC. Trước đây luật này chỉ có ở giao diện,
-    nên gõ thẳng URL hay gọi `curl` là đọc được hàng đợi của mọi phòng ban.
+    §12.4 — ngoài trạm của mình và trạm 3 (Sản xuất), không thấy gì: trạm này không
+    mở được màn hình của trạm khác. Trước đây luật này chỉ có ở giao diện, nên gõ
+    thẳng URL hay gọi `curl` là đọc được hàng đợi của mọi phòng ban.
     """
     actor.require_step(station, VIEW)
     limit, offset = page

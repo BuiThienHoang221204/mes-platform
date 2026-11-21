@@ -20,7 +20,7 @@ class LineCreateIn(BaseModel):
 
 
 class CatalogReason(BaseModel):
-    """`group_code` để FE lọc: chỉ đưa lý do QC vào ô QC, lý do dừng vào ô dừng."""
+    """`group_code` để FE lọc theo nhóm lý do dừng/lỗi."""
 
     id: int
     group_code: str

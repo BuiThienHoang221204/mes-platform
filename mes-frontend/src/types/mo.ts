@@ -1,4 +1,4 @@
-import type { MoStatusValue, QcResultValue, WiOutcomeValue } from "@/constants/status";
+import type { MoStatusValue, WiOutcomeValue } from "@/constants/status";
 
 /** Kiểu SUY RA từ hằng ở `constants/status.ts` — khai lại là hai chỗ phải sửa. */
 export type MoStatus = MoStatusValue;
@@ -22,7 +22,6 @@ export type ScanOut = {
   duplicate: boolean;
 };
 
-export type QcOut = { result: QcResultValue; new_round_no: number | null; message: string };
 
 export type WarehouseInOut = {
   outcome: WiOutcomeValue;

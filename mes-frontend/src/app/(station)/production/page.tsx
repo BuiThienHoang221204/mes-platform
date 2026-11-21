@@ -16,7 +16,7 @@ import { FULL } from "@/constants/roles";
 import { useAtStation } from "@/hooks/board/useBoard";
 import { useStationPerm } from "@/hooks/useStationPerm";
 
-const STATION = 4;
+const STATION = 3;
 
 /**
  * Thanh lệnh đang mở — thu gọn thay cho cả một bảng.

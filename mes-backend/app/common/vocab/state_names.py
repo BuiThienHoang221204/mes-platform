@@ -14,7 +14,7 @@ tra ngược được; còn dòng dưới xưởng thì thợ đọc, chẳng ai
 
 Ba nguồn nhãn, dùng đúng nguồn chứ đừng gõ lại:
 
-    STEP_NAMES[n]      tên sáu trạm — `enums.py`, dùng chung với hàng đợi và câu lỗi
+    STEP_NAMES[n]      tên năm trạm — `enums.py`, dùng chung với hàng đợi và câu lỗi
     MoStatus.X         trạng thái lệnh — `enums.py`, khớp ENUM dưới CSDL
     State.X            phần còn lại — file này
 
@@ -31,19 +31,17 @@ from enum import StrEnum
 class State(StrEnum):
     """Nhãn trạng thái dưới xưởng. Giá trị là TIẾNG VIỆT vì nó hiện lên màn hình."""
 
-    # ══ Trạm 4 — bám theo `SegmentKind`: WAIT là chờ, RUN là đang lắp ═══════
+    # ══ Trạm 3 — bám theo `SegmentKind`: WAIT là chờ, RUN là đang lắp ═══════
     WAITING = "Chờ xử lý"
     ASSEMBLING = "Đang lắp ráp"
 
-    # ══ Đóng thùng — nằm TRONG trạm 4 ═════════════════════════════════════════
+    # ══ Đóng thùng — nằm TRONG trạm 3 ═════════════════════════════════════════
     PACKING = "Đóng thùng"
 
     # ══ Chốt một chặng ══════════════════════════════════════════════════════
     FINISHED = "Hoàn thành"
-    AWAITING_WAITING_DESK = "Chờ Bàn team leader nhận"   # QC PASS xong, chờ Bàn team leader quét
 
-    # ══ Sang vòng mới — hai đích duy nhất (BRD §6b.1) ═══════════════════════
-    NEW_ROUND_AT_WAREHOUSE = "Kho (vòng mới)"        # QC FAIL, làm lại từ gốc
+    # ══ Sang vòng mới (BRD §6b.1) ═══════════════════════════════════════════
     NEW_ROUND_AT_WAITING_DESK = "Bàn team leader (vòng mới)"  # thiếu SL, máy vẫn đúng
 
 

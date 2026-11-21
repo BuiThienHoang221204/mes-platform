@@ -1,7 +1,6 @@
-"""Màn hình quét — dùng chung cho cả sáu trạm.
+"""Màn hình quét — dùng chung cho các trạm.
 
-`warehouse_out`, `qc`, `step` đều được kích hoạt bằng cùng một payload này, nên chúng
-ở chung một file dù là ba service khác nhau.
+`warehouse_out`, `step` đều được kích hoạt bằng cùng một payload này.
 """
 
 from __future__ import annotations

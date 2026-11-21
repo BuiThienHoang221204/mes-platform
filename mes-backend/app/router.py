@@ -14,7 +14,6 @@ from app.modules.catalog import router as catalog_router
 from app.modules.mo import router as mo_router
 from app.modules.packing import router as packing_router
 from app.modules.production import router as production_router
-from app.modules.qc import router as qc_router
 from app.modules.reports import router as reports_router
 from app.modules.scan import router as scan_router
 from app.modules.sse import router as sse_router
@@ -28,7 +27,6 @@ for _sub in (
     mo_router.router,
     scan_router.router,
     warehouse_router.router,
-    qc_router.router,
     production_router.router,
     packing_router.router,
     warehouse_in_router.router,

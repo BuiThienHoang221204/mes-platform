@@ -37,9 +37,7 @@ def _toi_chuyen(flow, code: str) -> None:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
 
 
@@ -141,7 +139,7 @@ def test_thung_cuoi_duoc_dong_thieu_nen_don_xong_trong_MOT_vong(db, make_mo, flo
 
     flow.close_production(code, ok=3_000)
     flow.pack(code, 3_000)                          # chốt bằng PCS, gồm cả thùng lẻ
-    flow.accept(code, 5)
+    flow.accept(code, 4)
     out = flow.warehouse_in(code)
 
     assert out.outcome == "COMPLETED", "thùng cuối đóng thiếu nên đơn xong ngay vòng 1"

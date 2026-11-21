@@ -5,11 +5,11 @@
     progress(db, mo_id)                    đọc tiến độ từ view
     required_sec_for(mo, target_qty)       chia lại TG yêu cầu theo SL của vòng
     open_first_round(db, mo, actor_id)     vòng 1 — gọi từ Submit
-    open_next_round(db, …returned_to_step) vòng tiếp — QC FAIL (0) hoặc thiếu SL (3)
+    open_next_round(db, …returned_to_step) vòng tiếp — thiếu SL (2) hoặc về Kho (0)
     close_round_completed(db, mo, …)       đủ SL → đóng vòng và đóng MO
 
-`open_next_round` GHI `returned_to_step` chứ không để suy ra sau — QC FAIL (0) và
-thiếu SL (3) nhìn giống hệt nhau nếu suy ngược từ danh sách bước.
+`open_next_round` GHI `returned_to_step` chứ không để suy ra sau — về Kho (0) và
+thiếu SL (2) nhìn giống hệt nhau nếu suy ngược từ danh sách bước.
 """
 
 from __future__ import annotations
@@ -81,12 +81,12 @@ def open_next_round(db: Session, *, mo: ManufacturingOrder, current: MoRound,
                     returned_to_step: int, reason: str, actor_id: uuid.UUID) -> MoRound:
     """Đóng vòng hiện tại rồi mở vòng mới.
 
-    `returned_to_step` chỉ có hai giá trị và chúng khác hẳn nhau (BRD §6b.1):
-      3 Bàn team leader — thiếu SL hoặc dừng quá lâu. Máy setup đúng, hàng đã qua QC.
-      0 Kho     — QC FAIL. Setup sai thì phải làm lại từ gốc.
+    `returned_to_step` chỉ có hai giá trị (BRD §6b.1):
+      2 Bàn team leader — thiếu SL hoặc dừng quá lâu.
+      0 Kho     — làm lại từ gốc.
     """
     if returned_to_step not in (RETURN_TO_KHO, RETURN_TO_BANCHO):
-        raise DomainError("Vòng mới chỉ quay về Kho (0) hoặc Bàn team leader (3)")
+        raise DomainError("Vòng mới chỉ quay về Kho (0) hoặc Bàn team leader (2)")
 
     _close_open_segments(db, current.id, actor_id)
     current.closed_at = clock.db_now(db)
@@ -103,8 +103,7 @@ def open_next_round(db: Session, *, mo: ManufacturingOrder, current: MoRound,
         required_sec=required_sec_for(mo, p.qty_remain), returned_to_step=returned_to_step,
     )
 
-    # Về Bàn team leader thì MỞ SẴN bước 3 — MO nằm luôn ở hàng đợi Sản xuất, không phải
-    # in lại phiếu, không setup lại, không QC lại (BRD §6b.2).
+    # Về Bàn team leader thì MỞ SẴN bước 2 — MO nằm luôn ở hàng đợi Sản xuất (BRD §6b.2).
     if returned_to_step == RETURN_TO_BANCHO:
         round_repo.open_step(db, nxt.id, RETURN_TO_BANCHO, actor_id)
 

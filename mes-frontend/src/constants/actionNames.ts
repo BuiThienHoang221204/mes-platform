@@ -30,27 +30,24 @@ export const ACTION_META: Record<string, ActionMeta> = {
   RETURN_KHO: { label: "Trả về Kho xuất", tone: "danger" },
   RETURN_BANCHO: { label: "Trả về Bàn team leader", tone: "warn" },
 
-  // Quét nhận sáu trạm
+  // Quét nhận năm trạm
   STEP0_ACCEPT: { label: "Kho xuất nhận", tone: "accent" },
   STEP1_ACCEPT: { label: "Setup máy nhận", tone: "accent" },
-  STEP2_ACCEPT: { label: "QC nhận", tone: "accent" },
-  STEP3_ACCEPT: { label: "Bàn team leader nhận", tone: "accent" },
-  STEP4_ACCEPT: { label: "Sản xuất nhận", tone: "accent" },
-  STEP5_ACCEPT: { label: "Kho nhập nhận", tone: "accent" },
+    STEP2_ACCEPT: { label: "Bàn team leader nhận", tone: "accent" },
+  STEP3_ACCEPT: { label: "Sản xuất nhận", tone: "accent" },
+  STEP4_ACCEPT: { label: "Kho nhập nhận", tone: "accent" },
 
   // Trạm 0
   KHO_HANDOVER: { label: "Bàn giao vật tư xuống Setup", tone: "flat" },
 
   // Trạm 2
-  QC_PASS: { label: "QC đạt", tone: "ok" },
-  QC_FAIL: { label: "QC không đạt", tone: "danger" },
-
+    
   // Trạm 4 — chuyền
   RUN_ADD: { label: "Thêm chuyền", tone: "flat" },
   RUN_START: { label: "Chuyền vào Đang lắp ráp", tone: "ok" },
   RUN_HOLD: { label: "Dừng chuyền", tone: "danger" },
   HOURLY_ADD: { label: "Ghi sản lượng giờ", tone: "flat" },
-  STEP4_FINISH_ALL: { label: "Chốt sổ sản xuất", tone: "ok" },
+  STEP3_FINISH_ALL: { label: "Chốt sổ sản xuất", tone: "ok" },
 
   // Trạm 4 — đóng thùng
   PACK_START: { label: "Mở sổ đóng thùng", tone: "flat" },

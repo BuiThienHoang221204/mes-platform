@@ -13,7 +13,7 @@ import { rangeOf, type DateRange } from "@/utils/dateRange";
 const WAIT = "var(--color-series-2)";
 const HOLD = "var(--color-series-1)";
 
-/** MO theo giai đoạn — sáu trạm, tách CHỜ NHẬN và ĐANG LÀM.
+/** MO theo giai đoạn — năm trạm, tách CHỜ NHẬN và ĐANG LÀM.
  *
  *  Gộp hai số lại thì mất đúng thứ người điều độ cần: việc cần người đi quét khác
  *  hẳn việc đang chạy. Trạm có 5 lệnh chờ là trạm đang tắc; trạm có 5 lệnh đang

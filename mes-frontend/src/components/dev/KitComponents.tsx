@@ -13,7 +13,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { QtyStat } from "@/components/ui/QtyStat";
 import { RoundBadge } from "@/components/ui/RoundBadge";
 import { StationBadge } from "@/components/ui/StationBadge";
-import { MoStatusPill, QcResultPill, SegmentPill, StatusPill } from "@/components/ui/StatusPill";
+import { MoStatusPill, SegmentPill, StatusPill } from "@/components/ui/StatusPill";
 import { MO_FILTERS, MO_STATUS } from "@/constants/status";
 import { STATIONS } from "@/constants/stations";
 
@@ -60,8 +60,6 @@ export function KitComponents() {
             <MoStatusPill status={MO_STATUS.SUBMITTED} />
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <QcResultPill result="PASS" />
-            <QcResultPill result="FAIL" />
             <SegmentPill kind="WAIT" />
             <SegmentPill kind="RUN" />
             <StatusPill tone="warn">Rework</StatusPill>

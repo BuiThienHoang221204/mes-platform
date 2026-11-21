@@ -4,10 +4,8 @@ import type { PillTone } from "@/constants/status";
 import {
   MO_STATUS_LABEL,
   MO_STATUS_TONE,
-  QC_RESULT_LABEL,
   SEGMENT_KIND_LABEL,
   type MoStatusValue,
-  type QcResultValue,
 } from "@/constants/status";
 
 const TONE: Record<PillTone, string> = {
@@ -40,12 +38,6 @@ export function MoStatusPill({ status }: { status: MoStatusValue }) {
     <StatusPill tone={MO_STATUS_TONE[status]} live={status === "PROCESSING"}>
       {MO_STATUS_LABEL[status]}
     </StatusPill>
-  );
-}
-
-export function QcResultPill({ result }: { result: QcResultValue }) {
-  return (
-    <StatusPill tone={result === "PASS" ? "ok" : "danger"}>{QC_RESULT_LABEL[result]}</StatusPill>
   );
 }
 

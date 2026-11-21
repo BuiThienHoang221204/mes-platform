@@ -26,17 +26,15 @@ def test_buoc_cao_nhat_da_nhan(db, make_mo, flow):
     flow.accept(code, 1)
     assert _row(db, code)["current_step"] == 1
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
+    assert _row(db, code)["current_step"] == 2
     flow.accept(code, 3)
-    flow.accept(code, 4)
-    assert _row(db, code)["current_step"] == 4
+    assert _row(db, code)["current_step"] == 3
 
 
 def test_chua_toi_san_xuat_thi_chua_chia_chuyen_duoc(db, make_mo, flow):
     """Cột `current_step` và luật của backend phải nói CÙNG một điều.
 
-    Nút `Chia chuyền` ẩn khi `current_step < 4`. Nếu backend lại cho gán chuyền ở
-    bước 1 thì màn hình giấu mất một thao tác hợp lệ — sai theo chiều ngược lại.
+    Nút `Chia chuyền` ẩn khi `current_step < 3`.
     """
     import pytest
 
@@ -48,7 +46,7 @@ def test_chua_toi_san_xuat_thi_chua_chia_chuyen_duoc(db, make_mo, flow):
     flow.handover(code)
     flow.accept(code, 1)
 
-    assert _row(db, code)["current_step"] < 4
+    assert _row(db, code)["current_step"] < 3
     with pytest.raises(DomainError) as e:
         flow.assign_only(code, "L01")
     assert e.value.code == Err.NO_PRODUCTION_ACCEPT

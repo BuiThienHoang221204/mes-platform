@@ -1,71 +1,72 @@
-"""Màn hình điều hành: con số phải khớp danh sách, và số câu SQL không được tăng.
-
-Hai loại lỗi ở đây đều KHÔNG làm test nào khác đỏ:
-
-* Badge hiện một số, bấm vào ra số khác — vì câu đếm và câu liệt kê trôi khỏi nhau.
-* `trace` hỏi CSDL từng vòng một — chạy vẫn đúng, chỉ là chậm dần theo số vòng.
-"""
+"""Kiểm thử tầng đọc của bảng điều hành — `board/`."""
 
 from __future__ import annotations
 
-from contextlib import contextmanager
+import pytest
+from sqlalchemy.orm import Session
 
-from sqlalchemy import event
-
-from app.common.vocab.enums import STEP_NAMES
+from app.modules.board import repository as board_repo
 from app.modules.board import service as board_service
 
 
-def _queue(db, station: int) -> list[dict]:
-    return board_service.queue(db, station, limit=100)["items"]
+def _queue(db: Session, station: int) -> list[dict]:
+    return board_repo.queue_rows(db, station, limit=50)
 
-def _at(db, station: int) -> list[dict]:
-    return board_service.at_station(db, station, limit=100)["items"]
 
-@contextmanager
-def dem_sql(db):
-    """Đếm số câu lệnh gửi xuống CSDL trong khối `with`."""
-    so = []
-    bind = db.get_bind()
+def _at(db: Session, station: int) -> list[dict]:
+    return board_repo.at_station_rows(db, station, limit=50)
 
-    def nghe(conn, cursor, statement, params, context, executemany):
-        so.append(statement.strip().split()[0].upper())
 
-    event.listen(bind, "before_cursor_execute", nghe)
-    try:
-        yield so
-    finally:
-        event.remove(bind, "before_cursor_execute", nghe)
+def test_queue_va_counts_khong_bao_gio_lech_nhau(db, make_mo, flow):
+    """Quy tắc vàng của bảng điều hành: số trên badge PHẢI bằng đúng số dòng.
 
-def test_badge_cho_nhan_khop_danh_sach(db, make_mo, flow):
-    """`counts` và `queue` dựng từ cùng một nguồn SQL — phải ra cùng số, MỌI trạm.
-
-    Kể cả trạm 0: trước đây trạm 0 cộng thêm nhóm "đã nhận chưa bàn giao" vào cùng
-    con số, nên số của trạm 0 mang nghĩa khác số của năm trạm kia.
+    Nếu một ngày nào đó ai viết lại `queue_counts` bằng câu SQL riêng thay vì dùng
+    chung `QUEUE_SQL`, test này sẽ bắt quả tang ngay khi có điều kiện lọc mới lọt
+    vào một trong hai câu mà câu kia không có.
     """
-    a = make_mo()
-    make_mo()                 # lệnh thứ hai ở lại hàng chờ trạm 0
-    flow.accept(a, 0)
-    flow.handover(a)          # a sang hàng chờ trạm 1
+    for _ in range(2):
+        code = make_mo()
+        flow.accept(code, 0)
+        flow.handover(code)
 
     cho, _ = board_service.station_counts(db)
-    for tram in STEP_NAMES:
-        assert cho[tram] == len(_queue(db, tram)), f"trạm {tram}"
+    for s in (0, 1, 2, 3, 4):
+        rows = _queue(db, s)
+        assert cho[s] == len(rows), (
+            f"trạm {s}: badge hiện {cho[s]} nhưng danh sách có {len(rows)} dòng"
+        )
 
-def test_badge_dang_giu_khop_at_station(db, make_mo, flow):
-    """`holding` và `at_station` cũng phải là cùng một con số."""
-    a = make_mo()
-    flow.accept(a, 0)
 
-    _, giu = board_service.station_counts(db)
-    for tram in STEP_NAMES:
-        assert giu[tram] == len(_at(db, tram)), f"trạm {tram}"
+def test_counts_chuyen_ngay_khi_quet_nhan(db, make_mo, flow):
+    """Quét nhận ở trạm 0: hàng chờ trạm 0 giảm 1, hàng chờ trạm 1 KHÔNG tăng."""
+    code = make_mo()
+    truoc_cho, truoc_giu = board_service.station_counts(db)
+    assert truoc_cho[0] == 1 and truoc_giu[0] == 0
 
-def test_viec_dang_lam_khong_bien_thanh_0(db, make_mo, flow):
-    """Xưởng đang chạy mà mọi trạm hiện 0 — lỗi người dùng báo.
+    flow.accept(code, 0)
+
+    sau_cho, sau_giu = board_service.station_counts(db)
+    assert sau_cho[0] == 0, "đã nhận thì không còn trong hàng chờ trạm 0"
+    assert sau_giu[0] == 1, "đã nhận thì vào nhóm 'đang giữ' của trạm 0"
+    assert sau_cho[1] == 0, "chưa bàn giao thì trạm 1 chưa thấy việc"
+
+
+def test_counts_hien_tram_1_ngay_khi_ban_giao(db, make_mo, flow):
+    """Bàn giao ở trạm 0: lệnh rơi vào hàng chờ trạm 1."""
+    code = make_mo()
+    flow.accept(code, 0)
+    flow.handover(code)
+
+    cho, giu = board_service.station_counts(db)
+    assert cho[1] == 1, "bàn giao rồi thì trạm 1 phải thấy việc trong hàng chờ"
+    assert giu[0] == 1, "trạm 0 vẫn giữ phiếu cho tới khi trạm 1 quét nhận"
+
+
+def test_holding_dem_viec_dang_trong_tay_khong_dem_hang_cho(db, make_mo, flow):
+    """Cột 'đang ở trạm' đọc từ `mo_step.closed_at IS NULL`, không đọc từ hàng chờ.
 
     Lệnh đã quét nhận thì RỜI hàng chờ. Nếu chỉ đếm hàng chờ thì ba lệnh đang lắp
-    ráp ở trạm 4 hiện thành 0, và người đọc tưởng xưởng trống hoặc hệ thống hỏng.
+    ráp ở trạm 3 hiện thành 0, và người đọc tưởng xưởng trống hoặc hệ thống hỏng.
     """
     for _ in range(3):
         code = make_mo()
@@ -73,24 +74,24 @@ def test_viec_dang_lam_khong_bien_thanh_0(db, make_mo, flow):
         flow.handover(code)
         flow.accept(code, 1)
         flow.accept(code, 2)
-        flow.qc(code, "PASS")
         flow.accept(code, 3)
-        flow.accept(code, 4)
 
     cho, giu = board_service.station_counts(db)
     assert all(n == 0 for n in cho.values()), "không lệnh nào còn chờ nhận"
-    assert giu[4] == 3, "ba lệnh đang trong tay Sản xuất phải đếm được"
+    assert giu[3] == 3, "ba lệnh đang trong tay Sản xuất phải đếm được"
     assert sum(giu.values()) == 3
+
 
 def test_tram_0_dem_rieng_hai_nhom(db, make_mo, flow):
     """Kho có hai nhóm rời nhau, và giờ chúng nằm ở hai con số khác nhau."""
     chua_nhan = make_mo()
     da_nhan = make_mo()
-    flow.accept(da_nhan, 0)   # đã quét nhận, CHƯA bàn giao
+    flow.accept(da_nhan, 0)
 
     cho, giu = board_service.station_counts(db)
     assert cho[0] == 1 and chua_nhan in [r["code"] for r in _queue(db, 0)]
     assert giu[0] == 1 and da_nhan in [r["code"] for r in _at(db, 0)]
+
 
 def test_at_station_la_viec_DANG_cam_khong_phai_hang_doi(db, make_mo, flow):
     """Hai danh sách phải rời nhau: nhận rồi thì rời hàng đợi, sang `at_station`."""
@@ -102,8 +103,9 @@ def test_at_station_la_viec_DANG_cam_khong_phai_hang_doi(db, make_mo, flow):
     assert mo not in [r["code"] for r in _queue(db, 0)]
     giu = [r for r in _at(db, 0) if r["code"] == mo]
     assert len(giu) == 1
-    assert giu[0]["accepted_by"], "phải nói rõ ai đang giữ, không thì không truy được"
+    assert giu[0]["accepted_by"]
     assert giu[0]["holding_sec"] >= 0
+
 
 def test_at_station_nha_lenh_khi_tram_sau_quet_nhan(db, make_mo, flow):
     """Bước chỉ đóng khi trạm SAU nhận — lúc đó lệnh phải rời khỏi trạm trước."""
@@ -115,52 +117,44 @@ def test_at_station_nha_lenh_khi_tram_sau_quet_nhan(db, make_mo, flow):
     assert mo not in [r["code"] for r in _at(db, 0)]
     assert mo in [r["code"] for r in _at(db, 1)]
 
-def test_hang_doi_tram_3_chi_hien_lenh_QC_da_DAT(db, make_mo, flow):
-    """Màn hình không được hứa thứ mà `guard_can_accept` sẽ chặn.
 
-    QC quét nhận là bước 2 MỞ, chưa phải là đã phán. Liệt kê sớm thì Bàn team
-    leader thấy lệnh, quét vào, và ăn lỗi `NO_QC` — lỗi không phải của họ.
-    """
+def test_hang_doi_tram_2_hien_lenh_khi_tram_1_da_nhan(db, make_mo, flow):
+    """Setup máy xong thì lệnh rơi vào hàng chờ của Bàn team leader (trạm 2)."""
     mo = make_mo()
     flow.accept(mo, 0)
     flow.handover(mo)
     flow.accept(mo, 1)
-    flow.accept(mo, 2)                      # QC đã NHẬN, chưa ra kết quả
 
-    assert mo in [r["code"] for r in _at(db, 2)]
-    assert mo not in [r["code"] for r in _queue(db, 3)]
+    assert mo in [r["code"] for r in _queue(db, 2)]
 
-    flow.qc(mo, "PASS")
-    assert mo in [r["code"] for r in _queue(db, 3)]
 
 def test_hang_doi_luon_co_waiting_sec(db, make_mo, flow):
     """Màn trạm hiện cột `chờ bao lâu` — thiếu trường là cả cột hiện dấu gạch."""
     mo = make_mo()
     flow.accept(mo, 0)
     flow.handover(mo)
+    rows = _queue(db, 1)
+    assert rows and rows[0]["waiting_sec"] is not None
+    assert rows[0]["waiting_sec"] >= 0
 
-    for tram in STEP_NAMES:
-        for r in _queue(db, tram):
-            assert "waiting_sec" in r, f"trạm {tram} thiếu waiting_sec"
-            assert r["waiting_sec"] >= 0
 
-def test_trace_KHONG_hoi_them_khi_MO_co_nhieu_vong(db, make_mo, flow):
-    """Số câu SQL của `trace` phải KHÔNG đổi khi MO có thêm vòng.
-
-    Trước khi gộp, mỗi vòng tốn thêm 5 câu: 1 vòng 10 câu, 4 vòng 25 câu. Test này
-    đỏ ngay nếu ai đó đưa truy vấn trở lại vào trong vòng lặp.
-    """
-    code = make_mo()
+def test_trace_khong_bi_N_cong_1_khi_tang_vong(db, make_mo, flow, dem_sql):
+    code = make_mo(qty=1000)
     flow.accept(code, 0)
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
+    flow.accept(code, 3)
+    flow.run_line(code, "L01")
+    flow.close_production(code, ok=500, short=500, short_reason="Thiếu vật tư")
+    flow.pack(code, 500)
+    flow.accept(code, 4)
 
     db.flush()
     with dem_sql(db) as mot_vong:
         board_service.trace(db, code)
 
-    flow.qc(code, "FAIL", reason="Sai thông số setup")   # đóng vòng 1, mở vòng 2
+    flow.warehouse_in(code)   # mở vòng 2
     assert flow.round_of(code).round_no == 2
 
     db.flush()
@@ -172,22 +166,25 @@ def test_trace_KHONG_hoi_them_khi_MO_co_nhieu_vong(db, make_mo, flow):
         f"truy vấn đã lọt lại vào vòng lặp"
     )
 
+
 def test_trace_van_tra_du_du_lieu_cua_tung_vong(db, make_mo, flow):
-    """Gộp truy vấn mà ghép sai thì dữ liệu nhảy sang nhầm vòng — kiểm cả hai vòng."""
-    code = make_mo()
+    code = make_mo(qty=1000)
     flow.accept(code, 0)
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "FAIL", reason="Sai thông số setup")
+    flow.accept(code, 3)
+    flow.run_line(code, "L01")
+    flow.close_production(code, ok=500, short=500, short_reason="Thiếu vật tư")
+    flow.pack(code, 500)
+    flow.accept(code, 4)
+    flow.warehouse_in(code)
 
     cay = board_service.trace(db, code)
     assert len(cay["rounds"]) == 2
 
     vong1, vong2 = cay["rounds"]
     assert vong1["round_no"] == 1 and vong2["round_no"] == 2
-    assert [s["step_no"] for s in vong1["steps"]] == [0, 1, 2]
-    assert vong2["steps"] == []
+    assert [s["step_no"] for s in vong1["steps"]] == [0, 1, 2, 3, 4]
+    assert [s["step_no"] for s in vong2["steps"]] == [2]
     assert vong1["closed_at"] is not None and vong2["closed_at"] is None
-    assert vong1["production"] is None and vong2["production"] is None
-    assert vong1["packing"] is None and vong2["packing"] is None

@@ -42,7 +42,9 @@ case "${1:-help}" in
   docs-check) $PY tools/docs_link.py --check && $PY tools/docs_check.py ;;
 
   # Dữ liệu mẫu cho máy phát triển — mã lệnh đều bắt đầu bằng M2, xem tools/seed_demo.py
+  # --master-only: chỉ nạp danh mục (app_user, line, reason_code), không sinh lệnh mẫu
   seed-demo) $PY tools/seed_demo.py "${@:2}" ;;
+  clear-db)  $PY tools/clear_data.py "${@:2}" ;;
 
   mig)     $PY -m alembic upgrade head ;;
   mig-new) $PY -m alembic revision -m "${2:?cần tên: ./run.sh mig-new \"them cot abc\"}" ;;

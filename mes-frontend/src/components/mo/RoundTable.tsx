@@ -70,7 +70,7 @@ export function RoundTable({ rounds }: { rounds: TraceRound[] }) {
         <p>
           <strong className="text-fg">Bắt đầu từ</strong> đọc thẳng nơi vòng đó mở, ghi lại ngay lúc
           mở vòng — không suy từ các bước đã đi. Suy thì vòng vừa mở luôn bị đoán nhầm thành Bàn
-          team leader, kể cả khi QC vừa trả nó về Kho.
+          team leader, kể cả khi vừa trả nó về Kho.
         </p>
       </div>
     </AppCard>

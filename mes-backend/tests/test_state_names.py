@@ -74,9 +74,7 @@ def test_hai_von_tu_trong_CUNG_hai_cot(db, make_mo, flow):
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
 
     from app.common.event_log import repository as event_repo

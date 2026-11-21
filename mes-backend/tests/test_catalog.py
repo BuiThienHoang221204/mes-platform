@@ -60,9 +60,7 @@ def test_xoa_chuyen_da_chay_bi_chan(db, make_mo, flow):
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
 
     with pytest.raises(IntegrityError) as e:

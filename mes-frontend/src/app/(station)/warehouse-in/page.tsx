@@ -13,7 +13,7 @@ import { FULL } from "@/constants/roles";
 import { useStationPerm } from "@/hooks/useStationPerm";
 import type { AtStationRow } from "@/types/board";
 
-const STATION = 5;
+const STATION = 4;
 
 function WarehouseInBody() {
   const [picked, setPicked] = useState<AtStationRow | null>(null);

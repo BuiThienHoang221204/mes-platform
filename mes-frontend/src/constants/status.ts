@@ -46,15 +46,6 @@ export const MO_FILTERS = [
   MO_STATUS.CANCELLED,
 ] as const;
 
-/* ── Kết quả QC — khớp ENUM `qc_verdict` ─────────────────────────────────── */
-export const QC_RESULT = { PASS: "PASS", FAIL: "FAIL" } as const;
-export type QcResultValue = (typeof QC_RESULT)[keyof typeof QC_RESULT];
-
-export const QC_RESULT_LABEL: Record<QcResultValue, string> = {
-  [QC_RESULT.PASS]: "Đạt",
-  [QC_RESULT.FAIL]: "Không đạt",
-};
-
 /* ── Kết quả nhập kho — `WarehouseInCompleteOut.outcome` ─────────────────── */
 export const WI_OUTCOME = {
   /** Đủ số lượng — đơn đóng lại. */

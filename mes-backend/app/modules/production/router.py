@@ -1,4 +1,4 @@
-"""Trạm 4 — Sản xuất. Phòng Sản xuất (và Bàn team leader, §9b.4). Gồm cả ô ghi sản lượng giờ.
+"""Trạm 3 — Sản xuất. Phòng Sản xuất (và Bàn team leader, §9b.4). Gồm cả ô ghi sản lượng giờ.
 
     POST /lines/{code}/assign          thêm chuyền → TG chờ bắt đầu đếm
     POST /lines/{code}/start           cho chạy    → TG thực tế bắt đầu đếm

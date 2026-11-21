@@ -48,7 +48,7 @@ def test_hanh_dong_nao_cung_co_noi_phat():
         nguon = tep.read_text(encoding="utf-8")
         dung |= set(re.findall(r"\bAct\.([A-Z_0-9]+)", nguon))
         if "step_accept(" in nguon:
-            dung |= {f"STEP{n}_ACCEPT" for n in range(6)}
+            dung |= {f"STEP{n}_ACCEPT" for n in range(5)}
     thua = sorted({m.name for m in Act} - dung)
     assert not thua, "Khai mà không nơi nào phát: " + ", ".join(thua)
 
@@ -56,9 +56,9 @@ def test_hanh_dong_nao_cung_co_noi_phat():
 def test_step_accept_chan_tram_la():
     """Ghép chuỗi `f"STEP{n}_ACCEPT"` thì trạm 9 vẫn ghi xuống sổ ngon lành."""
     assert step_accept(0) is Act.STEP0_ACCEPT
-    assert step_accept(5) is Act.STEP5_ACCEPT
-    for lac in (-1, 6, 9):
-        with pytest.raises(ValueError, match="chỉ có trạm 0 đến 5"):
+    assert step_accept(4) is Act.STEP4_ACCEPT
+    for lac in (-1, 5, 9):
+        with pytest.raises(ValueError, match="chỉ có trạm 0 đến 4"):
             step_accept(lac)
 
 

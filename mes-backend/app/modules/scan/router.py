@@ -1,4 +1,4 @@
-"""Quét mã QR — MỘT cửa vào cho cả sáu trạm.
+"""Quét mã QR — MỘT cửa vào cho cả năm trạm.
 
     POST /scan                         nhận lệnh tại trạm của thiết bị
 
@@ -22,7 +22,7 @@ router = APIRouter(tags=["scan"])
 
 @router.post("/scan", response_model=ScanOut)
 def scan(body: ScanIn, db: DbDep, actor: ActorDep) -> ScanOut:
-    """Quét mã QR để NHẬN lệnh — thao tác chung của cả sáu trạm.
+    """Quét mã QR để NHẬN lệnh — thao tác chung của cả năm trạm.
     Trạm suy từ vai người quét; bắn trùng trong 2 giây trả lại kết quả lần trước."""
     station = actor.scan_station(body.station)
     actor.require_station(station)

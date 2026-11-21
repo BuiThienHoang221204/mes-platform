@@ -42,8 +42,6 @@ def _advance_to_station(flow, code: str, station: int) -> None:
     flow.handover(code)
     for step in range(1, station):
         flow.accept(code, step)
-        if step == 2:
-            flow.qc(code, "PASS")
 
 
 @pytest.mark.parametrize("next_station", sorted(QUEUE_WAITS_ON_PREV_STEP))

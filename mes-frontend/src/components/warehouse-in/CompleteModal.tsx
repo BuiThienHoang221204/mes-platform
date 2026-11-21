@@ -80,7 +80,7 @@ export function CompleteModal({ row, onClose }: Props) {
         <Note>
           <strong className="text-ok">Đủ số</strong> — lệnh đóng lại, hoàn thành.{" "}
           <strong className="text-warn">Thiếu số</strong> — lệnh tự mở vòng mới và quay về Bàn
-          team leader, không qua lại Kho xuất, Setup hay QC.
+          team leader, không qua lại Kho xuất hay Setup.
         </Note>
       </div>
     </AppModal>

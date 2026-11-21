@@ -43,29 +43,24 @@ class Act(StrEnum):
     RETURN_KHO = "RETURN_KHO"               # vòng sau bắt đầu lại từ Kho
     RETURN_BANCHO = "RETURN_BANCHO"         # vòng sau vào thẳng Bàn team leader (§6b.2)
 
-    # ══ Quét nhận ở sáu trạm — xem `step_accept()` ══════════════════════════
+    # ══ Quét nhận ở năm trạm — xem `step_accept()` ══════════════════════════
     STEP0_ACCEPT = "STEP0_ACCEPT"           # Kho xuất
     STEP1_ACCEPT = "STEP1_ACCEPT"           # Setup
-    STEP2_ACCEPT = "STEP2_ACCEPT"           # QC
-    STEP3_ACCEPT = "STEP3_ACCEPT"           # Bàn team leader
-    STEP4_ACCEPT = "STEP4_ACCEPT"           # Sản xuất
-    STEP5_ACCEPT = "STEP5_ACCEPT"           # Kho nhập
+    STEP2_ACCEPT = "STEP2_ACCEPT"           # Bàn team leader
+    STEP3_ACCEPT = "STEP3_ACCEPT"           # Sản xuất
+    STEP4_ACCEPT = "STEP4_ACCEPT"           # Kho nhập
 
     # ══ Trạm 0 — Kho xuất ═══════════════════════════════════════════════════
     KHO_HANDOVER = "KHO_HANDOVER"           # bàn giao vật tư cho Setup
 
-    # ══ Trạm 2 — QC ═════════════════════════════════════════════════════════
-    QC_PASS = "QC_PASS"
-    QC_FAIL = "QC_FAIL"                     # kèm lý do (§5)
-
-    # ══ Trạm 4 — Sản xuất ═══════════════════════════════════════════════════
+    # ══ Trạm 3 — Sản xuất ═══════════════════════════════════════════════════
     RUN_ADD = "RUN_ADD"                     # gán chuyền vào vòng
     RUN_START = "RUN_START"                 # chuyền bắt đầu lắp ráp
     RUN_HOLD = "RUN_HOLD"                   # dừng máy kèm lý do (§17)
     HOURLY_ADD = "HOURLY_ADD"               # ghi sản lượng một khung giờ (§7.2b)
-    STEP4_FINISH_ALL = "STEP4_FINISH_ALL"   # chốt sổ sản xuất cả vòng
+    STEP3_FINISH_ALL = "STEP3_FINISH_ALL"   # chốt sổ sản xuất cả vòng
 
-    # ══ Đóng thùng — nằm TRONG trạm 4 ═════════════════════════════════════════
+    # ══ Đóng thùng — nằm TRONG trạm 3 ═════════════════════════════════════════
     PACK_START = "PACK_START"
     PACK_HOURLY = "PACK_HOURLY"             # ghi số thùng một khung giờ (§7b.2)
     PACK_COMPLETE = "PACK_COMPLETE"
@@ -74,11 +69,11 @@ class Act(StrEnum):
 def step_accept(step_no: int) -> Act:
     """Dòng nhật ký lúc trạm `step_no` quét nhận.
 
-    Sáu hằng số khai riêng chứ không ghép chuỗi `f"STEP{n}_ACCEPT"` tại chỗ gọi:
-    ghép chuỗi thì `step_no` lạc ra ngoài 0-5 vẫn ghi xuống sổ ngon lành, mà sổ
+    Năm hằng số khai riêng chứ không ghép chuỗi `f"STEP{n}_ACCEPT"` tại chỗ gọi:
+    ghép chuỗi thì `step_no` lạc ra ngoài 0-4 vẫn ghi xuống sổ ngon lành, mà sổ
     này không xoá được. Tra bảng thì số lạ ném `KeyError` ngay tại chỗ.
     """
     try:
         return Act[f"STEP{step_no}_ACCEPT"]
     except KeyError:
-        raise ValueError(f"Không có trạm {step_no} — chỉ có trạm 0 đến 5") from None
+        raise ValueError(f"Không có trạm {step_no} — chỉ có trạm 0 đến 4") from None

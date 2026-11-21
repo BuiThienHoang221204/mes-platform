@@ -1,4 +1,4 @@
-"""Quét mã QR — MỘT cửa vào cho cả sáu trạm.
+"""Quét mã QR — MỘT cửa vào cho cả năm trạm.
 
     models.py  schemas.py  repository.py  service.py  mocode.py  router.py
     bảng: scan_dedupe                 (HẠ TẦNG, không thuộc 14 sổ)

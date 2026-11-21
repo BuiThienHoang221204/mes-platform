@@ -32,7 +32,7 @@ class MoRound(Base):
     opened_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                 nullable=False, server_default=func.now())
     closed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
-    # GHI lúc mở vòng, KHÔNG suy ra sau: 0 Kho (QC FAIL) · 3 Bàn team leader (thiếu SL).
+    # GHI lúc mở vòng, KHÔNG suy ra sau: 0 Kho · 2 Bàn team leader (thiếu SL).
     # Suy ngược từ danh sách bước thì hai đường này nhìn giống hệt nhau.
     returned_to_step: Mapped[int | None] = mapped_column(SmallInteger)
     return_reason_text: Mapped[str | None] = mapped_column(Text)

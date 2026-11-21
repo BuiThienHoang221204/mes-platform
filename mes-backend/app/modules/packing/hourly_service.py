@@ -1,4 +1,4 @@
-"""Đếm THÙNG theo giờ (§7b.2). Phòng Sản xuất, nằm trong trạm 4.
+"""Đếm THÙNG theo giờ (§7b.2). Phòng Sản xuất, nằm trong trạm 3.
 
     add_packing_hourly(db, code, work_date, slot_hour, boxes…)
 
@@ -88,7 +88,7 @@ def add_packing_hourly(db: Session, *, code: str, work_date: date, slot_hour: in
     le = max(0, made - packed)
 
     event_repo.log(
-        db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.PACK_HOURLY,
+        db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.PACK_HOURLY,
         reason=f"{work_date} {slot_hour:02d}h · {boxes} thùng × {mo.pcs_per_box} "
                f"= {boxes * mo.pcs_per_box} pcs" + (f" — còn lẻ {le}" if le else ""),
         actor_id=actor_id,

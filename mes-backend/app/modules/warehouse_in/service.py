@@ -1,4 +1,4 @@
-"""Luật của trạm 5 — nơi MO đóng lại HOẶC chạy tiếp. Phòng Kho nhập.
+"""Luật của trạm 4 — nơi MO đóng lại HOẶC chạy tiếp. Phòng Kho nhập.
 
     CompleteOutcome                        COMPLETED | ROUND_OPENED + số còn thiếu
     complete(db, code, actor_id)           nhận hàng về kho
@@ -45,8 +45,8 @@ def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
     """BRD §8: tổng = qtyDone + SL đã đóng thùng của vòng này.
 
     Đủ  → COMPLETED.
-    Thiếu → tự động về BÀN TEAM LEADER vòng mới. Không về Kho: máy đã setup đúng, hàng đã
-    qua QC, chỉ là chưa làm đủ số.
+    Thiếu → tự động về BÀN TEAM LEADER vòng mới. Không về Kho: máy đã setup đúng,
+    chỉ là chưa làm đủ số.
 
     **Không nhận số đếm từ client.** Hàng đã vào thùng bao nhiêu thì kho nhận bấy
     nhiêu — đó cũng đúng là công thức §8 vốn dĩ đang dùng. Tham số `qty_received` cũ
@@ -54,7 +54,7 @@ def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
     vì tiến độ lấy từ `v_mo_progress.qty_done = SUM(packing.qty_packed)`.
     """
     mo, rnd = round_service.lock_round(db, code)
-    if round_repo.get_step(db, rnd.id, 5) is None:
+    if round_repo.get_step(db, rnd.id, 4) is None:
         raise DomainError("Nhập kho chưa quét nhận lệnh này", code=Err.NO_WAREHOUSE_IN_ACCEPT)
     if warehouse_in_repo.get_warehouse_in(db, rnd.id) is not None:
         raise DomainError("Vòng này đã nhập kho rồi", code=Err.WAREHOUSE_IN_DONE)
@@ -65,15 +65,15 @@ def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
 
     warehouse_in_repo.save_warehouse_in(db, rnd.id, qty_received=pack.qty_packed or 0,
                                    counted_at=clock.db_now(db), by=actor_id)
-    step5 = round_repo.get_step(db, rnd.id, 5)
-    if step5 is not None:
-        round_repo.close_step(db, step5, actor_id)
+    step4 = round_repo.get_step(db, rnd.id, 4)
+    if step4 is not None:
+        round_repo.close_step(db, step4, actor_id)
     db.flush()
 
     p = round_service.progress(db, mo.id)
     if p.qty_done >= p.quantity:
         round_service.close_round_completed(db, mo=mo, current=rnd, actor_id=actor_id)
-        mark_affected(5)
+        mark_affected(4)
         return CompleteOutcome("COMPLETED", p.qty_done, 0, None)
 
     nxt = round_service.open_next_round(
@@ -81,9 +81,9 @@ def complete(db: Session, *, code: str, actor_id: uuid.UUID) -> CompleteOutcome:
         reason=f"Còn {p.qty_remain} chưa đóng thùng — về Bàn team leader làm tiếp",
         actor_id=actor_id,
     )
-    event_repo.log(db, mo_id=mo.id, round_id=rnd.id, step_no=5, action=Act.MO_PARTIAL,
-             from_state=STEP_NAMES[5], to_state=State.NEW_ROUND_AT_WAITING_DESK,
+    event_repo.log(db, mo_id=mo.id, round_id=rnd.id, step_no=4, action=Act.MO_PARTIAL,
+             from_state=STEP_NAMES[4], to_state=State.NEW_ROUND_AT_WAITING_DESK,
              reason=f"cộng dồn {p.qty_done}/{p.quantity}", actor_id=actor_id)
-    # ROUND_OPENED: station 5 (atStation), station 3 (queue vòng mới)
-    mark_affected(5, 3)
+    # ROUND_OPENED: station 4 (atStation), station 2 (queue vòng mới)
+    mark_affected(4, 2)
     return CompleteOutcome("ROUND_OPENED", p.qty_done, p.qty_remain, nxt.round_no)

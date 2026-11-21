@@ -1,32 +1,28 @@
-"""Màn Tổng quan gom vào MỘT lời gọi — con số và cảnh báo phải khớp nguồn gốc.
-
-Trước đây màn này gọi ba endpoint rồi tự tính ở frontend. Gom xuống backend thì
-được gói tin nhỏ hơn hai chục lần, nhưng đổi lại phép tính rời khỏi tầm mắt: sai
-ở đây không màn nào khác đỏ, chỉ là người điều độ đọc một con số không đúng.
-
-Nên test bám vào QUAN HỆ với nguồn, không bám con số cứng: `rework` phải bằng số
-dòng vòng-2-trở-lên trong hàng đợi Kho xuất, `lines_busy` phải bằng số chuyền thật
-sự đang bận — chứ không phải "phải bằng 3".
-"""
+"""Kiểm thử màn Tổng quan — `board_service.overview`."""
 
 from __future__ import annotations
 
+from sqlalchemy.orm import Session
+
 from app.modules.board import service as board_service
+from app.modules.round import service as round_service
+from app.common.vocab.enums import RETURN_TO_KHO
 
 
-def _ov(db) -> dict:
-    return board_service.overview(db)
+def _ov(db: Session, **kw) -> dict:
+    return board_service.overview(db, **kw)
 
 
-def test_xuong_trong_thi_moi_so_deu_khong(db):
+def test_tong_quan_khi_chua_co_lenh(db):
+    """Xưởng trống: mọi con số = 0, danh sách cảnh báo rỗng."""
     ov = _ov(db)
     assert ov["running_rounds"] == 0
     assert ov["lines_busy"] == 0
     assert ov["lines_held"] == 0
+    assert ov["re_round"] == 0
     assert ov["rework"] == 0
     assert ov["alerts"] == []
     assert ov["alerts_total"] == 0
-    # 14 chuyền là dữ liệu hệ thống của migration 0002 — có sẵn kể cả khi chưa có lệnh.
     assert ov["lines_total"] == 14
 
 
@@ -36,9 +32,7 @@ def test_chuyen_dang_chay_vao_lines_busy(db, make_mo, flow):
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
     flow.run_line(code, "L02")
 
@@ -54,9 +48,7 @@ def test_chuyen_dung_sinh_canh_bao_HOLD_kem_ly_do(db, make_mo, flow):
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
     flow.hold_line(code, "L01", reason="Mất điện")
 
@@ -67,17 +59,19 @@ def test_chuyen_dung_sinh_canh_bao_HOLD_kem_ly_do(db, make_mo, flow):
     assert len(hold) == 1
     assert hold[0]["code"] == code
     assert hold[0]["lines"] == ["L01"]
-    # Lý do phải đi kèm: thiếu nó thì màn hình hiện "đang dừng — undefined".
     assert hold[0]["reason"] == "Mất điện"
 
 
-def test_QC_khong_dat_dem_vao_rework_va_khop_hang_doi(db, make_mo, flow):
+def test_rework_dem_vao_rework_va_khop_hang_doi(db, make_mo, flow, actor):
     code = make_mo()
     flow.accept(code, 0)
     flow.handover(code)
     flow.accept(code, 1)
-    flow.accept(code, 2)
-    flow.qc(code, "FAIL", reason="Canh máy sai")
+    mo, rnd = round_service.lock_round(db, code)
+    round_service.open_next_round(
+        db, mo=mo, current=rnd, returned_to_step=RETURN_TO_KHO,
+        reason="Làm lại từ gốc", actor_id=actor,
+    )
 
     ov = _ov(db)
     kho = board_service.queue(db, 0, limit=100)["items"]
@@ -97,14 +91,15 @@ def test_vong_2_dang_chay_sinh_canh_bao_RE_ROUND(db, make_mo, flow):
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "FAIL", reason="Canh máy sai")
-    flow.accept(code, 0)
-    flow.handover(code)
-    flow.accept(code, 1)
-    flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
+    flow.run_line(code, "L01")
+    flow.close_production(code, ok=6_000, short=4_000, short_reason="hết ca")
+    flow.pack(code, 6_000)
     flow.accept(code, 4)
+    flow.warehouse_in(code)
+
+    # Vòng 2 vào Bàn team leader rồi sang Sản xuất
+    flow.accept(code, 3)
     flow.run_line(code, "L01")
 
     ov = _ov(db)
@@ -118,20 +113,17 @@ def test_vong_2_dang_chay_sinh_canh_bao_RE_ROUND(db, make_mo, flow):
     assert re_round[0]["target_qty"] is not None
 
 
-def test_alerts_total_dem_ca_phan_chua_tra_ve(db, make_mo, flow):
-    """`alerts` có trần, `alerts_total` thì không — màn hình cần biết còn bao nhiêu.
-
-    Một lệnh QC trả về sinh HAI cảnh báo, không phải một: nó vừa nằm ở hàng đợi Kho
-    xuất chờ nhận lại (REWORK), vừa là một vòng 2 đang mở (RE_ROUND). Đây là hành vi
-    của bản cũ, giữ nguyên — gộp lại là một thay đổi nghiệp vụ, không phải tối ưu.
-    """
+def test_alerts_total_dem_ca_phan_chua_tra_ve(db, make_mo, flow, actor):
     for _ in range(2):
         code = make_mo()
         flow.accept(code, 0)
         flow.handover(code)
         flow.accept(code, 1)
-        flow.accept(code, 2)
-        flow.qc(code, "FAIL", reason="Canh máy sai")
+        mo, rnd = round_service.lock_round(db, code)
+        round_service.open_next_round(
+            db, mo=mo, current=rnd, returned_to_step=RETURN_TO_KHO,
+            reason="Làm lại từ đầu", actor_id=actor,
+        )
 
     day_du = _ov(db)
     assert day_du["alerts_total"] == 4

@@ -92,7 +92,7 @@ def overview(db: Session, *, alert_limit: int = 50) -> dict:
     """Gom cả màn Tổng quan vào MỘT lời gọi.
 
     Thứ tự cảnh báo là thứ tự KHẨN: chuyền đang dừng (xưởng đứng im) → quá giờ →
-    QC trả về → đang làm bù. Một lệnh vừa quá giờ vừa ở vòng 2+ chỉ hiện MỘT lần,
+    trả về → đang làm bù. Một lệnh vừa quá giờ vừa ở vòng 2+ chỉ hiện MỘT lần,
     ở mục nặng hơn — hiện hai lần là người đọc tưởng có hai việc phải xử.
     """
     rows = _running_scan(db)
@@ -258,7 +258,7 @@ def trace(db: Session, mo_code: str) -> dict:
         "rounds": [
             {
                 "round_no": rnd.round_no,
-                "started_from": rnd.returned_to_step,   # 0 Kho · 3 Bàn team leader — GHI, không suy
+                "started_from": rnd.returned_to_step,   # 0 Kho · 2 Bàn team leader — GHI, không suy
                 "opened_at": local_dt(rnd.opened_at),
                 "closed_at": local_dt(rnd.closed_at),
                 "target_qty": rnd.target_qty,

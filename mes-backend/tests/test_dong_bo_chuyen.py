@@ -22,9 +22,7 @@ def _toi_buoc_san_xuat(flow, code: str) -> None:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
 
 
 def test_chuyen_chua_chay_lan_nao_thi_chan(db, make_mo, flow):

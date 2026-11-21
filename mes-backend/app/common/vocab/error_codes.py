@@ -11,7 +11,7 @@ Bốn mã `NO_*_ACCEPT` cùng một nghĩa nên phải cùng một khuôn.
 Trước đây 53 mã này nằm rải trong 10 file dưới dạng chuỗi trần `code="..."`. Gõ sai
 một chữ thì FE nhận mã lạ mà backend không báo gì, vì chuỗi nào cũng hợp lệ.
 
-    raise DomainError("...", code=Err.QC_DONE)      ← gõ sai là AttributeError ngay
+    raise DomainError("...", code=Err.STEP_DONE)     ← gõ sai là AttributeError ngay
 
 `tests/test_error_codes.py` canh hai chiều: không còn chuỗi trần nào ngoài file này,
 và mọi mã khai ở đây đều có nơi dùng.
@@ -20,8 +20,8 @@ Nhóm theo NƠI SINH RA, không theo mức nghiêm trọng:
 
     Chung          mặc định của bốn lớp lỗi
     Lệnh (mo)      vòng đời một lệnh trước khi xuống xưởng
-    Bước / vòng    luật đi qua sáu trạm
-    Từng trạm      kho xuất · QC · sản xuất · đóng thùng · kho nhập
+    Bước / vòng    luật đi qua năm trạm
+    Từng trạm      kho xuất · setup · bàn team leader · sản xuất · kho nhập
     Từ CSDL        do CHECK / trigger / RULE ném ra, backend chỉ dịch lại
 """
 
@@ -57,8 +57,6 @@ class Err(StrEnum):
 
     # ── Chưa xong việc ở trạm trước, trạm sau không nhận được ───────────────
     NO_HANDOVER = "NO_HANDOVER"             # Kho chưa bàn giao
-    NO_QC = "NO_QC"                         # chưa có kết quả QC
-    QC_FAILED = "QC_FAILED"                 # QC FAIL, không đi tiếp được
     NO_PRODUCTION = "NO_PRODUCTION"         # chưa chốt sổ sản xuất
     NO_PACKING = "NO_PACKING"               # chưa kết thúc đóng thùng
 
@@ -66,13 +64,8 @@ class Err(StrEnum):
     NO_WAREHOUSE_OUT_ACCEPT = "NO_WAREHOUSE_OUT_ACCEPT"   # chưa quét nhận ở trạm 0
     HANDED_OVER = "HANDED_OVER"             # đã bàn giao rồi
 
-    # ══ Trạm 2 — QC ═════════════════════════════════════════════════════════
-    NO_QC_ACCEPT = "NO_QC_ACCEPT"                   # chưa quét nhận ở trạm 2
-    QC_DONE = "QC_DONE"                     # vòng này đã có kết quả
-    QC_REASON = "QC_REASON"                 # FAIL mà không có lý do (§5)
-
-    # ══ Trạm 4 — Sản xuất ═══════════════════════════════════════════════════
-    NO_PRODUCTION_ACCEPT = "NO_PRODUCTION_ACCEPT"   # chưa quét nhận ở trạm 4
+    # ══ Trạm 3 — Sản xuất ═══════════════════════════════════════════════════
+    NO_PRODUCTION_ACCEPT = "NO_PRODUCTION_ACCEPT"   # chưa quét nhận ở trạm 3
     NO_LINE = "NO_LINE"                     # chuyền chưa gán vào vòng
     LINE_ADDED = "LINE_ADDED"               # chuyền đã có trong vòng
     LINE_RUNNING = "LINE_RUNNING"           # đang chạy rồi
@@ -101,7 +94,7 @@ class Err(StrEnum):
     HOURLY_PEOPLE = "HOURLY_PEOPLE"         # thiếu số người đứng chuyền
     HOURLY_TARGET = "HOURLY_TARGET"         # thiếu sản lượng yêu cầu của khung
 
-    # ══ Đóng thùng — nằm TRONG trạm 4 ═════════════════════════════════════════
+    # ══ Đóng thùng — nằm TRONG trạm 3 ═════════════════════════════════════════
     NO_RUN = "NO_RUN"                       # chưa chuyền nào chạy (§7b)
     PACK_STARTED = "PACK_STARTED"           # đã bắt đầu đóng thùng rồi
     PACK_DONE = "PACK_DONE"                 # đã kết thúc rồi
@@ -114,8 +107,8 @@ class Err(StrEnum):
     BOX_DUP = "BOX_DUP"                     # khung giờ đó của ngày đó ghi thùng rồi
     BOX_OVER_MADE = "BOX_OVER_MADE"         # đóng nhiều hơn số đã làm ra — trigger ném
 
-    # ══ Trạm 5 — Kho nhập ═══════════════════════════════════════════════════
-    NO_WAREHOUSE_IN_ACCEPT = "NO_WAREHOUSE_IN_ACCEPT"     # chưa quét nhận ở trạm 5
+    # ══ Trạm 4 — Kho nhập ═══════════════════════════════════════════════════
+    NO_WAREHOUSE_IN_ACCEPT = "NO_WAREHOUSE_IN_ACCEPT"     # chưa quét nhận ở trạm 4
     WAREHOUSE_IN_DONE = "WAREHOUSE_IN_DONE"         # vòng này đã nhập kho rồi
 
     # ══ Quét QR ═════════════════════════════════════════════════════════════

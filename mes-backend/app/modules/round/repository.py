@@ -59,7 +59,7 @@ def lock_open_round(db: Session, mo_id: uuid.UUID) -> MoRound:
 def open_round(db: Session, *, mo: ManufacturingOrder, round_no: int, target_qty: int,
                required_sec: int, returned_to_step: int | None = None,
                reason: str | None = None) -> MoRound:
-    """`returned_to_step` GHI thẳng vào vòng: 0 Kho (QC FAIL) · 3 Bàn team leader (thiếu SL)."""
+    """`returned_to_step` GHI thẳng vào vòng: 0 Kho · 2 Bàn team leader (thiếu SL)."""
     rnd = MoRound(
         mo_id=mo.id, round_no=round_no, target_qty=target_qty, required_sec=required_sec,
         returned_to_step=returned_to_step, return_reason_text=reason,

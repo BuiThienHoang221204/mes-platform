@@ -19,9 +19,7 @@ def _toi_san_xuat(flow, code: str) -> None:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
 
 
 def test_chot_so_xong_van_con_o_tram_4(db, make_mo, flow):
@@ -53,7 +51,7 @@ def test_kho_nhap_quet_nhan_thi_buoc_4_moi_dong(db, make_mo, flow):
     flow.pack_start(code)
     flow.close_production(code, ok=1_000)
     flow.pack(code, qty=1_000)
-    flow.accept(code, 5)
+    flow.accept(code, 4)
 
     assert code not in [r["code"] for r in board_repo.at_station_rows(db, 4, limit=100)]
     assert code in [r["code"] for r in board_repo.at_station_rows(db, 5, limit=100)]

@@ -67,7 +67,6 @@ CONSTRAINT_MESSAGES: dict[str, tuple[str, int, str]] = {
     "mo_round_mo_id_round_no_key": (Err.ROUND_DUP, 409, "Vòng này đã tồn tại"),
     "mo_step_round_id_step_no_key": (Err.STEP_DUP, 409, "Bước này đã được nhận ở vòng hiện tại"),
     "step_closed_after_accept": (Err.STEP_TIME, 422, "Mốc đóng bước không được sớm hơn mốc nhận"),
-    "qc_fail_needs_reason": (Err.QC_REASON, 422, "QC không đạt — bắt buộc ghi lý do"),
     "prod_has_output": (Err.PROD_EMPTY, 422,
                         "Vòng này chưa làm ra PCS nào — không có gì để chốt sổ"),
     "ng_needs_reason": (Err.NG_REASON, 422, "Có hàng hỏng — bắt buộc ghi LÝ DO HỎNG"),

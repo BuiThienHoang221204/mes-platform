@@ -36,7 +36,7 @@ function alertText(a: OverviewAlert): string {
     case "LATE":
       return `quá giờ ${dur(a.late_sec ?? null)} — hạn mức vòng ${a.round_no} là ${dur(a.required_sec ?? null)} cho ${nfmt(a.target_qty ?? 0)} pcs.`;
     case "REWORK":
-      return `QC trả về Kho xuất, đang chờ nhận lại để chạy vòng ${a.round_no}.`;
+      return `Làm lại từ đầu, đang chờ nhận lại để chạy vòng ${a.round_no}.`;
     case "RE_ROUND":
       return `đang chạy vòng ${a.round_no} — còn ${nfmt(a.target_qty ?? 0)}/${nfmt(a.quantity ?? 0)} pcs phải làm bù.`;
   }
@@ -81,7 +81,7 @@ export function Overview() {
         <QtyStat
           label="Làm lại"
           value={reworkCount}
-          hint="QC trả về Kho xuất"
+          hint="Làm lại từ đầu"
           tone={reworkCount ? "danger" : "plain"}
         />
         <QtyStat

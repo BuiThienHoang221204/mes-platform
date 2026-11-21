@@ -53,13 +53,13 @@ def test_ma_nao_cung_co_noi_dung():
 
 
 def test_ma_di_ra_JSON_van_la_chuoi():
-    """`StrEnum` phải serialize thành chuỗi trần, không phải `"Err.QC_DONE"`.
+    """`StrEnum` phải serialize thành chuỗi trần, không phải `"Err.NO_HANDOVER"`.
 
     `main.domain_error_handler` đưa thẳng `exc.code` vào `JSONResponse`.
     """
-    e = DomainError("thử", code=Err.QC_DONE)
-    assert json.dumps({"code": e.code}) == '{"code": "QC_DONE"}'
-    assert e.code == "QC_DONE", "so sánh với chuỗi thường vẫn phải đúng"
+    e = DomainError("thử", code=Err.NO_HANDOVER)
+    assert json.dumps({"code": e.code}) == '{"code": "NO_HANDOVER"}'
+    assert e.code == "NO_HANDOVER", "so sánh với chuỗi thường vẫn phải đúng"
 
 
 def test_bon_lop_loi_giu_nguyen_ma_mac_dinh_va_ma_HTTP():

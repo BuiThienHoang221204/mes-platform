@@ -17,7 +17,6 @@ from app.modules.auth.schemas import LoginIn
 from app.modules.mo.schemas import MoCancelIn, MoCreateIn
 from app.modules.packing.schemas import PackingFinishIn, PackingHourlyIn
 from app.modules.production.schemas import HourlyIn, LineHoldIn, ProductionCloseIn
-from app.modules.qc.schemas import QcDecideIn
 
 
 def _mo(**kw):
@@ -44,7 +43,6 @@ def test_ten_con_hang_duoc_cat_dau_cach_thua():
 @pytest.mark.parametrize(
     "dung",
     [
-        lambda t: QcDecideIn(result="FAIL", reason_text=t),
         lambda t: LineHoldIn(line_code="L01", reason_text=t),
         lambda t: ProductionCloseIn(qty_ok=1, qty_ng=0, qty_short=0, ng_reason_text=t),
         lambda t: MoCancelIn(reason=t),

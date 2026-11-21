@@ -25,14 +25,14 @@ class Page(BaseModel, Generic[T]):
 MoCode = Annotated[str, Field(pattern=r"^M\d{6}$", examples=["M068820"])]
 StationNo = Annotated[
     int,
-    Field(ge=0, le=5, description="0 Kho · 1 Setup · 2 QC · 3 Bàn team leader · 4 SX · 5 Nhập kho"),
+    Field(ge=0, le=4, description="0 Kho xuất · 1 Setup · 2 Bàn team leader · 3 SX · 4 Kho nhập"),
 ]
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
 """Tên con hàng, tên người — bắt buộc có, không quá 200 ký tự."""
 
 ReasonText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=500)]
-"""Lý do BẮT BUỘC ghi: huỷ lệnh, QC không đạt, dừng chuyền."""
+"""Lý do BẮT BUỘC ghi: huỷ lệnh, dừng chuyền."""
 
 NoteText = Annotated[str, StringConstraints(strip_whitespace=True, max_length=500)]
 """Ghi chú tuỳ chọn — cho phép rỗng, chỉ chặn độ dài."""

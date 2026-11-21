@@ -156,7 +156,6 @@ def flow(db: Session, actor: uuid.UUID):
     from app.modules.packing import repository as packing_repo
     from app.modules.packing import service as packing_service
     from app.modules.production import service as production_service
-    from app.modules.qc import service as qc_service
     from app.modules.round import service as round_service
     from app.modules.round import step_service
     from app.modules.warehouse_in import service as warehouse_in_service
@@ -173,14 +172,6 @@ def flow(db: Session, actor: uuid.UUID):
 
         def handover(self, code: str):
             return warehouse_out_service.handover(db, code=code, actor_id=actor)
-
-        def qc(self, code: str, result: str, reason: str | None = None):
-            from app.common.vocab.enums import QcVerdict
-
-            return qc_service.qc_decide(
-                db, code=code, result=QcVerdict(result),
-                reason_code_id=None, reason_text=reason, actor_id=actor,
-            )
 
         def assign_only(self, code: str, line_code: str):
             """Gán chuyền nhưng KHÔNG cho chạy — dựng đúng vế `never_ran` của §16."""

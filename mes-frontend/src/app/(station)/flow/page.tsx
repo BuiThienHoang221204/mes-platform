@@ -14,9 +14,9 @@ import { useStationPerm } from "@/hooks/useStationPerm";
 import { useSessionStore } from "@/stores/useSessionStore";
 
 /**
- * Một dòng của sáu trạm. Bấm được hay không tuỳ quyền XEM ở trạm đó.
+ * Một dòng của năm trạm. Bấm được hay không tuỳ quyền XEM ở trạm đó.
  *
- * §12.4 — ngoài trạm của mình và trạm 4 thì không mở được màn hình trạm khác. Vẽ
+ * §12.4 — ngoài trạm của mình và trạm 3 (Sản xuất) thì không mở được màn hình trạm khác. Vẽ
  * dòng thành liên kết cho mọi người thì bấm vào là ăn 403: màn hình mời làm một
  * việc mà hệ thống sẽ từ chối, đúng loại lỗi khiến người vận hành hết tin nút bấm.
  *
@@ -97,7 +97,7 @@ export default function FlowPage() {
       <PageHeader
         kicker="Xem chung"
         title="Luồng toàn quy trình"
-        subtitle="Lệnh đi qua sáu trạm theo thứ tự. Hai chỗ có ngã rẽ quay lui — đó cũng là hai chỗ người vận hành hay hoang mang nhất."
+        subtitle="Lệnh đi qua năm trạm theo thứ tự. Quy trình quay lui khi thiếu số hoặc dừng chuyền."
       />
 
       <div className="grid gap-4 lg:grid-cols-2 lg:gap-5">
@@ -105,10 +105,10 @@ export default function FlowPage() {
           title="Đường đi chính"
           meta={
             openable.length === STATIONS.length
-              ? "sáu trạm · bấm để mở trạm nào cũng được"
+              ? "năm trạm · bấm để mở trạm nào cũng được"
               : openable.length
-                ? `sáu trạm · bạn mở được ${openable.map((s) => s.name).join(" và ")}`
-                : "sáu trạm · chỉ xem"
+                ? `năm trạm · bạn mở được ${openable.map((s) => s.name).join(" và ")}`
+                : "năm trạm · chỉ xem"
           }
           flush
         >
@@ -122,17 +122,12 @@ export default function FlowPage() {
         </AppCard>
 
         <div className="space-y-5">
-          <AppCard title="Hai đường quay lui">
+          <AppCard title="Quy tắc quay lui">
             <div className="space-y-3">
               <Note tone="warn">
-                <strong>Thiếu số · chuyền dừng quá lâu → về Bàn team leader.</strong> Máy đã canh
-                đúng, hàng đã qua QC, chỉ là chưa làm đủ. Không in lại phiếu, không canh máy lại,
-                không kiểm lại.
-              </Note>
-              <Note tone="danger">
-                <strong>QC không đạt → về Kho xuất.</strong> Không đạt nghĩa là canh máy sai nên
-                phải làm lại từ gốc. Cho về Bàn team leader thì lệnh nhảy qua luôn Setup và QC —
-                hàng lỗi đi thẳng vào chuyền mà không ai sửa máy.
+                <strong>Thiếu số · chuyền dừng quá lâu → về Bàn team leader (Trạm 2).</strong> Máy
+                đã canh đúng, chỉ là chưa làm đủ hoặc cần bố trí lại. Không in lại phiếu, không canh
+                máy lại.
               </Note>
             </div>
           </AppCard>

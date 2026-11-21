@@ -1,4 +1,4 @@
-"""Luật đóng thùng — chạy SONG SONG với sản xuất. Phòng Sản xuất, trong trạm 4.
+"""Luật đóng thùng — chạy SONG SONG với sản xuất. Phòng Sản xuất, trong trạm 3.
 
     packing_start(db, rnd, actor_id)       cần ít nhất một chuyền đã chạy
     packing_finish(db, rnd, qty_packed…)   ghi SL đã đóng
@@ -48,9 +48,9 @@ def open_book(db: Session, rnd, actor_id: uuid.UUID) -> Packing:
 
     row = packing_repo.save_packing(db, rnd.id, actor_id)
     db.flush()
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.PACK_START,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.PACK_START,
              to_state=State.PACKING, actor_id=actor_id)
-    mark_affected(4)
+    mark_affected(3)
     return row
 
 
@@ -87,9 +87,9 @@ def packing_finish(db: Session, *, code: str, qty_packed: int, note_text: str | 
     row.completed_at = clock.db_now(db)
     row.completed_by = actor_id
     db.flush()
-    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=4, action=Act.PACK_COMPLETE,
+    event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=3, action=Act.PACK_COMPLETE,
              to_state=State.FINISHED, reason=f"đóng {qty_packed} — {note_text or ''}",
              actor_id=actor_id)
-    # Packing xong: station 4 (atStation), station 5 (queue hiện lệnh này)
-    mark_affected(4, 5)
+    # Packing xong: station 3 (atStation), station 4 (queue hiện lệnh này)
+    mark_affected(3, 4)
     return row

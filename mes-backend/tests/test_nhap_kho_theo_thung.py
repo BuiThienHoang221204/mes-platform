@@ -21,9 +21,7 @@ def _toi_tram_4(flow, code: str) -> None:
     flow.handover(code)
     flow.accept(code, 1)
     flow.accept(code, 2)
-    flow.qc(code, "PASS")
     flow.accept(code, 3)
-    flow.accept(code, 4)
     flow.run_line(code, "L01")
 
 
@@ -39,7 +37,7 @@ def _toi_kho_nhap(flow, code: str, *, target: int, ok: int) -> None:
     flow.close_production(code, ok=ok, short=short,
                           short_reason="Hết ca chưa xong" if short else None)
     flow.pack(code, ok)
-    flow.accept(code, 5)
+    flow.accept(code, 4)
 
 
 def _so_da_nhan(db, code: str) -> int | None:
@@ -113,5 +111,5 @@ def test_chua_ket_thuc_dong_thung_thi_KHONG_QUET_NHAN_duoc(db, make_mo, flow):
     flow.close_production(code, ok=3_000)
 
     with pytest.raises(DomainError) as e:
-        flow.accept(code, 5)
+        flow.accept(code, 4)
     assert "đóng thùng" in str(e.value)

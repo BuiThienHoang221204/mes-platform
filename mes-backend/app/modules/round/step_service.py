@@ -1,10 +1,9 @@
-"""Nhận một bước — thao tác chung của cả sáu trạm.
+"""Nhận một bước — thao tác chung của cả năm trạm.
 
     guard_can_accept(db, rnd, step_no)     chặn nhảy bước, báo RÕ lý do
     accept(db, rnd, step_no, actor_id)     đóng bước trước + mở bước này
 
 Không có nút Hoàn thành: bước N đóng khi bước N+1 quét, `closed_by` là người quét sau (§9).
-LƯU Ý: `guard_can_accept` đọc sang 4 module trạm → phụ thuộc HAI CHIỀU, nên chuyển sang `scan/`.
 """
 
 from __future__ import annotations
@@ -20,7 +19,6 @@ from app.common.vocab.enums import STEP_NAMES
 from app.common.vocab.error_codes import Err
 from app.modules.packing import repository as packing_repo
 from app.modules.production import repository as production_repo
-from app.modules.qc import repository as qc_repo
 from app.modules.round import repository as round_repo
 from app.modules.round.models import MoRound, MoStep
 from app.modules.warehouse_out import repository as warehouse_out_repo
@@ -35,23 +33,17 @@ def guard_can_accept(db: Session, rnd: MoRound, step_no: int) -> None:
         # §3.2 — chưa bàn giao thì Setup không nhận được
         if warehouse_out_repo.get_warehouse_out(db, rnd.id) is None:
             raise DomainError("Chưa bàn giao — Setup không nhận được", code=Err.NO_HANDOVER)
-    elif step_no == 3:
-        qc = qc_repo.get_qc(db, rnd.id)
-        if qc is None:
-            raise DomainError("Chưa có kết quả QC", code=Err.NO_QC)
-        if qc.result != "PASS":
-            raise DomainError("QC không đạt — MO đã quay về Kho", code=Err.QC_FAILED)
-    elif step_no == 5:
+    elif step_no == 4:
         prod = production_repo.get_production(db, rnd.id)
         pack = packing_repo.get_packing(db, rnd.id)
         if prod is None:
             raise DomainError("Chưa chốt sổ Sản xuất", code=Err.NO_PRODUCTION)
         if pack is None or pack.completed_at is None:
             raise DomainError("Chưa kết thúc đóng thùng", code=Err.NO_PACKING)
-    elif step_no not in (0, 2, 4):
+    elif step_no not in (0, 2, 3):
         raise DomainError(f"Trạm {step_no} không hợp lệ")
 
-    # Các bước 1..5 đòi bước liền trước đã được nhận. Riêng bước 3 của vòng quay
+    # Các bước 1..4 đòi bước liền trước đã được nhận. Riêng bước 2 của vòng quay
     # về Bàn team leader được mở sẵn nên không bao giờ đi qua đây.
     if step_no >= 1:
         prev = round_repo.get_step(db, rnd.id, step_no - 1)

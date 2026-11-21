@@ -12,12 +12,11 @@ export const PLANNER = "PLANNER";
 
 /** phòng ban → { trạm: mức quyền } */
 const DEPT_PERM: Record<string, Record<number, Perm>> = {
-  WAREHOUSE_OUT: { 0: FULL, 4: VIEW },
-  SETUP: { 1: FULL, 4: VIEW },
-  QC: { 2: FULL, 4: VIEW },
-  WAITING: { 3: FULL, 4: FULL },   // §9b.4 — ngoại lệ DUY NHẤT
-  PRODUCTION: { 4: FULL },
-  WAREHOUSE_IN: { 5: FULL, 4: VIEW },
+  WAREHOUSE_OUT: { 0: FULL, 3: VIEW },
+  SETUP: { 1: FULL, 3: VIEW },
+  WAITING: { 2: FULL, 3: FULL },
+  PRODUCTION: { 3: FULL },
+  WAREHOUSE_IN: { 4: FULL, 3: VIEW },
 };
 
 const deptOf = (role: string): string | null => {
@@ -41,13 +40,12 @@ export function permissionFor(roles: string[], step: number): Perm {
 
 /** Trạm mà người này THAO TÁC được — dùng để đoán trạm mặc định khi đăng nhập. */
 export function ownStations(roles: string[]): number[] {
-  return [0, 1, 2, 3, 4, 5].filter((s) => permissionFor(roles, s) === FULL);
+  return [0, 1, 2, 3, 4].filter((s) => permissionFor(roles, s) === FULL);
 }
 
 const DEPT_LABEL: Record<string, string> = {
   WAREHOUSE_OUT: "Kho xuất",
   SETUP: "Setup máy",
-  QC: "QC",
   WAITING: "Bàn team leader",
   PRODUCTION: "Sản xuất",
   WAREHOUSE_IN: "Kho nhập",

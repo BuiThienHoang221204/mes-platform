@@ -1,4 +1,4 @@
-"""Bảng `warehouse_in` — sổ trạm 5 (Nhập kho). 1-1 với vòng.
+"""Bảng `warehouse_in` — sổ trạm 4 (Nhập kho). 1-1 với vòng.
 
 Đếm lại là TUỲ CHỌN: để trống thì lấy SL đã đóng thùng. Đây là nơi MO đóng lại
 hoặc mở vòng mới, nên cột ở đây ít mà hệ quả thì lớn.

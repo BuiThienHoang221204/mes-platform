@@ -96,7 +96,7 @@ def test_THIEU_QUYEN_van_la_403_chu_khong_phai_401(db, actor):
 
     app.dependency_overrides[get_db] = lambda: db
     app.dependency_overrides[current_actor] = lambda: Actor(
-        user_id=str(actor), full_name="Thợ QC", roles=("QC_MEMBER",)
+        user_id=str(actor), full_name="Thợ Setup", roles=("SETUP_MEMBER",)
     )
     try:
         with TestClient(app) as c:
