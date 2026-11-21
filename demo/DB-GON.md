@@ -247,34 +247,21 @@ Cả năm dùng chung một khuôn: `round_id` vừa là khoá chính vừa là 
 CREATE TABLE warehouse_out (
   round_id       uuid PRIMARY KEY REFERENCES mo_round(id) ON DELETE CASCADE,
   handed_over_at timestamptz NOT NULL DEFAULT now(),
-  handed_over_by uuid NOT NULL REFERENCES app_user(id)
+  handed_over_by uuid NOT NULL REFERENCES app_user(id),
+  note_text      text -- ghi chú dặn dò khi bàn giao xuống Setup (tuỳ chọn)
 );
 ```
 
-**Hai ô, hết.** §3 bỏ thao tác In phiếu nên không còn `first_printed_at` · `printed_by` ·
-`print_count`, và ràng buộc *"chưa in thì không bàn giao"* cũng không còn gì để chặn.
+**Ba ô, hết.** §3 bỏ thao tác In phiếu nên không còn `first_printed_at` · `printed_by` ·
+`print_count`, và ràng buộc *"chưa in thì không bàn giao"* cũng không còn gì để chặn. Cột `note_text`
+giữ lời nhắn của Kho gửi xuống cho thợ Setup máy (ví dụ: giao trước một phần phôi, lưu ý chỉnh khuôn).
 
 Mốc *Kho quét nhận lệnh* nằm ở `mo_step` bước 0 — bảng này chỉ giữ đúng cái `mo_step` không biết:
-**hàng rời kho lúc nào, ai giao**. Có dòng = đã bàn giao; chưa có dòng = Setup chưa được nhận.
+**hàng rời kho lúc nào, ai giao, ghi chú gì**. Có dòng = đã bàn giao; chưa có dòng = Setup chưa được nhận.
 
-### 5.2 `qc_result` — QC (§5)
-
-```sql
-CREATE TABLE qc_result (
-  round_id   uuid PRIMARY KEY REFERENCES mo_round(id) ON DELETE CASCADE,
-  result     qc_verdict NOT NULL,
-  checked_at timestamptz NOT NULL DEFAULT now(),
-  checked_by uuid NOT NULL REFERENCES app_user(id),
-  reason_code_id smallint REFERENCES reason_code(id),
-  reason_text    text,
-
-  CONSTRAINT qc_fail_needs_reason
-    CHECK (result <> 'FAIL' OR reason_code_id IS NOT NULL OR reason_text IS NOT NULL)
-);
-```
-
-**Kết quả QC gắn theo vòng.** Sang vòng mới là dòng mới — kết quả cũ vẫn nằm nguyên ở vòng cũ, không bị
-xoá, không lẫn sang.
+> **Ghi chú về QC (§5)**: Bảng `qc_result` và kiểu `qc_verdict` đã được **xoá bỏ hoàn toàn** từ migration `0012`
+> để rút gọn xưởng còn chuẩn **5 trạm liên tục (0..4)**:
+> 0: Lấy nguyên liệu → 1: Setup máy → 2: Team Leader → 3: Sản xuất & Đóng thùng → 4: Kho nhập.
 
 ### 5.3 `production` — chốt sổ Sản xuất (§7.5)
 

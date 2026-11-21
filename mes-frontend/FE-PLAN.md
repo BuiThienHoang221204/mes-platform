@@ -683,17 +683,16 @@ Làm việc →  endpoint của trạm → bàn giao · kết quả QC · chạy
 >
 > Đừng đi tìm `POST /setup/{code}`. Không có, và thêm vào là thêm một nút không có việc để làm.
 
-### 8.2 Bảng đầy đủ — sáu trạm
+### 8.2 Bảng đầy đủ — năm trạm (chuẩn 5 trạm không có QC)
 
 | Trạm | Màn hình | Hàng đợi | Nhận lệnh | Việc của trạm |
 | --- | --- | --- | --- | --- |
-| **0** Kho xuất | `/warehouse-out` | `GET /board/queue/0` | `POST /scan` | `POST /warehouse-out/{code}/handover`<br>`POST /warehouse-out/handover-batch` |
-| **1** Setup máy | `/setup` | `GET /board/queue/1` | `POST /scan` | **không có** — xem §8.1 |
-| **2** QC | `/qc` | `GET /board/queue/2` | `POST /scan` | `POST /qc/{code}` |
-| **3** Bàn team leader | `/waiting` | `GET /board/queue/3` | `POST /scan` | **không có** — xem §8.1 |
-| **4** Sản xuất | `/production` | `GET /board/queue/4` | `POST /scan` | `POST /lines/{code}/assign`<br>`POST /lines/{code}/start`<br>`POST /lines/{code}/hold`<br>`POST /production/{code}/close`<br>`POST /hourly/{code}` |
-| **4** Đóng thùng *(song song)* | `/production` (panel) | — | — | `POST /packing/{code}/start`<br>`POST /packing/{code}/hourly`<br>`POST /packing/{code}/finish` |
-| **5** Kho nhập | `/warehouse-in` | `GET /board/queue/5` | `POST /scan` | `POST /warehouse-in/{code}/complete` |
+| **0** Lấy nguyên liệu | `/warehouse-out` | `GET /board/queue/0` | `POST /scan` | `POST /warehouse-out/{code}/handover` *(kèm popup ghi chú HandoverModal)*<br>`POST /warehouse-out/handover-batch` |
+| **1** Setup máy | `/setup` | `GET /board/queue/1` *(hiển thị thẻ ghi chú từ Kho)* | `POST /scan` | **không có** — xem §8.1 |
+| **2** Team Leader | `/waiting` | `GET /board/queue/2` | `POST /scan` | **không có** — xem §8.1 *(nhận lệnh thiếu số quay về)* |
+| **3** Sản xuất | `/production` | `GET /board/queue/3` | `POST /scan` | `POST /lines/{code}/assign`<br>`POST /lines/{code}/start`<br>`POST /lines/{code}/hold`<br>`POST /production/{code}/close`<br>`POST /hourly/{code}` |
+| **3** Đóng thùng *(song song)* | `/production` (panel) | — | — | `POST /packing/{code}/start`<br>`POST /packing/{code}/hourly`<br>`POST /packing/{code}/finish` |
+| **4** Kho nhập | `/warehouse-in` | `GET /board/queue/4` | `POST /scan` | `POST /warehouse-in/{code}/complete` *(nhập kho theo thùng)* |
 
 **Mỗi trạm có HAI danh sách, không phải một.** `GET /board/queue/{station}` là việc **chưa ai nhận**;
 `GET /board/at/{station}` là việc **đang trong tay trạm** (đã quét nhận, chưa trạm sau lấy đi). Bản đầu
@@ -703,8 +702,8 @@ của FE chỉ có cái thứ nhất, nên quét xong lệnh biến mất khỏi
 Bước chỉ đóng khi trạm SAU quét nhận, nên danh sách thứ hai **không có nút "xong"**. Cột duy nhất đáng
 xem ở đó là thời gian giữ.
 
-**Màn hình của trạm 1 và 3 có gì?** Hàng đợi + ô quét + đồng hồ bước, hết. Chúng vẫn là màn thật và
-vẫn cần thiết — người ở Setup phải thấy lệnh nào đang chờ mình và đã nhận lúc mấy giờ.
+**Màn hình của trạm 1 và 2 có gì?** Hàng đợi + ô quét + đồng hồ bước, hết. Chúng vẫn là màn thật và
+vẫn cần thiết — người ở Setup phải thấy lệnh nào đang chờ mình, đọc ghi chú dặn dò của Kho xuất và biết đã nhận lúc mấy giờ.
 
 ### 8.3 Ngoài trạm
 

@@ -467,12 +467,11 @@ Chia theo **trạm**, đúng như người vận hành nghĩ — không chia the
 | **Quét** | `POST /v1/scan` | body chỉ `{raw}` — **trạm lấy từ token thiết bị** |
 | **Lệnh** | `POST /v1/mos` · `POST /v1/mos/bulk` | tạo lẻ · nhập từ tệp Excel |
 | | `POST /v1/mos/{code}/submit` · `POST /v1/mos/{code}/cancel` | huỷ bắt buộc có lý do |
-| **Kho** | `POST /v1/warehouse/{code}/handover` · `POST /v1/warehouse/handover-batch` | §7A cả lô |
-| **QC** | `POST /v1/qc/{code}` | `{result, reason_code_id?, reason_text?}` |
+| **Kho xuất** | `POST /v1/warehouse-out/{code}/handover` · `POST /v1/warehouse-out/handover-batch` | nhận `body: HandoverIn {note?}`, ghi chú dặn dò Setup (§7A cả lô) |
 | **Sản xuất** | `POST /v1/lines/{code}/assign` · `/start` · `/hold` | hold bắt buộc lý do |
 | | `POST /v1/production/{code}/close` | 3 số + 2 lý do |
-| **Đóng thùng** | `POST /v1/packing/{code}/start` · `/finish` | |
-| **Nhập kho** | `POST /v1/receipt/{code}/complete` | trả về `COMPLETED` hoặc `ROUND_OPENED` |
+| **Đóng thùng** | `POST /v1/packing/{code}/start` · `/finish` | song song với sản xuất |
+| **Nhập kho** | `POST /v1/warehouse-in/{code}/complete` | trả về `COMPLETED` hoặc `ROUND_OPENED` (trả về trạm 2) |
 | **Sản lượng giờ** | `POST /v1/hourly/{code}` | |
 | **Màn hình** | `GET /v1/board/running` · `/queue/{station}` · `/counts` | đọc view |
 | **Truy cứu** | `GET /v1/mos/{code}/trace` | mọi vòng · mọi bước · năng suất line · sản lượng giờ |
@@ -570,20 +569,20 @@ duyệt từ chối cặp đó rồi im lặng không gửi cookie. Origin khai 
 phòng Sản xuất. Mỗi phòng có Leader và Member — **hiện quyền y hệt nhau**, tách sẵn để sau siết không
 phải sửa dữ liệu tài khoản.
 
-| Phòng ban | Step của mình | Step 4 · Sản xuất | Step khác |
+| Phòng ban | Step của mình | Step 3 · Sản xuất | Step khác |
 |---|---|---|---|
-| Kho xuất · Setup · QC · Kho nhập | Full | **View** *(gồm cả Đóng thùng)* | — |
-| **Bàn team leader** | Full | **FULL** (kể cả Đóng thùng) | — |
-| Sản xuất | Full | *(chính nó)* | — |
+| Kho xuất · Setup · Kho nhập | Full | **View** *(gồm cả Đóng thùng)* | — |
+| **Team Leader** (trạm 2) | Full | **FULL** (kể cả Đóng thùng) | — |
+| Sản xuất (trạm 3) | Full | *(chính nó)* | — |
 | **PLANNER** | **Full mọi step** | Full | Full |
 
 `Bảng đang chạy` là ngoại lệ: **mọi phòng ban đều xem được**, vì nó là bảng tổng quan của cả xưởng.
 
-**13 vai** = 6 phòng × 2 cấp + PLANNER, **sinh ra từ** bảng quyền trong
-`common/security/permissions.py` chứ không gõ tay — thêm phòng ban thì danh sách tự dài ra:
+**11 vai** = 5 phòng × 2 cấp + PLANNER, **sinh ra từ** bảng quyền trong
+`common/security/permissions.py` chứ không gõ tay (đã bỏ QC từ migration 0012):
 
 ```
-WAREHOUSE_OUT_LEADER/MEMBER · SETUP_* · QC_* · WAITING_* · PRODUCTION_* · WAREHOUSE_IN_* · PLANNER
+WAREHOUSE_OUT_LEADER/MEMBER · SETUP_* · WAITING_* · PRODUCTION_* · WAREHOUSE_IN_* · PLANNER
 ```
 
 Một người giữ được nhiều vai (`roles` là mảng) — lúc đó lấy **mức cao nhất**.

@@ -1,36 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MES Frontend
 
-## Getting Started
+Giao diện vận hành hệ thống MES cho nhà máy sản xuất. Xây dựng bằng Next.js 15 (App Router), React 19, TailwindCSS và TanStack Query.
 
-First, run the development server:
+## 5 Trạm sản xuất liên tục (0..4)
 
+| Trạm | Tên màn hình | Đường dẫn | Thao tác chính |
+|---|---|---|---|
+| **0** | **Lấy nguyên liệu** | `/warehouse-out` | Quét nhận lệnh, Xem phiếu, Bàn giao xuống Setup (kèm popup ghi chú `HandoverModal`) |
+| **1** | **Setup máy** | `/setup` | Hàng đợi Setup (hiển thị thẻ lưu ý dặn dò từ Kho), Quét nhận gá máy |
+| **2** | **Team Leader** | `/waiting` | Bàn điều phối, nhận lệnh thiếu số hoặc sự cố quay về từ Kho nhập |
+| **3** | **Sản xuất** | `/production` | Chọn line chạy lệnh, ghi sản lượng giờ, dừng chuyền, đóng thùng song song, chốt ca |
+| **4** | **Kho nhập** | `/warehouse-in` | Quét nhận hàng thành phẩm, xác nhận nhập kho theo số thùng |
+
+### Các màn hình quản trị & hỗ trợ:
+* `/mos`: Lập kế hoạch, tạo lẻ, nhập danh sách MO từ Excel, submit lệnh.
+* `/running`: Bảng Kanban trực quan hoá tiến độ thời gian thực cho toàn xưởng.
+* `/reports`: Báo cáo sản lượng, KPI, hiệu suất chuyền.
+* `/scan`: Màn quét mã vạch / QR dùng chung cho thiết bị đầu đọc ở trạm.
+
+## Chạy Local
+
+1. Cài đặt thư viện:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Cấu hình biến môi trường (`.env`):
+```env
+BACKEND_ORIGIN=https://mes-backend-adts.onrender.com
+# hoặc khi chạy backend local:
+# BACKEND_ORIGIN=http://127.0.0.1:8000
+```
+*(Next.js tự động rewrite `/v1/*` sang `BACKEND_ORIGIN` để giải quyết vấn đề CORS & Cookie SameSite).*
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Khởi chạy:
+```bash
+pnpm dev
+```
+Truy cập: [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. Kiểm tra TypeScript & Build:
+```bash
+pnpm tsc --noEmit
+pnpm build
+```

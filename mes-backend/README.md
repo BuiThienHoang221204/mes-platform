@@ -17,8 +17,8 @@ cp .env.example .env      # rồi sửa MES_JWT_SECRET và POSTGRES_PASSWORD
 
 Những lần sau chỉ cần `./run.sh db && ./run.sh dev`.
 
-Tám tài khoản mẫu, PIN đều `1234`: `NV001` PLANNER · `NV010` KHO · `NV030` QC ·
-`NV050` LEADER · `NV060` PACKING. **Đổi PIN trước khi chạy thật.**
+Tám tài khoản mẫu, PIN đều `1234`: `NV001` PLANNER · `NV010` KHO · `NV020` SETUP ·
+`NV040` TEAM_LEADER · `NV050` LEADER · `NV060` PACKING. **Đổi PIN trước khi chạy thật.**
 
 Chạy hết bằng Docker, giống máy thật hơn nhưng không tự nạp lại khi sửa code:
 
@@ -59,15 +59,15 @@ curl -s localhost:8000/v1/scan -H "authorization: Bearer $TOKEN" \
      -d '{"raw":"XM068820"}'
 ```
 
-| Mã NV | Vai |
-|---|---|
-| NV001 | PLANNER |
-| NV010 · NV070 | KHO |
-| NV020 | SETUP |
-| NV030 | QC |
-| NV040 | BANCHO |
-| NV050 | LEADER |
-| NV060 | PACKING |
+| Mã NV | Vai | Trạm |
+|---|---|---|
+| NV001 | PLANNER | Toàn quyền các trạm |
+| NV010 · NV070 | WAREHOUSE_OUT | Trạm 0 — Lấy nguyên liệu / Kho xuất |
+| NV020 | SETUP | Trạm 1 — Setup máy |
+| NV040 | WAITING | Trạm 2 — Team Leader |
+| NV050 | PRODUCTION | Trạm 3 — Sản xuất |
+| NV060 | PACKING | Trạm 3 — Đóng thùng (song song) |
+| NV070 | WAREHOUSE_IN | Trạm 4 — Kho nhập |
 
 ## Bố cục
 
