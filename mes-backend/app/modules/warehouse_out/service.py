@@ -26,7 +26,8 @@ from app.common.event_bus import mark_affected
 
 
 @transactional
-def handover(db: Session, *, code: str, actor_id: uuid.UUID) -> WarehouseOut:
+def handover(db: Session, *, code: str, actor_id: uuid.UUID,
+             note_text: str | None = None) -> WarehouseOut:
     """Bàn giao xuống xưởng. Từ BRD v2.18 đây là thao tác DUY NHẤT của Kho —
     không còn bước In phiếu."""
     _, rnd = round_service.lock_round(db, code)
@@ -35,10 +36,11 @@ def handover(db: Session, *, code: str, actor_id: uuid.UUID) -> WarehouseOut:
     if warehouse_out_repo.get_warehouse_out(db, rnd.id) is not None:
         raise DomainError("Lệnh này đã bàn giao rồi", code=Err.HANDED_OVER)
 
-    row = warehouse_out_repo.save_handover(db, rnd.id, actor_id)
+    row = warehouse_out_repo.save_handover(db, rnd.id, actor_id, note_text=note_text)
     db.flush()
     event_repo.log(db, mo_id=rnd.mo_id, round_id=rnd.id, step_no=0, action=Act.KHO_HANDOVER,
-             from_state=STEP_NAMES[0], to_state=STEP_NAMES[1], actor_id=actor_id)
+             from_state=STEP_NAMES[0], to_state=STEP_NAMES[1], actor_id=actor_id,
+             reason=note_text)
     # Bàn giao: station 0 (atStation thay đổi), station 1 (queue hiện lệnh này)
     mark_affected(0, 1)
     return row

@@ -32,7 +32,7 @@ const TONE: Record<OverviewAlert["kind"], PillTone> = {
 function alertText(a: OverviewAlert): string {
   switch (a.kind) {
     case "HOLD":
-      return `chuyền ${(a.lines ?? []).join(", ")} đang dừng — ${a.reason}. Dừng quá lâu thì cân nhắc trả về Bàn team leader chạy vòng mới.`;
+      return `chuyền ${(a.lines ?? []).join(", ")} đang dừng — ${a.reason}. Dừng quá lâu thì cân nhắc trả về Team Leader chạy vòng mới.`;
     case "LATE":
       return `quá giờ ${dur(a.late_sec ?? null)} — hạn mức vòng ${a.round_no} là ${dur(a.required_sec ?? null)} cho ${nfmt(a.target_qty ?? 0)} pcs.`;
     case "REWORK":

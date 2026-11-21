@@ -8,7 +8,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, func
+from sqlalchemy import DateTime, ForeignKey, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.common.base import Base
@@ -21,3 +21,4 @@ class WarehouseOut(Base):
     handed_over_at: Mapped[datetime] = mapped_column(DateTime(timezone=True),
                                                      nullable=False, server_default=func.now())
     handed_over_by: Mapped[uuid.UUID] = mapped_column(ForeignKey("app_user.id"), nullable=False)
+    note_text: Mapped[str | None] = mapped_column(Text, nullable=True)

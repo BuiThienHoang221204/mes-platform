@@ -1,6 +1,6 @@
 "use client";
 
-import { Package } from "@/components/common/PhosphorIcons";
+import { ChatText, Package } from "@/components/common/PhosphorIcons";
 import { AppCard } from "@/components/ui/AppCard";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -64,6 +64,13 @@ export function QueueList({ station, title = "Hàng đợi", fill = true, action
                     <span className="block truncate text-caption text-fg-subtle">
                       {waitingSince(station)} · {dur(r.waiting_sec)}
                     </span>
+                    {r.handover_note ? (
+                      <span className="mt-1.5 flex items-start gap-1.5 rounded border border-warn-line/60 bg-warn-soft/60 px-2 py-0.5 text-caption text-warn-fg sm:w-fit">
+                        <ChatText size={15} className="mt-0.5 shrink-0 text-warn" />
+                        <span className="font-medium text-warn">Lưu ý từ Kho:</span>
+                        <span className="break-words text-fg">{r.handover_note}</span>
+                      </span>
+                    ) : null}
                   </span>
 
                   <span className="w-40 shrink-0 sm:w-auto">

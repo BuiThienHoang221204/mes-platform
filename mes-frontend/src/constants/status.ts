@@ -50,7 +50,7 @@ export const MO_FILTERS = [
 export const WI_OUTCOME = {
   /** Đủ số lượng — đơn đóng lại. */
   COMPLETED: "COMPLETED",
-  /** Chưa đủ — tự mở vòng mới về Bàn team leader (§6b). */
+  /** Chưa đủ — tự mở vòng mới về Team Leader (§6b). */
   ROUND_OPENED: "ROUND_OPENED",
 } as const;
 export type WiOutcomeValue = (typeof WI_OUTCOME)[keyof typeof WI_OUTCOME];

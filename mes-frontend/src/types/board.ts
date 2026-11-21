@@ -12,9 +12,11 @@ export type QueueRow = {
   round_no: number;
   target_qty?: number;
   waiting_sec?: number;
-  /** Riêng hàng đợi trạm 5 — hai số này đi cùng nhau để quy pcs ra THÙNG. */
+  /** Riêng hàng đợi trạm 4 — hai số này đi cùng nhau để quy pcs ra THÙNG. */
   qty_packed?: number;
   pcs_per_box?: number;
+  /** Ghi chú bàn giao từ Kho/Lấy nguyên liệu gửi xuống Setup (nếu có). */
+  handover_note?: string | null;
 };
 
 /** `/board/at/{station}` — lệnh ĐANG trong tay trạm, khác hẳn hàng đợi. */
@@ -31,6 +33,8 @@ export type AtStationRow = {
   holding_sec: number;
   /** Trạm 0 — đã bàn giao xuống xưởng chưa. */
   handed_over_at: string | null;
+  /** Ghi chú bàn giao từ Kho/Lấy nguyên liệu gửi xuống Setup (nếu có). */
+  handover_note?: string | null;
   /** Trạm 3 — đã đóng được bao nhiêu, xong lúc nào. */
   qty_packed: number | null;
   packing_done_at: string | null;

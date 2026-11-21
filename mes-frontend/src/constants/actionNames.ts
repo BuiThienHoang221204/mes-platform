@@ -27,13 +27,13 @@ export const ACTION_META: Record<string, ActionMeta> = {
 
   // Vòng chạy
   ROUND_OPEN: { label: "Mở vòng mới", tone: "accent" },
-  RETURN_KHO: { label: "Trả về Kho xuất", tone: "danger" },
-  RETURN_BANCHO: { label: "Trả về Bàn team leader", tone: "warn" },
+  RETURN_KHO: { label: "Trả về Lấy nguyên liệu", tone: "danger" },
+  RETURN_BANCHO: { label: "Trả về Team Leader", tone: "warn" },
 
   // Quét nhận năm trạm
-  STEP0_ACCEPT: { label: "Kho xuất nhận", tone: "accent" },
+  STEP0_ACCEPT: { label: "Lấy nguyên liệu nhận", tone: "accent" },
   STEP1_ACCEPT: { label: "Setup máy nhận", tone: "accent" },
-    STEP2_ACCEPT: { label: "Bàn team leader nhận", tone: "accent" },
+    STEP2_ACCEPT: { label: "Team Leader nhận", tone: "accent" },
   STEP3_ACCEPT: { label: "Sản xuất nhận", tone: "accent" },
   STEP4_ACCEPT: { label: "Kho nhập nhận", tone: "accent" },
 

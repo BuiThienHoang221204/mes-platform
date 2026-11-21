@@ -14,9 +14,10 @@ from sqlalchemy.orm import Session
 from app.modules.warehouse_out.models import WarehouseOut
 
 
-def save_handover(db: Session, round_id: uuid.UUID, by: uuid.UUID) -> WarehouseOut:
+def save_handover(db: Session, round_id: uuid.UUID, by: uuid.UUID,
+                  note_text: str | None = None) -> WarehouseOut:
     """Ghi dòng bàn giao. Có dòng = đã bàn giao — Setup nhìn vào đây để biết."""
-    row = WarehouseOut(round_id=round_id, handed_over_by=by)
+    row = WarehouseOut(round_id=round_id, handed_over_by=by, note_text=note_text)
     db.add(row)
     return row
 

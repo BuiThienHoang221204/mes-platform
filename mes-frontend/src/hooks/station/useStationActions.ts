@@ -12,8 +12,16 @@ export function useHandover() {
   const invalidate = useInvalidateStation();
   const toast = useUiStore((s) => s.toast);
   return useMutation({
-    mutationFn: (code: string) => stationService.handover(code),
-    onSuccess: (r, code) => { invalidate(code); toast(r.message); },
+    mutationFn: (arg: string | { code: string; note?: string | null }) => {
+      const code = typeof arg === "string" ? arg : arg.code;
+      const note = typeof arg === "string" ? undefined : arg.note;
+      return stationService.handover(code, note);
+    },
+    onSuccess: (r, arg) => {
+      const code = typeof arg === "string" ? arg : arg.code;
+      invalidate(code);
+      toast(r.message);
+    },
     onError: (e: ApiError) => toast(e.message, "danger"),
   });
 }

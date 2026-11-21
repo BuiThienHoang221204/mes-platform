@@ -18,7 +18,7 @@ function SetupBody() {
             <>
               <StationScanArea
                 station={STATION}
-                hint="Quét QR để Setup nhận. Chỉ nhận được lệnh Kho xuất đã bàn giao."
+                hint="Quét QR để Setup nhận. Chỉ nhận được lệnh Lấy nguyên liệu đã bàn giao."
               />
               <QueueList station={STATION} title="Hàng đợi Setup" />
             </>

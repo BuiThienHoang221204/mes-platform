@@ -52,7 +52,7 @@ export function StepTable({ round, totals }: Props) {
       <p className="border-t border-line px-4 py-3 text-body-sm text-fg-muted">
         Bảng cộng dồn qua <strong className="text-fg">mọi vòng</strong>, kèm chú thích khi bước đó
         chạy nhiều lần. Chỉ đọc vòng hiện tại thì lệnh đi qua Setup hai lần mà vòng cuối bắt đầu từ
-        Bàn team leader sẽ hiện dấu gạch — nhìn vào tưởng chưa từng canh máy.
+        Team Leader sẽ hiện dấu gạch — nhìn vào tưởng chưa từng canh máy.
       </p>
     </AppCard>
   );

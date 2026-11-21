@@ -14,9 +14,9 @@ export const STATION_FLOW: Record<number, StationFlowInfo> = {
     next: "Setup máy",
   },
   1: {
-    from: "Kho xuất bàn giao",
+    from: "Lấy nguyên liệu bàn giao",
     here: "Canh máy, gá khuôn — làm xong KHÔNG bấm gì",
-    next: "Bàn team leader quét nhận là bước này tự đóng",
+    next: "Team Leader quét nhận là bước này tự đóng",
   },
   2: {
     from: "Setup máy",
@@ -24,7 +24,7 @@ export const STATION_FLOW: Record<number, StationFlowInfo> = {
     next: "Sản xuất",
   },
   3: {
-    from: "Bàn team leader",
+    from: "Team Leader",
     here: "Chia chuyền, chạy, ghi sản lượng từng giờ, đóng thùng",
     next: "Kho nhập",
   },
@@ -32,15 +32,15 @@ export const STATION_FLOW: Record<number, StationFlowInfo> = {
     from: "Sản xuất đóng thùng xong",
     here: "Đối chiếu số lượng rồi nhập kho",
     next: "Đủ → Hoàn thành lệnh",
-    back: "Thiếu → về Bàn team leader, mở vòng mới",
+    back: "Thiếu → về Team Leader, mở vòng mới",
   },
 };
 
 export const WAITING_SINCE: Record<number, string> = {
   0: "Chờ từ lúc mở vòng",
-  1: "Chờ từ lúc Kho xuất bàn giao",
+  1: "Chờ từ lúc Lấy nguyên liệu bàn giao",
   2: "Chờ từ lúc Setup máy quét nhận",
-  3: "Chờ từ lúc Bàn team leader quét nhận",
+  3: "Chờ từ lúc Team Leader quét nhận",
   4: "Chờ từ lúc đóng thùng xong",
 };
 

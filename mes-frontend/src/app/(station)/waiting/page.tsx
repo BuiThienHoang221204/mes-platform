@@ -13,7 +13,7 @@ const STATION = 2;
 
 function WaitingBody() {
   return (
-    <StationPage station={STATION} title="Bàn team leader">
+    <StationPage station={STATION} title="Team Leader">
       {(step) => (
         <>
           {step === "scan" ? (
@@ -22,7 +22,7 @@ function WaitingBody() {
                 station={STATION}
                 hint="Quét QR để nhận lệnh vào bàn chờ. Lệnh thiếu số từ Kho nhập cũng quay về đây."
               />
-              <QueueList station={STATION} title="Hàng đợi Bàn team leader" />
+              <QueueList station={STATION} title="Hàng đợi Team Leader" />
             </>
           ) : (
             <AtStationTable

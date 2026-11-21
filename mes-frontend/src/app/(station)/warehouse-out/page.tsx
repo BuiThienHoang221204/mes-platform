@@ -11,21 +11,22 @@ import { StationScanArea } from "@/components/station/StationScanArea";
 import { AppButton } from "@/components/ui/AppButton";
 import { AppCard } from "@/components/ui/AppCard";
 import { QtyStat } from "@/components/ui/QtyStat";
+import { HandoverModal } from "@/components/warehouse-out/HandoverModal";
 import { FULL } from "@/constants/roles";
 import { useAtStation, useQueue } from "@/hooks/board/useBoard";
-import { useHandover, useHandoverBatch } from "@/hooks/station/useStationActions";
+import { useHandoverBatch } from "@/hooks/station/useStationActions";
 import { useStationPerm } from "@/hooks/useStationPerm";
 import type { AtStationRow } from "@/types/board";
 
 const STATION = 0;
 
 function WarehouseOutBody() {
-  const handover = useHandover();
   const batch = useHandoverBatch();
   const { items: at, total: atTotal } = useAtStation(STATION);
   const { items: queue, total: queueTotal } = useQueue(STATION);
   const canWrite = useStationPerm(STATION) === FULL;
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [handoverRow, setHandoverRow] = useState<AtStationRow | null>(null);
 
   const pending = at.filter((r) => !r.handed_over_at);
   const handed = atTotal - pending.length;
@@ -38,8 +39,7 @@ function WarehouseOutBody() {
       <AppButton
         size="md"
         variant="primary"
-        disabled={handover.isPending}
-        onClick={() => handover.mutate(r.code)}
+        onClick={() => setHandoverRow(r)}
         icon={<Truck size={24} />}
         aria-label="Bàn giao"
       >
@@ -66,7 +66,7 @@ function WarehouseOutBody() {
                   hint="Quét QR để Kho nhận lệnh. Nhận xong thì sang bước Bàn giao."
                 />
               </div>
-              <QueueList station={STATION} title="Hàng đợi Kho xuất" fill />
+              <QueueList station={STATION} title="Hàng đợi Lấy nguyên liệu" fill />
             </div>
           ) : null}
 
@@ -95,6 +95,7 @@ function WarehouseOutBody() {
                   </AppButton>
                 </div>
               ) : null}
+              <HandoverModal row={handoverRow} onClose={() => setHandoverRow(null)} />
             </div>
           ) : null}
 

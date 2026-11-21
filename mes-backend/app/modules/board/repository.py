@@ -50,6 +50,7 @@ QUEUE_SQL: dict[int, str] = {
     """,
     1: """
         SELECT m.code, m.product_name, m.quantity, r.round_no, r.target_qty,
+               w.note_text AS handover_note,
                EXTRACT(EPOCH FROM (now() - w.handed_over_at))::int AS waiting_sec
         FROM mo_round r JOIN manufacturing_order m ON m.id = r.mo_id
         JOIN warehouse_out w ON w.round_id = r.id
@@ -122,7 +123,9 @@ AT_STATION_SQL = """
            r.round_no, r.target_qty, r.required_sec,
            timezone(:tz, s.accepted_at) AS accepted_at, u.full_name AS accepted_by,
            EXTRACT(EPOCH FROM (now() - s.accepted_at))::int AS holding_sec,
-           timezone(:tz, w.handed_over_at) AS handed_over_at, pk.qty_packed,
+           timezone(:tz, w.handed_over_at) AS handed_over_at,
+           w.note_text AS handover_note,
+           pk.qty_packed,
            timezone(:tz, pk.completed_at) AS packing_done_at
     FROM mo_step s
     JOIN mo_round r ON r.id = s.round_id

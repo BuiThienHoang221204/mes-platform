@@ -67,6 +67,12 @@ function MoSlipDetailInner({ row: r }: Props, ref: React.Ref<HTMLDivElement>) {
           <div className="flex justify-between"><span className="text-fg-muted">Quy cách</span><span className="font-medium">{packing}</span></div>
           <div className="flex justify-between"><span className="text-fg-muted">SL còn thiếu</span><span className="font-medium">{r.target_qty.toLocaleString("vi-VN")}</span></div>
           <div className="flex justify-between"><span className="text-fg-muted">Số lần trả lại</span><span className="font-medium">{returns}</span></div>
+          {r.handover_note ? (
+            <div className="flex justify-between sm:col-span-2 rounded bg-warn-soft/50 px-2.5 py-1.5 text-body-sm text-warn-fg border border-warn-line/50">
+              <span className="font-medium text-warn">Ghi chú bàn giao:</span>
+              <span className="font-medium text-fg">{r.handover_note}</span>
+            </div>
+          ) : null}
         </div>
         <AppButton
           size="sm"

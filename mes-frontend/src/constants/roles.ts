@@ -44,9 +44,9 @@ export function ownStations(roles: string[]): number[] {
 }
 
 const DEPT_LABEL: Record<string, string> = {
-  WAREHOUSE_OUT: "Kho xuất",
+  WAREHOUSE_OUT: "Lấy nguyên liệu",
   SETUP: "Setup máy",
-  WAITING: "Bàn team leader",
+  WAITING: "Team Leader",
   PRODUCTION: "Sản xuất",
   WAREHOUSE_IN: "Kho nhập",
 };

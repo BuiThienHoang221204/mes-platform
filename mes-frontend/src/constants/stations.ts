@@ -1,8 +1,8 @@
 /** Năm trạm — một nguồn duy nhất, chép từ `app/common/vocab/enums.py`. */
 export const STATIONS = [
-  { no: 0, name: "Kho xuất", route: "/warehouse-out" },
+  { no: 0, name: "Lấy nguyên liệu", route: "/warehouse-out" },
   { no: 1, name: "Setup máy", route: "/setup" },
-  { no: 2, name: "Bàn team leader", route: "/waiting" },
+  { no: 2, name: "Team Leader", route: "/waiting" },
   { no: 3, name: "Sản xuất", route: "/production" },
   { no: 4, name: "Kho nhập", route: "/warehouse-in" },
 ] as const;

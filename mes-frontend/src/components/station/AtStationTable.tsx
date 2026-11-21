@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { Clock } from "@/components/common/PhosphorIcons";
+import { ChatText, Clock } from "@/components/common/PhosphorIcons";
 import { AppCard } from "@/components/ui/AppCard";
 import { DataTable, type Column } from "@/components/ui/DataTable";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -39,7 +39,17 @@ export function AtStationTable({ station, title, fill = true, action }: Props) {
     key: r.code,
     cells: [
       r.code,
-      r.product_name,
+      station === 1 && r.handover_note ? (
+        <div>
+          <span>{r.product_name}</span>
+          <span className="mt-0.5 flex items-center gap-1 text-caption text-warn">
+            <ChatText size={14} className="shrink-0" />
+            <span className="truncate max-w-[200px] sm:max-w-xs">{r.handover_note}</span>
+          </span>
+        </div>
+      ) : (
+        r.product_name
+      ),
       nfmt(r.target_qty),
       ...(showBoxes
         ? [

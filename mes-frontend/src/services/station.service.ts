@@ -4,14 +4,15 @@ import type { ScanOut, WarehouseInOut } from "@/types/mo";
 
 /**
  * `POST /scan` là thao tác NHẬN của CẢ NĂM TRẠM (FE-PLAN §8.1).
- * Trạm suy từ VAI người quét. Chỉ vai đa trạm (Bàn team leader, PLANNER) mới
+ * Trạm suy từ VAI người quét. Chỉ vai đa trạm (Team Leader, PLANNER) mới
  * phải khai `station`; server luôn kiểm lại quyền.
  */
 export const stationService = {
   scan: (raw: string, station?: number | null) =>
     postData<ScanOut>("/scan", station == null ? { raw } : { raw, station }),
 
-  handover: (code: string) => postData<OkOut>(`/warehouse-out/${code}/handover`),
+  handover: (code: string, note?: string | null) =>
+    postData<OkOut>(`/warehouse-out/${code}/handover`, note ? { note } : {}),
 
   handoverBatch: (codes: string[]) =>
     postData<OkOut>("/warehouse-out/handover-batch", codes),

@@ -44,7 +44,7 @@ export function nextAction(
       tone: "danger",
       label: "Cần xử lý",
       title: `Chuyền ${held.map((l) => l.line_code).join(", ")} đang dừng`,
-      hint: `${held[0].hold_reason_text}. Thời gian thực tế đang đứng. Cho chạy lại, hoặc trả lệnh về Bàn team leader nếu dừng quá lâu.`,
+      hint: `${held[0].hold_reason_text}. Thời gian thực tế đang đứng. Cho chạy lại, hoặc trả lệnh về Team Leader nếu dừng quá lâu.`,
       goto: "lines",
     };
 

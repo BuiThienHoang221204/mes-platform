@@ -16,16 +16,18 @@ from fastapi import APIRouter
 from app.common.deps import ActorDep, DbDep
 from app.common.schemas import OkOut
 from app.modules.warehouse_out import service as warehouse_out_service
+from app.modules.warehouse_out.schemas import HandoverIn
 
 router = APIRouter(tags=["warehouse-out"])
 
 
 @router.post("/warehouse-out/{code}/handover", response_model=OkOut)
-def handover(code: str, db: DbDep, actor: ActorDep) -> OkOut:
+def handover(code: str, db: DbDep, actor: ActorDep, body: HandoverIn | None = None) -> OkOut:
     """Kho bàn giao một lệnh xuống xưởng.
     Chưa bàn giao thì Setup không quét nhận được (§3.2)."""
     actor.require_step(0)
-    warehouse_out_service.handover(db, code=code, actor_id=uuid.UUID(actor.user_id))
+    note = body.note if body else None
+    warehouse_out_service.handover(db, code=code, actor_id=uuid.UUID(actor.user_id), note_text=note)
     return OkOut(message=f"{code} đã bàn giao — Setup nhận được rồi")
 
 

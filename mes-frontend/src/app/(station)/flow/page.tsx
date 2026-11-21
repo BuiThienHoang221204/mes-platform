@@ -125,7 +125,7 @@ export default function FlowPage() {
           <AppCard title="Quy tắc quay lui">
             <div className="space-y-3">
               <Note tone="warn">
-                <strong>Thiếu số · chuyền dừng quá lâu → về Bàn team leader (Trạm 2).</strong> Máy
+                <strong>Thiếu số · chuyền dừng quá lâu → về Team Leader (Trạm 2).</strong> Máy
                 đã canh đúng, chỉ là chưa làm đủ hoặc cần bố trí lại. Không in lại phiếu, không canh
                 máy lại.
               </Note>
@@ -145,7 +145,7 @@ export default function FlowPage() {
                 <ArrowRight size={18} className="mt-1 shrink-0" />
                 <span>
                   <strong className="text-fg">Bước trước đóng khi bước sau nhận.</strong> Setup và
-                  Bàn team leader không có nút Hoàn thành — trạm sau quét là bước trước tự đóng.
+                  Team Leader không có nút Hoàn thành — trạm sau quét là bước trước tự đóng.
                 </span>
               </p>
             </div>

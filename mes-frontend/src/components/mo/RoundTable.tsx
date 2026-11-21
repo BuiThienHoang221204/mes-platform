@@ -40,7 +40,7 @@ export function RoundTable({ rounds }: { rounds: TraceRound[] }) {
             </StatusPill>
           ) : null}
         </span>,
-        `${r.started_from == null ? "Kho xuất" : stationName(r.started_from)} · ${hhmm(r.opened_at)}`,
+        `${r.started_from == null ? "Lấy nguyên liệu" : stationName(r.started_from)} · ${hhmm(r.opened_at)}`,
         hhmm(r.packing?.completed_at ?? null),
         nfmt(p?.qty_ok),
         nfmt(p?.qty_ng),
@@ -69,8 +69,8 @@ export function RoundTable({ rounds }: { rounds: TraceRound[] }) {
         </p>
         <p>
           <strong className="text-fg">Bắt đầu từ</strong> đọc thẳng nơi vòng đó mở, ghi lại ngay lúc
-          mở vòng — không suy từ các bước đã đi. Suy thì vòng vừa mở luôn bị đoán nhầm thành Bàn
-          team leader, kể cả khi vừa trả nó về Kho.
+          mở vòng — không suy từ các bước đã đi. Suy thì vòng vừa mở luôn bị đoán nhầm thành Team
+          Leader, kể cả khi vừa trả nó về Kho.
         </p>
       </div>
     </AppCard>
