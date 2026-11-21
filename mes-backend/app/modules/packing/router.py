@@ -29,7 +29,7 @@ router = APIRouter(tags=["packing"])
 def packing_start(code: str, db: DbDep, actor: ActorDep) -> OkOut:
     """Bắt đầu đóng thùng — SONG SONG với sản xuất.
     Cần ít nhất một chuyền đã vào Đang lắp ráp."""
-    actor.require_step(4)
+    actor.require_step(3)
     packing_service.packing_start(db, code=code, actor_id=uuid.UUID(actor.user_id))
     return OkOut(message=f"{code} — bắt đầu đóng thùng (song song với SX)")
 
@@ -43,7 +43,7 @@ def packing_hourly(code: str, body: PackingHourlyIn, db: DbDep,
     thiếu**: thiếu là chưa làm ra được và phải làm thêm; lẻ thì giờ sau gom tiếp, và
     cuối vòng vào thùng lẻ (thùng cuối của đơn được đóng thiếu, §7b.2).
     """
-    actor.require_step(4)
+    actor.require_step(3)
     t = packing_hourly_service.add_packing_hourly(
         db, code=code, work_date=body.work_date, slot_hour=body.slot_hour,
         boxes=body.boxes, note=body.note, actor_id=uuid.UUID(actor.user_id),
@@ -62,7 +62,7 @@ def packing_hourly(code: str, body: PackingHourlyIn, db: DbDep,
 def packing_finish(code: str, body: PackingFinishIn, db: DbDep, actor: ActorDep) -> OkOut:
     """Kết thúc đóng thùng, ghi SL đã đóng.
     Đây mới là con số đẩy tiến độ MO, không phải SL đạt."""
-    actor.require_step(4)
+    actor.require_step(3)
     packing_service.packing_finish(db, code=code, qty_packed=body.qty_packed,
                                    note_text=body.note_text,
                                    actor_id=uuid.UUID(actor.user_id))

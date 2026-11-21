@@ -87,7 +87,7 @@ def mo_events(code: str, db: DbDep, actor: ActorDep, limit: int = 10, offset: in
     Tách khỏi `trace` vì nhật ký là phần duy nhất của truy cứu lớn không giới hạn:
     một MO chạy nhiều vòng có hàng trăm dòng, mà màn hình chỉ hiện mười.
     """
-    actor.require_step(4, VIEW)
+    actor.require_step(3, VIEW)
     return board_service.events(
         db, code, limit=max(1, min(limit, 100)), offset=max(0, offset)
     )
@@ -100,19 +100,19 @@ def round_hourly(code: str, round_no: int, db: DbDep, actor: ActorDep, page: Pag
     cứu: `steps` tối đa 6, `lines` tối đa 14, số vòng hiếm khi quá 5 — còn sổ giờ thì
     một vòng chạy một tuần đã ~56 dòng, chạy một tháng là hơn hai trăm.
     """
-    actor.require_step(4, VIEW)
+    actor.require_step(3, VIEW)
     limit, offset = page
     return board_service.round_hourly(db, code, round_no, limit=limit, offset=offset)
 
 @router.get("/mos/{code}/rounds/{round_no}/boxes")
 def round_boxes(code: str, round_no: int, db: DbDep, actor: ActorDep, page: PageDep) -> dict:
     """MỘT TRANG sổ thùng theo giờ của một vòng."""
-    actor.require_step(4, VIEW)
+    actor.require_step(3, VIEW)
     limit, offset = page
     return board_service.round_boxes(db, code, round_no, limit=limit, offset=offset)
 
 @router.get("/mos/{code}/trace")
 def trace(code: str, db: DbDep, actor: ActorDep) -> dict:
     """Truy vết một MO: mọi vòng, từng bước, năng suất chuyền, sản lượng giờ, nhật ký."""
-    actor.require_step(4, VIEW)
+    actor.require_step(3, VIEW)
     return board_service.trace(db, code)

@@ -3,8 +3,8 @@
     models.py  schemas.py  repository.py  service.py  hourly_service.py  router.py
     bảng: packing · packing_hourly
 
-Thuộc phòng **Sản xuất**, nằm TRONG trạm 4 (§7b, §9b.4) — không có vai riêng, mọi
-endpoint kiểm bằng `require_step(4)`. Bàn team leader cũng đóng thùng được.
+Thuộc phòng **Sản xuất**, nằm TRONG trạm 3 (§7b, §9b.4) — không có vai riêng, mọi
+endpoint kiểm bằng `require_step(3)`. Bàn team leader cũng đóng thùng được.
 
 `hourly_service` tách riêng theo đúng khuôn của `production/`: ghi ĐỘC LẬP với chốt
 sổ, người đếm thùng trong ca và người chốt `qty_packed` là hai người khác nhau.

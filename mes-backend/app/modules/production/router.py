@@ -34,7 +34,7 @@ router = APIRouter(tags=["production"])
 @router.post("/lines/{code}/assign", response_model=OkOut)
 def assign_line(code: str, body: LineAssignIn, db: DbDep, actor: ActorDep) -> OkOut:
     """Thêm chuyền vào vòng đang chạy. TG CHỜ của chuyền bắt đầu đếm từ đây."""
-    actor.require_step(4)
+    actor.require_step(3)
     production_service.assign_line(db, code=code, line_code=body.line_code,
                                    actor_id=uuid.UUID(actor.user_id))
     return OkOut(message=f"Đã thêm {body.line_code} — TG chờ bắt đầu chạy")
@@ -43,7 +43,7 @@ def assign_line(code: str, body: LineAssignIn, db: DbDep, actor: ActorDep) -> Ok
 @router.post("/lines/{code}/start", response_model=OkOut)
 def start_line(code: str, body: LineStartIn, db: DbDep, actor: ActorDep) -> OkOut:
     """Cho chuyền chạy. TG chờ chốt lại, TG THỰC TẾ bắt đầu đếm."""
-    actor.require_step(4)
+    actor.require_step(3)
     production_service.line_start(db, code=code, line_code=body.line_code,
                                   actor_id=uuid.UUID(actor.user_id))
     return OkOut(message=f"{body.line_code} đang lắp ráp — TG thực tế bắt đầu đếm")
@@ -53,7 +53,7 @@ def start_line(code: str, body: LineStartIn, db: DbDep, actor: ActorDep) -> OkOu
 def hold_line(code: str, body: LineHoldIn, db: DbDep, actor: ActorDep) -> OkOut:
     """Dừng chuyền, BẮT BUỘC ghi lý do (§17).
     TG thực tế đứng lại, TG chờ chạy tiếp."""
-    actor.require_step(4)
+    actor.require_step(3)
     production_service.line_hold(db, code=code, line_code=body.line_code,
                                  reason_code_id=body.reason_code_id,
                                  reason_text=body.reason_text,
@@ -66,7 +66,7 @@ def close_production(code: str, body: ProductionCloseIn, db: DbDep,
                      actor: ActorDep) -> OkOut:
     """Chốt sổ SX: đạt + hỏng + thiếu cộng ĐÚNG BẰNG mục tiêu vòng.
     Đóng luôn mọi chuyền còn mở, tất cả cùng một mốc giờ (§16)."""
-    actor.require_step(4)
+    actor.require_step(3)
     production_service.close_production(
         db, code=code, qty_ok=body.qty_ok, qty_ng=body.qty_ng, qty_short=body.qty_short,
         ng_reason_code_id=body.ng_reason_code_id, ng_reason_text=body.ng_reason_text,
@@ -82,7 +82,7 @@ def close_production(code: str, body: ProductionCloseIn, db: DbDep,
 def add_hourly(code: str, body: HourlyIn, db: DbDep, actor: ActorDep) -> OkOut:
     """Ghi sản lượng MỘT khung giờ, chỉ khi đang có chuyền chạy.
     Mỗi (vòng, ngày, khung giờ) một dòng."""
-    actor.require_step(4)
+    actor.require_step(3)
     hourly_service.add_hourly(db, code=code, work_date=body.work_date,
                               slot_hour=body.slot_hour, headcount=body.headcount,
                               target_qty=body.target_qty, qty=body.qty, note=body.note,

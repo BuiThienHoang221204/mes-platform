@@ -116,7 +116,7 @@ def list_mos(db: DbDep, actor: ActorDep, page: PageDep,
     Quyền y hệt `GET /mos/{code}`: chỉ-đọc và mọi phòng ban đều xem được trạm 4
     (§9b). Mở chi tiết mà khoá danh sách thì mới là chỗ khó hiểu.
     """
-    actor.require_step(4, VIEW)
+    actor.require_step(3, VIEW)
     if date_from and date_to and date_from > date_to:
         raise Invalid("Ngày bắt đầu sau ngày kết thúc")
     limit, offset = page
@@ -130,9 +130,9 @@ def list_mos(db: DbDep, actor: ActorDep, page: PageDep,
 def get_mo(code: str, db: DbDep, actor: ActorDep) -> MoOut:
     """Xem một lệnh: tên hàng, SL, đơn vị, trạng thái, TG yêu cầu."""
     # Trước đây KHÔNG kiểm gì — ai đăng nhập cũng đọc được. Mọi phòng ban đều
-    # xem được trạm 4 (§9b.4) nên câu này hiện đúng với tất cả, và sẽ bắt đầu
-    # chặn khi có vai không được xem trạm 4 (ví dụ vai cho khách xem tiến độ).
-    actor.require_step(4, VIEW)
+    # xem được trạm 3 (§9b.4) nên câu này hiện đúng với tất cả, và sẽ bắt đầu
+    # chặn khi có vai không được xem trạm 3 (ví dụ vai cho khách xem tiến độ).
+    actor.require_step(3, VIEW)
     return _mo_out(mo_repo.get_mo(db, code))
 
 

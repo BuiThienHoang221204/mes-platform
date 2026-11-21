@@ -28,7 +28,7 @@ def complete(code: str, db: DbDep, actor: ActorDep) -> WarehouseInCompleteOut:
 
     Không nhận số liệu nào từ client: số nhập kho **là** số đã đóng thùng (§8).
     FE phải phân nhánh theo `outcome`."""
-    actor.require_step(5)
+    actor.require_step(4)
     out = warehouse_in_service.complete(
         db, code=code, actor_id=uuid.UUID(actor.user_id))
     msg = (f"{code} HOÀN THÀNH — đủ {out.qty_done}" if out.outcome == "COMPLETED"
