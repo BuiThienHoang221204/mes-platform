@@ -7,11 +7,12 @@ type Props = InputHTMLAttributes<HTMLInputElement> & {
   hint?: string;
   error?: string;
   mono?: boolean;
+  leading?: ReactNode;
   trailing?: ReactNode;
 };
 
 export const AppInput = forwardRef<HTMLInputElement, Props>(function AppInput(
-  { label, hint, error, mono, trailing, className = "", id, ...rest },
+  { label, hint, error, mono, leading, trailing, className = "", id, ...rest },
   ref,
 ) {
   const inputId = id ?? rest.name;
@@ -31,16 +32,22 @@ export const AppInput = forwardRef<HTMLInputElement, Props>(function AppInput(
       ) : null}
 
       <div className="relative">
+        {leading ? (
+          <span className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-fg-subtle">
+            {leading}
+          </span>
+        ) : null}
         <input
           {...guarded}
           id={inputId}
           ref={ref}
           aria-invalid={error ? true : undefined}
           className={[
-            "min-h-touch w-full rounded-field border bg-surface px-4 text-body-lg text-fg",
+            "min-h-touch w-full rounded-field border bg-surface px-4 text-field text-fg",
             "placeholder:text-fg-subtle",
             mono ? "font-mono tracking-wide" : "",
             error ? "border-danger" : "border-line-strong",
+            leading ? "pl-12" : "",
             trailing ? "pr-14" : "",
             className,
           ].join(" ")}

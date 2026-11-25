@@ -11,7 +11,7 @@ export {
   Play, Pause, StopCircle, ArrowsClockwise, PaperPlaneRight,
   Clock, Timer, CalendarBlank, ChartBar, ListNumbers, Table,
   ArrowLeft, ArrowRight, CaretDown, CaretLeft, CaretRight, CaretUp, List, SidebarSimple, X,
-  User, UserSwitch, SignOut, SignIn, Lock, DeviceTablet,
+  User, UserSwitch, SignOut, SignIn, Lock, DeviceTablet, Eye, EyeClosed,
   Plus, Minus, Trash, Printer, DownloadSimple, UploadSimple, Copy, ImageSquare,
   TextAa, Sun, Moon, Desktop, ChatText,
 } from "@phosphor-icons/react";

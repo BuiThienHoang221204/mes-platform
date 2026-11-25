@@ -4,6 +4,12 @@ import type { ButtonHTMLAttributes, ReactNode } from "react";
 
 type Variant = "primary" | "ghost" | "danger" | "outline";
 type Size = "lg" | "md" | "sm";
+type Shape = "field" | "pill";
+
+const SHAPE: Record<Shape, string> = {
+  field: "rounded-field",
+  pill: "rounded-pill",
+};
 
 const VARIANT: Record<Variant, string> = {
   primary: "bg-accent text-accent-on border-accent hover:bg-accent-strong",
@@ -21,6 +27,7 @@ const SIZE: Record<Size, string> = {
 type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: Variant;
   size?: Size;
+  shape?: Shape;
   block?: boolean;
   icon?: ReactNode;
   compact?: boolean;
@@ -29,6 +36,7 @@ type Props = ButtonHTMLAttributes<HTMLButtonElement> & {
 export function AppButton({
   variant = "outline",
   size = "lg",
+  shape = "field",
   block,
   icon,
   compact,
@@ -49,7 +57,8 @@ export function AppButton({
       title={title ?? (iconOnly ? asText : undefined)}
       aria-label={ariaLabel ?? (iconOnly ? asText : undefined)}
       className={[
-        "items-center justify-center gap-2 whitespace-nowrap rounded-field border font-medium transition-colors",
+        "items-center justify-center gap-2 whitespace-nowrap border font-medium transition-colors",
+        SHAPE[shape],
         VARIANT[variant],
         SIZE[size],
         iconOnly ? "max-sm:gap-0 max-sm:px-2 sm:!px-2.5" : "inline-flex",

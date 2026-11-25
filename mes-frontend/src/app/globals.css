@@ -79,6 +79,7 @@
   --text-body: calc(15px * var(--fs));
   --text-body-sm: calc(13.5px * var(--fs));
   --text-caption: calc(12px * var(--fs));
+  --text-field: max(16px, calc(17px * var(--fs)));
   --text-label: calc(13.5px * var(--fs));
   --text-button: calc(15px * var(--fs));
   --text-badge: calc(12px * var(--fs));

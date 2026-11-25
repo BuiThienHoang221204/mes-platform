@@ -51,7 +51,7 @@ export function ScanBar({ station, hint }: { station: number; hint: string }) {
           placeholder="Quét / nhập mã lệnh…"
           autoComplete="off"
           spellCheck={false}
-          className="min-h-touch w-full min-w-0 basis-full rounded-field border border-accent bg-surface-2 px-4 font-mono text-body-lg tracking-wide text-fg placeholder:font-sans placeholder:text-fg-subtle sm:w-auto sm:flex-1 sm:basis-auto"
+          className="min-h-touch w-full min-w-0 basis-full rounded-field border border-accent bg-surface-2 px-4 font-mono text-field tracking-wide text-fg placeholder:font-sans placeholder:text-fg-subtle sm:w-auto sm:flex-1 sm:basis-auto"
         />
         <AppButton
           className="flex-1 sm:flex-none"

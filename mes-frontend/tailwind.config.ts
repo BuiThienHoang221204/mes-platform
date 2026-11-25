@@ -18,6 +18,7 @@ const config: Config = {
       h2: ["var(--text-h2)", { fontWeight: "600" }],
       h1: ["var(--text-h1)", { fontWeight: "600" }],
       display: ["var(--text-display)", { fontWeight: "600" }],
+      field: ["var(--text-field)", { fontWeight: "400" }],
       label: ["var(--text-label)", { fontWeight: "500" }],
       button: ["var(--text-button)", { fontWeight: "500" }],
       badge: ["var(--text-badge)", { fontWeight: "500" }],

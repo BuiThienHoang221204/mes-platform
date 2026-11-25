@@ -34,7 +34,7 @@ export const AppSelect = forwardRef<HTMLSelectElement, Props>(function AppSelect
           ref={ref}
           aria-invalid={error ? true : undefined}
           className={[
-            "min-h-touch w-full appearance-none rounded-field border bg-surface px-4 pr-12 text-body-lg text-fg",
+            "min-h-touch w-full appearance-none rounded-field border bg-surface px-4 pr-12 text-field text-fg",
             error ? "border-danger" : "border-line-strong",
             className,
           ].join(" ")}

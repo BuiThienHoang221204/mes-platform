@@ -101,7 +101,7 @@ export function HandoverModal({ row, onClose }: Props) {
               }
             }}
             placeholder="Ví dụ: Giao trước 200 phôi làm thử, khuôn cần canh kỹ chốt định vị..."
-            className="w-full rounded-field border border-line-strong bg-surface px-4 py-2.5 text-body text-fg placeholder:text-fg-subtle focus:border-accent focus:outline-none"
+            className="w-full rounded-field border border-line-strong bg-surface px-4 py-2.5 text-field text-fg placeholder:text-fg-subtle focus:border-accent focus:outline-none"
             maxLength={500}
           />
           <p className="text-caption text-fg-subtle">
